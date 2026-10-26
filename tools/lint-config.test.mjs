@@ -39,6 +39,14 @@ describe('shared ESLint config (US-002, ARCHITECTURE.md §3.1)', () => {
     expect(await rulesHit('clean.ts')).toEqual([]);
   });
 
+  it('[US-005:AC2] should reject process.env in the API outside its config module', async () => {
+    const [outside] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/reads-env.ts']);
+    const [inside] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/config/reads-env.ts']);
+
+    expect(outside.messages.map((m) => m.ruleId)).toEqual(['no-restricted-properties']);
+    expect(inside.messages).toEqual([]);
+  });
+
   it('[US-002:AC3] should allow `!`, the clock and randomness in test files', async () => {
     expect(await rulesHit('allowed.spec.ts')).toEqual([]);
   });

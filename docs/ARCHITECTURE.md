@@ -130,7 +130,7 @@ sequenceDiagram
 | Tablas | TanStack Table (+ Virtual) | `[DECIDIDO]` | |
 | i18n | vue-i18n (`DEC-019`) | `[DECIDIDO]` | es → en → pt |
 | Búsqueda | PostgreSQL `pg_trgm` + `unaccent` (`DEC-039`) | `[DECIDIDO]` | |
-| Pruebas | Vitest en todo el monorepo (en `apps/api` con `unplugin-swc` para los decoradores; compatibilidad comprobada en `SOURCES.md` §6), fast-check, Supertest, Testcontainers, Playwright, k6 (`DEC-021`) | `[DECIDIDO]` | Ver `TESTING.md` y `TEST-PLAN.md` |
+| Pruebas | Vitest en todo el monorepo (en `apps/api`, su transformador oxc emite los metadatos de los decoradores: `ADR-0004`), fast-check, Supertest, Testcontainers, Playwright, k6 (`DEC-021`) | `[DECIDIDO]` | Ver `TESTING.md` y `TEST-PLAN.md` |
 | Calidad | ESLint (flat config), Prettier, Husky + lint-staged, commitlint | `[DECIDIDO]` | |
 | CI/CD | GitHub Actions (`DEC-022`) | `[DECIDIDO]` | `OQ-007` resuelta |
 | Contenedores | Docker, docker-compose para desarrollo (`DEC-023`) | `[DECIDIDO]` | |
@@ -160,7 +160,7 @@ Todos los paquetes extienden `packages/config/tsconfig.base.json`:
 
 | Necesidad | Librería | Dónde | Historia |
 |---|---|---|---|
-| Compilación rápida de Nest y de Vitest con decoradores | `@swc/core` (builder de Nest CLI) + `unplugin-swc` | api | US-001, US-002 |
+| Compilación de Nest y pruebas con decoradores | `tsc` para compilar; el transformador de Vitest para las pruebas (sin SWC, `ADR-0004`) | api | US-005 |
 | Configuración tipada | `@nestjs/config` + esquema Zod | api | US-005 |
 | Contexto por petición (tenant, usuario, correlación) | `nestjs-cls` | api | US-025 |
 | Logs estructurados | `nestjs-pino` + `pino-http` | api | US-006 |
@@ -770,6 +770,8 @@ Como la SPA no ejecuta JS en los rastreadores de vista previa (WhatsApp, etc.), 
 | `WORKER` | api | `true` para proceso de workers |
 | `SENTRY_DSN`, `OTEL_EXPORTER_OTLP_ENDPOINT` | api | Opcionales |
 | `VITE_API_BASE_URL`, `VITE_WS_URL`, `VITE_DEFAULT_LOCALE` | web | Nunca secretos |
+
+Validación (`US-005`, `apps/api/src/config/env.schema.ts`): un arranque con variables faltantes o inválidas se detiene y lista **todas** por nombre, nunca su valor. Además de los valores por defecto de la tabla, `PORT` vale 3000, `LOG_LEVEL` `info`, `WORKER` y `E2E_TEST_HOOKS` `false` y `COOKIE_SECURE` `true` (seguro por defecto; en local, `.env.example` lo pone en `false`). El resto es obligatorio, salvo `DATABASE_MIGRATION_URL` (solo la usan las migraciones), `DATABASE_MAINTENANCE_URL` (obligatoria con `WORKER=true`), `SMTP_URL` (obligatoria con `MAIL_PROVIDER=smtp`), `SENTRY_DSN` y `OTEL_EXPORTER_OTLP_ENDPOINT`. Un valor vacío cuenta como no definido. Formatos: duraciones como `500ms`, `30s`, `15m`, `24h` o `7d`; tamaños como `512kb` o `1mb`; booleanos solo `true` o `false`; `CORS_ORIGINS` con orígenes sin ruta. El código lee la configuración solo con `AppConfig` (ESLint prohíbe `process.env` fuera de `apps/api/src/config`), y `AppConfig` oculta los secretos al serializarse.
 
 ### 16.3 Docker
 

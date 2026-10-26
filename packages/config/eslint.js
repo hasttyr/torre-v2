@@ -129,6 +129,21 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
       },
     },
     {
+      // The API reads its environment only through AppConfig, validated at start-up (US-005:AC2).
+      files: ['**/apps/api/src/**/*.ts'],
+      ignores: ['**/apps/api/src/config/**', ...TEST_FILES],
+      rules: {
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'process',
+            property: 'env',
+            message: 'Read configuration through AppConfig (apps/api/src/config), never process.env (US-005).',
+          },
+        ],
+      },
+    },
+    {
       files: JS_FILES,
       extends: [tseslint.configs.disableTypeChecked],
       languageOptions: { globals: NODE_GLOBALS },
