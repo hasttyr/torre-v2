@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// pnpm test:nightly (US-004:AC9) — 5 000 property runs with a random seed, e2e and benchmarks.
+// pnpm test:nightly (US-004:AC9) — 5 000 property runs with a random seed, e2e and full benchmarks.
 // The seed goes to the run manifest so any failure can be replayed with FC_SEED.
 import { spawnSync } from 'node:child_process';
 import { randomInt } from 'node:crypto';
@@ -32,8 +32,8 @@ const results = {
     '--outputFile.junit=reports/junit.xml',
   ]),
   e2e: step('e2e', ['tools/run-e2e.mjs']),
+  bench: step('benchmarks (modo completo)', ['tools/bench.mjs']),
 };
-// Benchmarks arrive with US-048 and US-096.
 
 const suiteArgs = Object.entries(results).flatMap(([name, ok]) => ['--suite', `${name}=${ok ? 'passed' : 'failed'}`]);
 step('manifiesto', ['tools/run-manifest.mjs', ...suiteArgs]);

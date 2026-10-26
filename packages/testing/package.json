@@ -20,5 +20,12 @@
   },
   "devDependencies": {
     "@torre/config": "workspace:*"
+  },
+  "dependencies": {
+    "@torre/core": "workspace:*",
+    "@torre/rules": "workspace:*",
+    "fast-check": "catalog:",
+    "vitest": "catalog:",
+    "zod": "catalog:"
   }
 }

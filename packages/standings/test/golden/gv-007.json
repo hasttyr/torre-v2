@@ -1,0 +1,130 @@
+{
+  "id": "GV-007",
+  "description": "Puntos con byes, forfeits, un retiro y una partida pendiente",
+  "source": "manual: docs/CORE-BUSINESS.md §18 GV-007 (puntuación de SRC-15 Art. 10.1, SRC-11 Art. 3 y SRC-04 Art. 16.1.1)",
+  "verifiedBy": "cálculo manual registrado en CORE-BUSINESS.md §18",
+  "verifiedAt": "2026-10-26",
+  "rules": ["BR-SCORE-01", "BR-SCORE-02", "BR-SCORE-03", "BR-SCORE-04", "BR-WD-01", "BR-NUM-01", "INV-S-1"],
+  "input": {
+    "scoring": {
+      "win": 2,
+      "draw": 1,
+      "loss": 0,
+      "forfeitWin": 2,
+      "forfeitLoss": 0,
+      "doubleForfeit": 0,
+      "pairingBye": 2,
+      "halfPointBye": 1,
+      "zeroPointBye": 0
+    },
+    "competitors": [
+      {
+        "id": "P1",
+        "seed": 1
+      },
+      {
+        "id": "P2",
+        "seed": 2
+      },
+      {
+        "id": "P3",
+        "seed": 3
+      },
+      {
+        "id": "P4",
+        "seed": 4
+      },
+      {
+        "id": "P5",
+        "seed": 5
+      },
+      {
+        "id": "P6",
+        "seed": 6,
+        "status": "WITHDRAWN"
+      }
+    ],
+    "rounds": [
+      [
+        {
+          "white": "P1",
+          "black": "P4",
+          "result": "WHITE_WINS_BY_FORFEIT"
+        },
+        {
+          "white": "P2",
+          "black": "P5",
+          "result": "DRAW"
+        },
+        {
+          "white": "P3",
+          "black": "P6",
+          "result": "BLACK_WINS"
+        }
+      ],
+      [
+        {
+          "bye": "P3",
+          "kind": "HALF_POINT_BYE"
+        },
+        {
+          "bye": "P4",
+          "kind": "ZERO_POINT_BYE"
+        },
+        {
+          "white": "P1",
+          "black": "P2",
+          "result": "BLACK_WINS"
+        },
+        {
+          "bye": "P5",
+          "kind": "PAIRING_BYE"
+        }
+      ],
+      [
+        {
+          "white": "P1",
+          "black": "P3",
+          "result": "PENDING"
+        },
+        {
+          "white": "P4",
+          "black": "P5",
+          "result": "DOUBLE_FORFEIT"
+        },
+        {
+          "bye": "P2",
+          "kind": "PAIRING_BYE"
+        }
+      ]
+    ]
+  },
+  "expected": {
+    "points": {
+      "P1": 2,
+      "P2": 5,
+      "P3": 1,
+      "P4": 0,
+      "P5": 3,
+      "P6": 2
+    },
+    "pendingGames": {
+      "P1": 1,
+      "P2": 0,
+      "P3": 1,
+      "P4": 0,
+      "P5": 0,
+      "P6": 0
+    },
+    "ranking": ["P2", "P5", "P1", "P6", "P3", "P4"],
+    "totalAwarded": 13,
+    "pending": [
+      {
+        "round": 3,
+        "board": 1,
+        "white": "P1",
+        "black": "P3"
+      }
+    ]
+  }
+}

@@ -21,7 +21,13 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: 'tools', include: ['tools/**/*.test.mjs'], testTimeout: 60_000 },
+        test: {
+          name: 'tools',
+          include: ['tools/**/*.test.mjs'],
+          testTimeout: 60_000,
+          // Benchmarks belong to the packages project; without this the default include also picks them up here.
+          benchmark: { include: [] },
+        },
       },
       {
         extends: true,
@@ -29,6 +35,14 @@ export default defineConfig({
           name: 'packages',
           include: ['packages/*/src/**/*.spec.ts'],
           setupFiles: ['tools/vitest/fast-check.setup.ts'],
+          // Benchmarks with a budget run in their own isolated group after the tests (US-096:AC4): reduced
+          // in every run, full at night (BENCH_MODE=full, tools/nightly.mjs).
+          benchmark: {
+            enabled: true,
+            include: ['packages/*/test/bench/**/*.bench.ts'],
+            retainSamples: true,
+          },
+          provide: { benchMode: process.env['BENCH_MODE'] === 'full' ? 'full' : 'reduced' },
         },
       },
     ],

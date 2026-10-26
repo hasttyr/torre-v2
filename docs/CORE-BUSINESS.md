@@ -520,6 +520,31 @@ Rama femenina con instituciones ficticias A, B y C. Clásico: 1.º A, 2.º B, 3.
 - Ranking: A (42), B (30), C (11). Verificación: 42 + 30 + 11 = 83 = (20 + 15 + 10 + 5) + (15 + 10 + 6 + 2).
 - Origen: tabla de `SRC-01` Art. 20 `[ASCUN-2012]`, cálculo manual.
 
+### GV-007 — Puntos con byes, forfeits, retiro y partida pendiente (`BR-SCORE-01..04`, `BR-WD-01`)
+
+Seis jugadores P1…P6 (*seed* 1…6). Puntuación de las Leyes del Ajedrez en medios puntos, la del preset `FIDE_DUTCH_2026`: victoria 2, tablas 1, derrota 0, victoria por forfeit 2, derrota por forfeit 0, doble forfeit 0, PAB 2, bye de medio punto 1, bye de cero puntos 0 (`SRC-15` Art. 10.1, `SRC-11` Art. 3, `SRC-04` Art. 16.1.1).
+
+| Ronda | Partidas y byes |
+|---|---|
+| R1 | P1–P4 gana P1 por forfeit · P2–P5 tablas · P3–P6 gana P6 (negras) |
+| R2 | P6 se retira y no aparece · P3 bye de medio punto · P4 bye de cero puntos · P1–P2 gana P2 (negras) · P5 PAB |
+| R3 | P1–P3 sin resultado (pendiente) · P4–P5 doble forfeit · P2 PAB |
+
+| Jugador | R1 | R2 | R3 | Puntos (medios puntos) | Pendientes |
+|---|---|---|---|---|---|
+| P1 | 2 | 0 | — | 2 (1) | 1 |
+| P2 | 1 | 2 | 2 | 5 (2½) | 0 |
+| P3 | 0 | 1 | — | 1 (½) | 1 |
+| P4 | 0 | 0 | 0 | 0 | 0 |
+| P5 | 1 | 2 | 0 | 3 (1½) | 0 |
+| P6 | 2 | — | — | 2 (1) | 0 |
+
+- Verificación: lo otorgado por ronda es R1 2 + 0 + 1 + 1 + 0 + 2 = 6, R2 1 + 0 + 0 + 2 + 2 = 5 y R3 0 + 0 + 2 = 2; total 13 = 2 + 5 + 1 + 0 + 3 + 2 (`INV-S-1`).
+- P6 conserva los 2 puntos de R1 aunque se retiró (`BR-WD-01`); la partida P1–P3 no suma y queda reportada como pendiente (ronda 3, tablero 1).
+- Clasificación base por puntos, *seed* e id (`US-012`): P2 (5), P5 (3), P1 (2, *seed* 1), P6 (2, *seed* 6), P3 (1), P4 (0).
+- Este caso solo prueba **puntos**: el tratamiento de las rondas no jugadas en los desempates (`BR-TIE-03`) se prueba en `US-013`.
+- Origen: cálculo manual, 2026-10-26.
+
 ## 19. Resumen de lo pendiente de ASCUN (actualizado 2026-10-26)
 
 | Tema | Reglas afectadas | Pregunta | Estado |
