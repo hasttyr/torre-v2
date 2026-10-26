@@ -23,7 +23,7 @@
 - **Notas para la IA:** no inventes versiones: consulta la última estable al momento y regístrala en el ADR. No agregues dependencias que no estén listadas en `ARCHITECTURE.md` §3 sin justificarlo.
 
 ### US-002 — Configuración compartida: TypeScript estricto, ESLint y Prettier
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como desarrollador quiero configuraciones compartidas y estrictas para que ningún paquete relaje las reglas de calidad.
 - **Contexto:** `ARCHITECTURE.md` §3.1 lista los flags estrictos. `apps/api` añade decoradores; `packages/*` **no**.
 - **Referencias:** DEC-001 · `CONVENTIONS.md` §2

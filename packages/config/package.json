@@ -2,12 +2,23 @@
   "name": "@torre/config",
   "version": "0.0.0",
   "private": true,
-  "description": "Configuración compartida: TypeScript (y, desde US-002, ESLint y Prettier).",
+  "description": "Configuración compartida: TypeScript, ESLint y Prettier.",
   "type": "module",
   "exports": {
-    "./tsconfig.base.json": "./tsconfig.base.json"
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint": "./eslint.js",
+    "./prettier": "./prettier.js"
   },
   "files": [
-    "tsconfig.base.json"
-  ]
+    "tsconfig.base.json",
+    "eslint.js",
+    "prettier.js"
+  ],
+  "dependencies": {
+    "@eslint/js": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
+  }
 }

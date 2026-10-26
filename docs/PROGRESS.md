@@ -5,9 +5,9 @@
 ## Resumen
 
 - **Rebanada en curso:** VS-1 — esqueleto andante (`USER-STORIES.md` §5).
-- **Historias terminadas:** 1 de 102 (VS-1: 1 de 38).
-- **Última historia:** `US-001` — monorepo y herramientas base.
-- **Siguiente:** `US-002` — configuración estricta de TypeScript, ESLint y Prettier.
+- **Historias terminadas:** 2 de 102 (VS-1: 2 de 38).
+- **Última historia:** `US-002` — configuración estricta compartida.
+- **Siguiente:** `US-003` — entorno local de infraestructura.
 
 ## Entorno local verificado (esta máquina)
 
@@ -25,7 +25,8 @@
 
 | Historia | Estado | Rama / commit | Qué funciona | Pruebas | Pendiente |
 |---|---|---|---|---|---|
-| `US-001` Monorepo y herramientas base | DONE | `feat/US-001-monorepo` | Workspace pnpm con `apps/api`, `apps/web` y 9 paquetes `@torre/*` en ESM que compilan; scripts raíz (`lint`, `typecheck`, `test`, `test:e2e`, `build`, `dev`, `verify:fast`, `check:floor`, `verify`, `verify:full`, `depcruise`, `secrets`); Husky + lint-staged + commitlint; reglas de dependencias de `ARCHITECTURE.md` §5; guardia de piso; gitleaks verificado; `ADR-0001` | `tools/floor-guard.test.mjs` (9), `tools/depcruise-canary.test.mjs` (2) | `test:e2e` y `dev` todavía no tienen nada que ejecutar (llegan con `US-003`, `US-005`, `US-009`, `US-022`); `test:trace` y `test:report` se crean en `US-004` |
+| `US-001` Monorepo y herramientas base | DONE | `16e7615` (merge `27c90f0`) | Workspace pnpm con `apps/api`, `apps/web` y 9 paquetes `@torre/*` en ESM que compilan; scripts raíz (`lint`, `typecheck`, `test`, `test:e2e`, `build`, `dev`, `verify:fast`, `check:floor`, `verify`, `verify:full`, `depcruise`, `secrets`); Husky + lint-staged + commitlint; reglas de dependencias de `ARCHITECTURE.md` §5; guardia de piso; gitleaks verificado; `ADR-0001` | `tools/floor-guard.test.mjs` (9), `tools/depcruise-canary.test.mjs` (2) | `test:e2e` y `dev` todavía no tienen nada que ejecutar (llegan con `US-003`, `US-005`, `US-009`, `US-022`); `test:trace` y `test:report` se crean en `US-004` |
+| `US-002` Configuración estricta compartida | DONE | `feat/US-002-strict-config` | `@torre/config` exporta la base de TypeScript, el preset de ESLint (reglas con tipos: `no-explicit-any`, `no-non-null-assertion` salvo pruebas, `no-floating-promises`, `switch-exhaustiveness-check`, `consistent-type-imports`; en `packages/*` además reloj, azar, `process` y módulos de Node prohibidos) y Prettier | `tools/lint-config.test.mjs` (9, con *fixtures* que deben fallar), `tools/tsconfig.test.mjs` (3) | Reglas de Vue al crear la web (`US-009`) |
 
 ## Pendiente global
 
