@@ -55,7 +55,7 @@
 - **Notas para la IA:** no pongas credenciales reales; usa valores de desarrollo claramente identificables.
 
 ### US-004 — Pipeline de integración continua
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** IN_PROGRESS
 - **Historia:** Como equipo quiero un pipeline que bloquee cambios que rompan calidad para detectar problemas antes de integrar.
 - **Contexto:** Etapas definidas en `ARCHITECTURE.md` §16.4. Plataforma: GitHub Actions (`OQ-007` pendiente de confirmar).
 - **Referencias:** DEC-022 · `ARCHITECTURE.md` §16.4 · `TESTING.md` §9
