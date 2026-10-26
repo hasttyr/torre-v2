@@ -82,6 +82,12 @@ pnpm verify          # lint + typecheck + unitarias + propiedades + contrato + c
 pnpm verify:full     # verify + humo + integración + e2e (lo que corre la CI en cada PR)
 pnpm test:trace      # matriz criterio de aceptación → prueba (TEST-PLAN.md §6.2.1)
 pnpm test:report     # informe de pruebas desde los resultados JSON y el manifiesto
+pnpm test:ci         # pruebas con cobertura y reportes JSON/JUnit (lo que usa la CI)
+pnpm test:manifest   # reports/run-manifest.json (commit, versiones, semillas)
+pnpm test:smoke      # casos de humo (TC-080…)
+pnpm test:nightly    # 5 000 ejecuciones por propiedad con semilla aleatoria
+pnpm dev:infra       # infraestructura local (Docker o Postgres nativo); infra:check la comprueba
+pnpm secrets         # gitleaks sobre el diff (--all: todo el historial)
 pnpm build
 pnpm dev             # levanta api + web con docker compose para dependencias
 ```
