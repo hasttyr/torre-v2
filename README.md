@@ -40,7 +40,7 @@ pnpm verify           # lint, tipos, límites y pruebas
 ### Integración continua
 
 - `.github/workflows/ci.yml` corre en cada PR y en cada push a `main`: **quality** (lint, tipos, límites, piso, pruebas con cobertura, trazabilidad, *build*, manifiesto e informe), **security** (`pnpm audit --audit-level=high` y gitleaks), **infra** (`pnpm dev:infra` + `pnpm infra:check` con Docker) e **integration** (Testcontainers, cuando existan esas pruebas).
-- `.github/workflows/nightly.yml` corre `pnpm test:nightly` cada noche (5 000 ejecuciones por propiedad con semilla aleatoria registrada) y abre un *issue* `defect` si falla.
+- `.github/workflows/nightly.yml` corre `pnpm test:nightly` cada noche (5 000 ejecuciones por propiedad con semilla aleatoria registrada y los benchmarks en modo completo) y abre un *issue* `defect` si falla.
 - **Protección de `main` (regla obligatoria al crear el repositorio remoto):** *Settings → Branches → Branch protection rules* para `main` con "Require a pull request before merging", "Require status checks to pass" (`quality`, `security`, `infra`) y "Require branches to be up to date". Así un PR con un error de lint, tipos o pruebas no se puede fusionar.
 - La evidencia de cada ejecución (`reports/` y `coverage/`) queda como artefacto durante 90 días.
 

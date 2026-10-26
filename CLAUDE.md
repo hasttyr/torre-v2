@@ -85,7 +85,8 @@ pnpm test:report     # informe de pruebas desde los resultados JSON y el manifie
 pnpm test:ci         # pruebas con cobertura y reportes JSON/JUnit (lo que usa la CI)
 pnpm test:manifest   # reports/run-manifest.json (commit, versiones, semillas)
 pnpm test:smoke      # casos de humo (TC-080…)
-pnpm test:nightly    # 5 000 ejecuciones por propiedad con semilla aleatoria
+pnpm test:nightly    # 5 000 ejecuciones por propiedad con semilla aleatoria + benchmarks completos
+pnpm bench           # benchmarks con presupuesto en modo completo (pnpm test ya los corre en modo reducido)
 pnpm dev:infra       # infraestructura local (Docker o Postgres nativo); infra:check la comprueba
 pnpm secrets         # gitleaks sobre el diff (--all: todo el historial)
 pnpm build

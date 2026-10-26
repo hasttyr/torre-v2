@@ -46,6 +46,7 @@ Se piden con la carta de `docs/requests/SOLICITUD-ASCUN.md`, que envía el respo
 | OQ-024 | **Modalidad Rápido:** ritmo, número de rondas y puntos en el ranking institucional | Preset de Rápido | `timeControl`, `BR-PAIR-12`, `BR-CHAMP-02` | Sin preset de Rápido; no entra al ranking institucional |
 | OQ-026 | **Clasificación entre torneos y cupos** (Arts. 3 y 4 de 2012): ¿siguen vigentes? ¿Desde qué fase se clasifica? | Cupos y clasificación | `BR-CHAMP-04`, `BR-REG-06` | Cupo como parámetro; clasificación entre torneos sin implementar |
 | OQ-028 | **Ranking institucional:** desempate entre instituciones y reparto de puntos con puestos individuales compartidos | Cálculo del campeón institucional | `BR-CHAMP-03`, US-100 | Puesto institucional compartido; con puesto individual compartido, el cálculo falla de forma explícita |
+| OQ-033 | **Bye con doble partida** (`gamesPerPairing = 2`, Blitz): ¿el PAB vale los puntos de una partida o de las dos? (`OQ-025` decidió que cada partida puntúa por separado, pero no dice nada del bye) | Puntos del PAB en Blitz | `BR-SCORE-01`, `BR-SCORE-04`, US-015 (PAB con doble partida), preset `ascun-chess-blitz` | `computeScores` (US-012) suma cada entrada `BYE` tal como la registra la ronda, sin suponer cuántas son; cuántas entradas genera el emparejamiento se decide antes de US-015 |
 
 ## 2. Pendientes de decisión técnica
 

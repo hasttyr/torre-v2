@@ -25,7 +25,7 @@
 | Carga | Tiempo real y API | k6 | `infra/k6` |
 | Accesibilidad | Reglas automáticas | axe (Playwright) | web |
 | Seguridad | IDOR, inyección, enumeración, CORS, límites | Pruebas e2e dedicadas | api |
-| Rendimiento (benchmarks) | Complejidad empírica | Scripts `pnpm bench` | paquetes y api |
+| Rendimiento (benchmarks) | Presupuestos de `ARCHITECTURE.md` §17 y complejidad empírica | Vitest bench (`packages/*/test/bench/*.bench.ts`): modo reducido en cada `pnpm test`, completo con `pnpm bench` y en el nocturno | paquetes y api |
 | Mutación (opcional) | Calidad de las pruebas del dominio | Stryker | `packages/*` |
 | Humo | Que el sistema arranca y responde (infraestructura, API, web, clon limpio) | Scripts + Playwright | raíz, `apps/*` |
 | Aceptación | Cada criterio de aceptación tiene una prueba etiquetada y verde; guion de demostración | `pnpm test:trace` + Playwright + ejecución manual | `tools/`, `apps/web/e2e` |
@@ -191,7 +191,7 @@ La **regresión** no es un nivel aparte: es volver a ejecutar **todas** las suit
 
 - Ubicación: `packages/<paquete>/test/golden/*.json` con: `description`, `input`, `expected`, **`source`** (`manual`, `SRC-nn` con artículo, o herramienta externa con versión), `verifiedBy`, `verifiedAt` y `rules` (`BR-*`).
 - Los contraejemplos que encuentre fast-check se guardan ya reducidos, con su semilla y ruta, en `packages/<paquete>/test/regressions/*.json`, y se ejecutan siempre como parte de la regresión.
-- `GV-001..GV-004` y `GV-006` están en `CORE-BUSINESS.md` §18 y se transcriben como casos dorados.
+- `GV-001..GV-007` están en `CORE-BUSINESS.md` §18 y se transcriben como casos dorados.
 - Desempates con rondas no jugadas: ejercicios oficiales de FIDE (`SRC-07`), revisados contra C.07 2026 (`SRC-04`).
 - Los casos que dependen de FIDE `[VERIFICAR]` solo se agregan cuando existe una fuente (texto oficial o herramienta de referencia), anotándola.
 - Un caso dorado **no** se actualiza con la salida del código para "hacerlo pasar"; se revisa a mano y se justifica en el PR.

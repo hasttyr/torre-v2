@@ -39,7 +39,7 @@
 - **Fuera de alcance:** lógica de puntuación, emparejamiento.
 
 ### US-012 — Cálculo de puntajes y clasificación base
-- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como árbitro quiero que el sistema calcule los puntos de cada competidor a partir de los resultados para tener una clasificación confiable.
 - **Referencias:** BR-SCORE-01..04, BR-NUM-01, BR-WD-01 · INV-S-1, INV-S-2
 - **Criterios de aceptación:**

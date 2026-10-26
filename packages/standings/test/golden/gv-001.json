@@ -1,0 +1,88 @@
+{
+  "id": "GV-001",
+  "description": "Todos contra todos, 4 jugadores: puntos y clasificación base (los desempates se agregan en US-013)",
+  "source": "manual: docs/CORE-BUSINESS.md §18 GV-001",
+  "verifiedBy": "cálculo manual registrado en CORE-BUSINESS.md §18",
+  "verifiedAt": "2026-10-25",
+  "rules": ["BR-SCORE-01", "BR-SCORE-02", "BR-NUM-01", "INV-S-1", "INV-S-2"],
+  "input": {
+    "scoring": {
+      "win": 2,
+      "draw": 1,
+      "loss": 0,
+      "forfeitWin": 2,
+      "forfeitLoss": 0,
+      "doubleForfeit": 0,
+      "pairingBye": 2,
+      "halfPointBye": 1,
+      "zeroPointBye": 0
+    },
+    "competitors": [
+      {
+        "id": "A",
+        "seed": 1
+      },
+      {
+        "id": "B",
+        "seed": 2
+      },
+      {
+        "id": "C",
+        "seed": 3
+      },
+      {
+        "id": "D",
+        "seed": 4
+      }
+    ],
+    "rounds": [
+      [
+        {
+          "white": "A",
+          "black": "D",
+          "result": "WHITE_WINS"
+        },
+        {
+          "white": "B",
+          "black": "C",
+          "result": "DRAW"
+        }
+      ],
+      [
+        {
+          "white": "A",
+          "black": "C",
+          "result": "DRAW"
+        },
+        {
+          "white": "D",
+          "black": "B",
+          "result": "BLACK_WINS"
+        }
+      ],
+      [
+        {
+          "white": "A",
+          "black": "B",
+          "result": "WHITE_WINS"
+        },
+        {
+          "white": "C",
+          "black": "D",
+          "result": "WHITE_WINS"
+        }
+      ]
+    ]
+  },
+  "expected": {
+    "points": {
+      "A": 5,
+      "B": 3,
+      "C": 4,
+      "D": 0
+    },
+    "ranking": ["A", "C", "B", "D"],
+    "totalAwarded": 12,
+    "pending": []
+  }
+}

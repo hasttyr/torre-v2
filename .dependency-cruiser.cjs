@@ -20,7 +20,12 @@ const layering = Object.entries(ALLOWED).map(([pkg, allowed]) => ({
   from: { path: `(^|/)packages/${pkg}/src/` },
   to: {
     path: '(^|/)packages/([^/]+)/src/',
-    pathNot: [`(^|/)packages/${pkg}/src/`, ...allowed.map((a) => `(^|/)packages/${a}/src/`)],
+    // @torre/testing is left to `testing-only-in-tests`, which already keeps it out of production code.
+    pathNot: [
+      `(^|/)packages/${pkg}/src/`,
+      '(^|/)packages/testing/src/',
+      ...allowed.map((a) => `(^|/)packages/${a}/src/`),
+    ],
   },
 }));
 
