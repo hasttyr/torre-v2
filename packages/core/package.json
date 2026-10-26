@@ -19,6 +19,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "@torre/config": "workspace:*"
+    "@torre/config": "workspace:*",
+    "fast-check": "catalog:",
+    "vitest": "catalog:"
   }
 }

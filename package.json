@@ -40,6 +40,7 @@
     "@vitest/coverage-v8": "catalog:",
     "dependency-cruiser": "catalog:",
     "eslint": "catalog:",
+    "fast-check": "catalog:",
     "husky": "catalog:",
     "lint-staged": "catalog:",
     "prettier": "catalog:",

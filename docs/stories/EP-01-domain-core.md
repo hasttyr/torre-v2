@@ -26,7 +26,7 @@
 - **Notas para la IA:** en los presets `ascun-chess-*` usa **solo** los valores de `SOURCES.md` §3 con su artículo; lo demás queda sin valor con `TODO(OQ-001)`/`TODO(OQ-023)`. No rellenes valores "razonables".
 
 ### US-011 — Tipos base del dominio y utilidades de medios puntos
-- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como desarrollador quiero tipos y utilidades base compartidos para que todos los paquetes hablen el mismo lenguaje.
 - **Referencias:** BR-NUM-01, BR-NUM-02, BR-TEAM-08 · DEC-036 · `GLOSSARY.md`
 - **Criterios de aceptación:**
