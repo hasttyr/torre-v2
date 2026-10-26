@@ -158,7 +158,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 | US-018 | Generador de eliminación directa | F1 | COULD | M | BLOCKED(OQ-013) | US-011 |
 | US-019 | Ratings: Elo, rendimiento (TPR) y redondeo | F1 | SHOULD | M | READY | US-011, US-013 |
 | US-020 | Motor de torneos por equipos | F1 | SHOULD | L | PARTIAL(OQ-009) | US-012, US-013, US-015 |
-| US-021 | PRNG determinista y hash canónico de entradas | F1 | MUST | S | READY | US-011 |
+| US-021 | PRNG determinista y hash canónico de entradas | F1 | MUST | S | DONE | US-011 |
 | US-042 | Decider del torneo (`@torre/tournament`): estado, `evolve`, `decide` y esquemas de eventos | F1 (integración en F2) | MUST | XL | PARTIAL(OQ-001) | US-010, US-012, US-014, US-021 (parcial: US-013, US-015, US-020) |
 
 #### EP-02

@@ -31,3 +31,8 @@ export { formatUnits, HALF_POINT_DIVISOR, halfPoints, parseUnits, QUARTER_POINT_
 export type { FormatOptions, HalfPoints } from './units.js';
 
 export { compareCompetitors, sortCompetitors } from './ordering.js';
+
+export { createPrng, drawLots, pick, shuffle, splitMix64, xoshiro128StarStar } from './prng.js';
+export type { Prng } from './prng.js';
+
+export { canonicalJson, hashCanonical } from './canonical.js';
