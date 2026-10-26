@@ -10,7 +10,32 @@ Esta carpeta **es** el monorepo (`DEC-063`): la documentación ya está en su si
 
 1. Lee `CLAUDE.md`, `CONSTRAINTS.md` y `docs/HANDOFF.md`.
 2. Revisa `docs/OPEN-QUESTIONS.md`: lo que sigue abierto depende de ASCUN y no bloquea el arranque.
-3. Implementa siguiendo `docs/USER-STORIES.md` (orden, rebanadas verticales y dependencias), empezando por `US-001`.
+3. Implementa siguiendo `docs/USER-STORIES.md` (orden, rebanadas verticales y dependencias). El avance real está en `docs/PROGRESS.md`.
+
+### Puesta en marcha
+
+Requisitos: Node 24 (`.nvmrc`), Git y Corepack (`corepack enable pnpm`, o `corepack enable --install-directory ~/bin pnpm` sin permisos de administrador). Docker es opcional pero recomendado.
+
+```
+pnpm install
+cp .env.example .env
+pnpm dev:infra        # levanta la infraestructura local
+pnpm infra:check      # comprueba cada servicio
+pnpm verify           # lint, tipos, límites y pruebas
+```
+
+### Infraestructura local
+
+| Servicio | Imagen (Docker) | Puerto (variable en `.env`) |
+|---|---|---|
+| PostgreSQL 18 con `pg_trgm` y `unaccent`; roles `torre_app` y `torre_migrator` | `postgres:18` | 5432 (`POSTGRES_PORT`) |
+| Redis (Valkey 8, `noeviction`, AOF) | `valkey/valkey:8.1.10` | 6379 (`REDIS_PORT`) |
+| Mailpit: SMTP y bandeja web | `axllent/mailpit:v1.31.5` | 1025 (`MAILPIT_SMTP_PORT`) y 8025 (`MAILPIT_UI_PORT`) |
+| S3 local (RustFS, `ADR-0003`) y su consola; *bucket* `torre-dev` | `rustfs/rustfs:1.0.1` | 9000 (`S3_PORT`) y 9001 (`S3_CONSOLE_PORT`) |
+
+- Con Docker, `pnpm dev:infra` usa `docker-compose.yml` y `pnpm dev:infra:down` lo detiene.
+- Sin Docker (modo nativo), `pnpm dev:infra` levanta solo PostgreSQL con los binarios instalados en el equipo (`PG_BIN` o `C:\Program Files\PostgreSQL\<versión>\bin`), con los datos en `.tools/infra/postgres`. Si el puerto 5432 está ocupado, cambia `POSTGRES_PORT` y el puerto de las URL de la base en `.env`.
+- Todas las credenciales son de desarrollo y están marcadas como tales.
 
 ## Orden de lectura recomendado (humano)
 

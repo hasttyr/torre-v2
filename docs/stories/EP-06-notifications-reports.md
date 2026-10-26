@@ -89,12 +89,12 @@
 - **Referencias:** BR-RPT-02, BR-RPT-04 · DEC-016 · `ARCHITECTURE.md` §11
 - **Criterios de aceptación:**
   1. `POST /tournaments/{id}/reports { kind, params }` crea un registro `reports` y encola el trabajo; responde con el estado.
-  2. El worker genera el PDF, lo sube a S3 (MinIO) y registra `storage_key`, `sha256` y `source_stream_version`.
+  2. El worker genera el PDF, lo sube a S3 (RustFS en local) y registra `storage_key`, `sha256` y `source_stream_version`.
   3. Reportes con los mismos `params_hash` y `source_stream_version` se reutilizan (no se regeneran innecesariamente).
   4. `GET /reports/{id}` devuelve estado y enlace de descarga con URL firmada de corta duración y autorización.
   5. El estado se refleja en vivo en la UI (por WS o sondeo).
   6. Fallos de generación quedan en `failed` con motivo y reintento manual.
-- **Pruebas requeridas:** e2e con MinIO real; autorización de descarga entre organizaciones; idempotencia.
+- **Pruebas requeridas:** e2e con el S3 local real (RustFS); autorización de descarga entre organizaciones; idempotencia.
 - **Depende de:** US-064, US-117, US-025
 - **Fuera de alcance:** firma digital de documentos.
 

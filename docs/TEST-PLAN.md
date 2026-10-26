@@ -251,7 +251,7 @@ Los comandos se crean en `US-001` y `US-004` (`CLAUDE.md` §6).
 | Elemento | Detalle |
 |---|---|
 | Máquina de desarrollo | Windows 11 + Docker Desktop; Node LTS fijado en `.nvmrc` |
-| Servicios locales | `docker-compose.yml`: PostgreSQL (con `pg_trgm` y `unaccent`), Redis, Mailpit, MinIO (`US-003`); imágenes fijadas por etiqueta y *digest* |
+| Servicios locales | `docker-compose.yml`: PostgreSQL (con `pg_trgm` y `unaccent`), Redis (Valkey), Mailpit, S3 local (RustFS, `ADR-0003`) (`US-003`); imágenes fijadas por etiqueta y *digest* |
 | Integración | Testcontainers con PostgreSQL y Redis reales; rol de aplicación sin `BYPASSRLS` ni `DELETE`; base limpia por suite |
 | CI | GitHub Actions (`OQ-007`), *runners* Linux; ejecución por PR, nocturna y por candidata de versión |
 | Navegadores | Chromium, Firefox y WebKit, más los perfiles móviles de Playwright (`DEC-066`). Las versiones las fija la versión de Playwright del *lockfile* |

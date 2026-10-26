@@ -6,10 +6,10 @@
 //   default: scans the commits since the merge base plus staged and unstaged changes.
 //   --all:   scans the whole history.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { ensureBinary, sha256From } from './lib/binary.mjs';
 
 const VERSION = '8.30.1';
 const ASSETS = {
@@ -28,46 +28,20 @@ function onPath() {
   return r.status === 0 ? 'gitleaks' : null;
 }
 
-async function download(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`download failed (${res.status}): ${url}`);
-  return Buffer.from(await res.arrayBuffer());
-}
-
-async function ensureBinary() {
+async function ensureGitleaks() {
   const fromPath = onPath();
   if (fromPath) return fromPath;
   const key = `${process.platform}-${process.arch}`;
   const asset = ASSETS[key];
   if (!asset) throw new Error(`no gitleaks release for ${key}; install gitleaks ${VERSION} on PATH`);
-  const dir = join(top, '.tools', 'gitleaks', VERSION);
-  const exe = join(dir, process.platform === 'win32' ? 'gitleaks.exe' : 'gitleaks');
-  if (existsSync(exe)) return exe;
-
-  console.log(`gitleaks: downloading ${asset} …`);
-  const [archive, sums] = await Promise.all([
-    download(`${RELEASE}/${asset}`),
-    download(`${RELEASE}/gitleaks_${VERSION}_checksums.txt`),
-  ]);
-  const expected = sums
-    .toString('utf8')
-    .split('\n')
-    .map((l) => l.trim().split(/\s+/))
-    .find(([, name]) => name === asset)?.[0];
-  const actual = createHash('sha256').update(archive).digest('hex');
-  if (!expected || expected !== actual)
-    throw new Error(`checksum mismatch for ${asset}: expected ${expected}, got ${actual}`);
-
-  mkdirSync(dir, { recursive: true });
-  const archivePath = join(dir, asset);
-  writeFileSync(archivePath, archive);
-  // Windows ships bsdtar, which also extracts .zip; Git Bash's GNU tar does not, so call it by path.
-  const tar =
-    process.platform === 'win32' ? join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe') : 'tar';
-  execFileSync(tar, ['-xf', archivePath, '-C', dir], { stdio: 'inherit' });
-  rmSync(archivePath);
-  if (!existsSync(exe)) throw new Error(`gitleaks binary not found after extracting ${asset}`);
-  return exe;
+  return ensureBinary({
+    root: top,
+    name: 'gitleaks',
+    version: VERSION,
+    url: `${RELEASE}/${asset}`,
+    sha256: await sha256From(`${RELEASE}/gitleaks_${VERSION}_checksums.txt`, asset),
+    exe: process.platform === 'win32' ? 'gitleaks.exe' : 'gitleaks',
+  });
 }
 
 function mergeBaseRange() {
@@ -90,7 +64,7 @@ function mergeBaseRange() {
 }
 
 try {
-  const bin = await ensureBinary();
+  const bin = await ensureGitleaks();
   const common = ['--redact', '--no-banner', '--exit-code', '1'];
   const runs = process.argv.includes('--all')
     ? [['git', ...common, '.']]

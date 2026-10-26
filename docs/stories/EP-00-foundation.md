@@ -39,14 +39,14 @@
 - **Notas para la IA:** si una regla genera demasiado ruido, **no** la desactives: propón la excepción puntual con comentario y razón.
 
 ### US-003 — Entorno local con Docker Compose
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** IN_PROGRESS
 - **Historia:** Como desarrollador quiero levantar las dependencias de infraestructura con un comando para trabajar sin instalar nada a mano.
-- **Contexto:** PostgreSQL con extensiones (`pg_trgm`, `unaccent`), Redis, Mailpit (SMTP de pruebas) y MinIO (S3 local).
+- **Contexto:** PostgreSQL con extensiones (`pg_trgm`, `unaccent`), Redis (Valkey), Mailpit (SMTP de pruebas) y un S3 local (RustFS, `ADR-0003`; MinIO dejó de publicar binarios).
 - **Referencias:** DEC-023, DEC-016, DEC-015 · `ARCHITECTURE.md` §16.3
 - **Criterios de aceptación:**
-  1. `docker-compose.yml` define `postgres`, `redis`, `mailpit`, `minio` con *healthchecks* y volúmenes nombrados.
+  1. `docker-compose.yml` define `postgres`, `redis`, `mailpit` y `s3` con *healthchecks* y volúmenes nombrados.
   2. Un script de inicialización crea las extensiones, el rol de aplicación (sin `BYPASSRLS`) y el rol de migración.
-  3. El bucket de MinIO se crea automáticamente.
+  3. El *bucket* del S3 local se crea automáticamente.
   4. `pnpm dev:infra` levanta todo y `pnpm dev:infra:down` lo detiene; los puertos están documentados.
   5. `.env.example` completo para API y web (según `ARCHITECTURE.md` §16.2) funciona con este compose.
 - **Pruebas requeridas:** script de verificación que comprueba conectividad a cada servicio (`pnpm infra:check`).
