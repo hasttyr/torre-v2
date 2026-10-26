@@ -118,15 +118,16 @@ export const ruleSetSchema = z.strictObject({
   provenance: z.record(z.string().min(1), provenanceEntry),
   format: z.enum(['INDIVIDUAL', 'TEAM']),
   system: z.enum(['SWISS', 'ROUND_ROBIN', 'DOUBLE_ROUND_ROBIN', 'KNOCKOUT']),
-  roundsPolicy,
+  /** Declared before the tournament (C.04.1 Art. 1); a draft may still lack it. */
+  roundsPolicy: roundsPolicy.optional(),
   /** 2 = two games against the same opponent with colours reversed, each scored on its own (BR-SCORE-01). */
   gamesPerPairing: z.union([z.literal(1), z.literal(2)]),
   scoring,
   requestedByes,
   swiss: swiss.optional(),
   roundRobin: z.strictObject({ reverseLastTwoRoundsOfFirstCycle: z.boolean() }).optional(),
-  /** Ordered list: the order is the priority (BR-TIE-01). */
-  tiebreaks: z.array(tiebreak),
+  /** Ordered list: the order is the priority (BR-TIE-01); chosen by the organiser (C.07 Art. 4.1). */
+  tiebreaks: z.array(tiebreak).optional(),
   tiebreakPolicy: z.strictObject({
     unplayedRounds: z.enum(['FIDE_C07_2026', 'AS_AWARDED', 'CUSTOM']).optional(),
     restartOnPartialSplit: z.boolean(),
@@ -151,8 +152,8 @@ export const ruleSetSchema = z.strictObject({
 
 export type RuleSet = z.infer<typeof ruleSetSchema>;
 export type Scoring = RuleSet['scoring'];
-export type RoundsPolicy = RuleSet['roundsPolicy'];
-export type TiebreakSpec = RuleSet['tiebreaks'][number];
+export type RoundsPolicy = NonNullable<RuleSet['roundsPolicy']>;
+export type TiebreakSpec = NonNullable<RuleSet['tiebreaks']>[number];
 export type ProvenanceEntry = RuleSet['provenance'][string];
 
 /** JSON Schema of the RuleSet, for documentation (US-010:AC6). Cross-field rules are not expressible here. */

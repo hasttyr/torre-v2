@@ -16,3 +16,5 @@ export type { ValidationContext, ValidationIssue } from './validate.js';
 
 export { assertImmutable, canApprove, listUnconfirmedFields, valueAt } from './lifecycle.js';
 export type { UnconfirmedField } from './lifecycle.js';
+
+export { ASCUN_CHESS_BLITZ, ASCUN_CHESS_CLASSICAL, DEMO_ROUND_ROBIN, FIDE_DUTCH_2026, PRESETS } from './presets.js';

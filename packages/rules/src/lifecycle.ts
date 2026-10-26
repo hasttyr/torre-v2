@@ -3,7 +3,12 @@ import type { Result } from '@torre/core';
 import type { ProvenanceEntry, RuleSet } from './schema.js';
 
 /** Values a rule set must define before it can be approved, even if no provenance entry names them. */
-const REQUIRED_FOR_APPROVAL = ['tiebreakPolicy.unplayedRounds', 'tiebreakPolicy.unresolved'] as const;
+const REQUIRED_FOR_APPROVAL = [
+  'roundsPolicy',
+  'tiebreaks',
+  'tiebreakPolicy.unplayedRounds',
+  'tiebreakPolicy.unresolved',
+] as const;
 
 export interface UnconfirmedField {
   readonly path: string;

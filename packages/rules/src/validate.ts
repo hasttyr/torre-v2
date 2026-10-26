@@ -4,7 +4,7 @@ import { MODIFIABLE_TIEBREAKS, MULTI_LISTABLE_TIEBREAKS } from './catalog.js';
 import type { TeamTiebreakId, TiebreakId } from './catalog.js';
 import { canApprove, valueAt } from './lifecycle.js';
 import { ruleSetSchema } from './schema.js';
-import type { RuleSet } from './schema.js';
+import type { RoundsPolicy, RuleSet } from './schema.js';
 
 export interface ValidationIssue {
   /** Name of the rule that failed, stable for tests and messages. */
@@ -18,7 +18,7 @@ export interface ValidationContext {
   readonly scope: 'PLATFORM' | 'ORGANIZATION';
 }
 
-const ROUNDS_POLICY_BY_SYSTEM: Readonly<Record<RuleSet['system'], readonly RuleSet['roundsPolicy']['kind'][]>> = {
+const ROUNDS_POLICY_BY_SYSTEM: Readonly<Record<RuleSet['system'], readonly RoundsPolicy['kind'][]>> = {
   SWISS: ['FIXED', 'TABLE'],
   ROUND_ROBIN: ['ALL_PLAY_ALL'],
   DOUBLE_ROUND_ROBIN: ['ALL_PLAY_ALL'],
@@ -66,15 +66,12 @@ export function crossFieldIssues(rs: RuleSet, { scope }: ValidationContext): Val
   if (rs.roundRobin !== undefined && rs.system !== 'ROUND_ROBIN' && rs.system !== 'DOUBLE_ROUND_ROBIN') {
     add('round-robin-block-matches-system', 'roundRobin', 'the roundRobin block only applies to round robins');
   }
-  if (!ROUNDS_POLICY_BY_SYSTEM[rs.system].includes(rs.roundsPolicy.kind)) {
-    add(
-      'rounds-policy-matches-system',
-      'roundsPolicy.kind',
-      `${rs.system} cannot use a ${rs.roundsPolicy.kind} rounds policy`,
-    );
+  const policy = rs.roundsPolicy;
+  if (policy !== undefined && !ROUNDS_POLICY_BY_SYSTEM[rs.system].includes(policy.kind)) {
+    add('rounds-policy-matches-system', 'roundsPolicy.kind', `${rs.system} cannot use a ${policy.kind} rounds policy`);
   }
-  if (rs.roundsPolicy.kind === 'TABLE') {
-    const rows = [...rs.roundsPolicy.table].sort((a, b) => a.min - b.min);
+  if (policy?.kind === 'TABLE') {
+    const rows = [...policy.table].sort((a, b) => a.min - b.min);
     rows.forEach((row, i) => {
       const previous = rows[i - 1];
       if (row.min > row.max || (previous !== undefined && row.min <= previous.max)) {
@@ -84,7 +81,7 @@ export function crossFieldIssues(rs: RuleSet, { scope }: ValidationContext): Val
   }
   const { win, draw, loss } = rs.scoring;
   if (!(win >= draw && draw >= loss)) add('scoring-order', 'scoring', 'scores must satisfy win ≥ draw ≥ loss');
-  issues.push(...tiebreakListIssues(rs.tiebreaks, 'tiebreaks'));
+  if (rs.tiebreaks !== undefined) issues.push(...tiebreakListIssues(rs.tiebreaks, 'tiebreaks'));
   if (rs.team !== undefined) issues.push(...tiebreakListIssues(rs.team.teamTiebreaks, 'team.teamTiebreaks'));
   if (rs.requestedByes.allowed && rs.requestedByes.kind === undefined) {
     add(
