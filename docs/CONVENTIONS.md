@@ -24,7 +24,7 @@
 
 ### 2.1 Ejemplo de referencia (dominio y prueba)
 
-Ilustra las reglas de §2, §3, §10 y §12 en un caso real (`BR-SCORE-01`, `BR-SCORE-02`, `BR-NUM-01`). Las firmas exactas de `Result`, `HalfPoints` y `DomainError` las fija `US-011`; si difieren, manda el código de `@torre/core` y este ejemplo se actualiza en ese mismo PR.
+Ilustra las reglas de §2, §3, §10 y §12 en un caso real (`BR-SCORE-01`, `BR-SCORE-02`, `BR-NUM-01`) con los tipos de `@torre/core` (`US-011`). Los *byes* no son resultados de partida: tienen su propio tipo, `ByeKind`.
 
 ```ts
 // packages/standings/src/points-for.ts
@@ -42,7 +42,7 @@ export function pointsFor(
   result: GameResult,
   side: Side,
   scoring: Readonly<Scoring>,
-): Result<HalfPoints, DomainError> {
+): Result<HalfPoints, DomainError<'RESULT_PENDING'>> {
   const isWhite = side === 'WHITE';
   switch (result) {
     case 'WHITE_WINS':
@@ -57,13 +57,6 @@ export function pointsFor(
       return ok(isWhite ? scoring.forfeitLoss : scoring.forfeitWin);
     case 'DOUBLE_FORFEIT':
       return ok(scoring.doubleForfeit);
-    // Byes have no opponent, so the side is irrelevant (BR-SCORE-04, BR-WD-03).
-    case 'PAIRING_BYE':
-      return ok(scoring.pairingBye);
-    case 'HALF_POINT_BYE':
-      return ok(scoring.halfPointBye);
-    case 'ZERO_POINT_BYE':
-      return ok(scoring.zeroPointBye);
     case 'PENDING':
       // A pending game is an expected state, not a bug: return it, do not throw (US-012:AC3).
       return err(new DomainError('RESULT_PENDING', { result }));
@@ -79,8 +72,7 @@ export function pointsFor(
 // packages/standings/src/points-for.spec.ts
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { ok } from '@torre/core';
-import { aScoring, PROPERTY_RUNS, PROPERTY_SEED } from '@torre/testing';
+import { aScoring } from '@torre/testing';
 import { pointsFor } from './points-for.js'; // ESM + nodenext: relative imports carry .js (DEC-071)
 
 const DECIDED = ['WHITE_WINS', 'BLACK_WINS', 'DRAW'] as const;
@@ -89,8 +81,8 @@ describe('pointsFor', () => {
   it('[US-012:AC2][BR-SCORE-02] should take the winner and loser points from the RuleSet when white wins', () => {
     const scoring = aScoring().build(); // builder from @torre/testing, never literals spread across tests
 
-    expect(pointsFor('WHITE_WINS', 'WHITE', scoring)).toEqual(ok(scoring.win));
-    expect(pointsFor('WHITE_WINS', 'BLACK', scoring)).toEqual(ok(scoring.loss));
+    expect(pointsFor('WHITE_WINS', 'WHITE', scoring)).toEqual({ ok: true, value: scoring.win });
+    expect(pointsFor('WHITE_WINS', 'BLACK', scoring)).toEqual({ ok: true, value: scoring.loss });
   });
 
   it('[US-012:AC3] should report RESULT_PENDING when the game has no result yet', () => {
@@ -100,6 +92,8 @@ describe('pointsFor', () => {
   });
 
   it('[US-012:AC1][INV-S-1][TC-006] should hand out win + loss or two draws for every decided game', () => {
+    // Runs and seed come from the global setup (tools/vitest/fast-check.setup.ts): 200 with a fixed seed
+    // in PRs, 5 000 with a recorded random seed at night (TESTING.md §9).
     fc.assert(
       fc.property(fc.constantFrom(...DECIDED), (result) => {
         const scoring = aScoring().build();
@@ -109,13 +103,12 @@ describe('pointsFor', () => {
 
         expect(white.ok && black.ok && white.value + black.value).toBe(expected);
       }),
-      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED }, // 200 runs, fixed seed in PRs (TESTING.md §9)
     );
   });
 });
 ```
 
-Qué muestra: nombres en inglés y comentarios que citan reglas; `readonly` y sin mutación; error esperado como `Result`, no excepción; `switch` exhaustivo con `never`; valores solo del `RuleSet`; una prueba por comportamiento, con etiquetas `[US-nnn:ACk]`, `[TC-nnn]`, `[BR-…]` e `[INV-…]`, *builders* de `@torre/testing` y semilla fija.
+Qué muestra: nombres en inglés y comentarios que citan reglas; `readonly` y sin mutación; error esperado como `Result`, no excepción; `switch` exhaustivo con `never`; valores solo del `RuleSet`; una prueba por comportamiento, con etiquetas `[US-nnn:ACk]`, `[TC-nnn]`, `[BR-…]` e `[INV-…]`, *builders* de `@torre/testing` y los parámetros globales de fast-check.
 
 ## 3. Estructura y nombres
 

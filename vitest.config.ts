@@ -1,8 +1,4 @@
 import { defineConfig } from 'vitest/config';
-import { fastCheckParams } from './tools/lib/fast-check-params.mjs';
-
-const fastCheck = fastCheckParams(process.env);
-
 export default defineConfig({
   resolve: {
     // Workspace packages export their TypeScript sources under this condition (ADR-0001).
@@ -10,8 +6,6 @@ export default defineConfig({
   },
   test: {
     passWithNoTests: true,
-    // Property tests read these with `inject('fastCheck')` (TESTING.md §9, TEST-PLAN.md §6.2.2).
-    provide: { fastCheck },
     coverage: {
       provider: 'v8',
       include: ['packages/*/src/**/*.ts', 'apps/api/src/**/*.ts'],
@@ -31,7 +25,11 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: 'packages', include: ['packages/*/src/**/*.spec.ts'] },
+        test: {
+          name: 'packages',
+          include: ['packages/*/src/**/*.spec.ts'],
+          setupFiles: ['tools/vitest/fast-check.setup.ts'],
+        },
       },
     ],
   },
