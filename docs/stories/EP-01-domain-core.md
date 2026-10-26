@@ -232,7 +232,7 @@
 - **Notas para la IA:** avanza por grupos pequeños; cada grupo se entrega con su suite. Los comandos que dependan de reglas `[PENDIENTE-ASCUN]` fallan de forma explícita si el `RuleSet` no define el parámetro.
 
 ### US-021 — PRNG determinista y hash canónico de entradas
-- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** S · **Estado:** READY
+- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** S · **Estado:** DONE
 - **Historia:** Como responsable quiero azar reproducible y huellas de entrada estables para cumplir el determinismo.
 - **Referencias:** BR-GEN-01, BR-PAIR-13, BR-TIE-05
 - **Criterios de aceptación:**
