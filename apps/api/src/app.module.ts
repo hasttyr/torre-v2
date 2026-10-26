@@ -3,6 +3,7 @@ import type { DynamicModule } from '@nestjs/common';
 import { LoggingModule } from './common/logging.module.js';
 import type { LoggingOptions } from './common/logging.module.js';
 import { AppConfigModule } from './config/config.module.js';
+import { HealthModule } from './health/health.module.js';
 import type { AppConfigOptions } from './config/config.module.js';
 
 export type AppOptions = AppConfigOptions & LoggingOptions;
@@ -13,7 +14,7 @@ export class AppModule {
   static async forRoot(options: AppOptions = {}): Promise<DynamicModule> {
     return {
       module: AppModule,
-      imports: [await AppConfigModule.forRoot(options), LoggingModule.forRoot(options)],
+      imports: [await AppConfigModule.forRoot(options), LoggingModule.forRoot(options), HealthModule],
     };
   }
 }

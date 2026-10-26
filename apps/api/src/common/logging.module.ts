@@ -59,6 +59,8 @@ function pinoHttpOptions(config: AppConfig): Options<IncomingMessage, ServerResp
     },
     // On every line written while the request runs, including the ones of Nest's Logger.
     customProps: (req: Request) => ({ correlationId: req.correlationId }),
+    // Load balancers poll the health checks every few seconds: those requests are not logged.
+    autoLogging: { ignore: (req: Request) => pathOf(req.url).startsWith('/health/') },
     redact: { paths: REDACT_PATHS, censor: REDACTED },
     serializers: {
       req: (req: Request) => ({ method: req.method, url: pathOf(req.url) }),
