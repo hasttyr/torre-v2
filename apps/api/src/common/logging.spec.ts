@@ -72,13 +72,13 @@ describe('request logs', () => {
       'REFRESH-SECRET-cookie',
       'RESET-SECRET-token',
       'ana@example.org',
-      'P4ssw0rd-SECRET',
+      'not-a-real-pw',
     ];
     await http()
       .post('/api/v1/probe/login?token=RESET-SECRET-token&email=ana%40example.org')
       .set('Authorization', 'Bearer Bearer-SECRET-access')
       .set('Cookie', '__Host-refresh=REFRESH-SECRET-cookie')
-      .send({ email: 'ana@example.org', password: 'P4ssw0rd-SECRET' });
+      .send({ email: 'ana@example.org', password: 'not-a-real-pw' });
 
     expect(lines.length).toBeGreaterThan(0);
     for (const secret of secrets) expect(lines.join('\n')).not.toContain(secret);
