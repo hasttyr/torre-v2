@@ -1,12 +1,21 @@
 import { Module } from '@nestjs/common';
 import type { DynamicModule } from '@nestjs/common';
+import { LoggingModule } from './common/logging.module.js';
+import { ThrottlingModule } from './common/throttling.module.js';
+import type { LoggingOptions } from './common/logging.module.js';
 import { AppConfigModule } from './config/config.module.js';
+import { HealthModule } from './health/health.module.js';
 import type { AppConfigOptions } from './config/config.module.js';
 
-/** Root module. Logging, errors, health and security arrive with US-006. */
+export type AppOptions = AppConfigOptions & LoggingOptions;
+
+/** Root module: configuration (US-005) and the cross-cutting layer (US-006). */
 @Module({})
 export class AppModule {
-  static async forRoot(options: AppConfigOptions = {}): Promise<DynamicModule> {
-    return { module: AppModule, imports: [await AppConfigModule.forRoot(options)] };
+  static async forRoot(options: AppOptions = {}): Promise<DynamicModule> {
+    return {
+      module: AppModule,
+      imports: [await AppConfigModule.forRoot(options), LoggingModule.forRoot(options), ThrottlingModule, HealthModule],
+    };
   }
 }

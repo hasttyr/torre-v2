@@ -137,7 +137,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 | US-003 | Entorno local con Docker Compose | F0 | MUST | M | IN_PROGRESS | US-001 |
 | US-004 | Pipeline de integración continua | F0 | MUST | M | IN_PROGRESS | US-001, US-002 |
 | US-005 | Módulo de configuración con validación de entorno (API) | F0 | MUST | S | DONE | US-001 |
-| US-006 | Capa transversal de la API: logging, errores, salud y seguridad básica | F0 | MUST | M | READY | US-005 |
+| US-006 | Capa transversal de la API: logging, errores, salud y seguridad básica | F0 | MUST | M | DONE | US-005 |
 | US-007 | Base de datos: Prisma, migraciones, seeds y utilidades de prueba | F0 | MUST | L | READY | US-003, US-005 |
 | US-008 | Contratos de API con oRPC (prueba previa) y OpenAPI | F0 | MUST | M | READY | US-006 |
 | US-009 | Esqueleto de la aplicación web | F0 | MUST | L | READY | US-002, US-008 |

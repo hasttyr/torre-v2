@@ -1,17 +1,13 @@
-import { readFileSync } from 'node:fs';
-import { inspect, parseEnv as parseDotenv } from 'node:util';
+import { inspect } from 'node:util';
 import { Inject, Injectable, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { stubExampleEnv } from '../__tests__/env.js';
 import { AppModule } from '../app.module.js';
 import { AppConfig } from './app-config.js';
 import { InvalidEnvironmentError } from './env.schema.js';
 
-const example = parseDotenv(readFileSync(new URL('../../../../.env.example', import.meta.url), 'utf8'));
-const stubExample = (overrides: Record<string, string> = {}) => {
-  for (const [key, value] of Object.entries({ ...example, ...overrides }))
-    if (value !== undefined) vi.stubEnv(key, value);
-};
+const stubExample = stubExampleEnv;
 
 /** A consumer that receives the configuration through constructor injection, as every module will. */
 @Injectable()

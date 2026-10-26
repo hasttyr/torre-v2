@@ -201,7 +201,7 @@ Cada paquete expone una API pública desde `src/index.ts`; nadie importa rutas i
 | `RATE_LIMITED` | 429 | Límite de tasa |
 | `INTERNAL_ERROR` | 500 | Error inesperado (con `correlationId`) |
 
-- Errores de dominio: clase `DomainError { code, details }` dentro de `Result`; el filtro global los mapea a HTTP.
+- Errores de dominio: clase `DomainError { code, details }` dentro de `Result`. La API los convierte con `fromDomainError` (`apps/api/src/common/api-error.ts`), que conserva el código y descarta `details`, y el filtro global `ProblemDetailsFilter` responde el `application/problem+json`. Los errores esperados de la propia API se lanzan con `apiError(code, { detail, errors })`. Un código que no está en el catálogo responde 500.
 - **Nunca** devolver trazas ni mensajes internos al cliente.
 
 ## 7. i18n
