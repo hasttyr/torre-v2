@@ -4,7 +4,7 @@
 > Estados: `READY` · `BLOCKED(OQ-xxx)` · `PARTIAL(OQ-xxx)` · `LATER` · `DONE`. Tamaños: S (sesión corta) · M (una sesión) · L (varias sesiones) · XL (dividir antes de empezar).
 
 ### US-001 — Estructura del monorepo y herramientas base
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como desarrollador quiero un monorepo pnpm con la estructura acordada y scripts raíz estándar para que tanto yo como la IA ejecutemos lint, typecheck, pruebas y build con un solo comando.
 - **Contexto:** `ARCHITECTURE.md` §4 define la estructura. Los paquetes pueden estar vacíos (con `package.json`, `tsconfig.json` y un `index.ts`), pero deben existir y compilar.
 - **Referencias:** DEC-004, DEC-001, DEC-035 · `ARCHITECTURE.md` §4, §5 · `CONVENTIONS.md` §2–§3
