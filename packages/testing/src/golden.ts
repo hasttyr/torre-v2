@@ -13,16 +13,22 @@ const entrySpec = z.union([
 ]);
 
 /**
- * Format of `packages/<package>/test/golden/*.json` (TESTING.md §7). The values under `expected` are
- * checked by hand and never copied from the code under test (TEST-PLAN.md §6).
+ * Fields every file under `packages/<package>/test/golden/` carries (TESTING.md §7). The values under
+ * `expected` are checked by hand or transcribed from an official source, never copied from the code
+ * under test (TEST-PLAN.md §6).
  */
-const goldenCaseSchema = z.strictObject({
-  id: z.string().regex(/^GV-\d{3}$/),
+const goldenMeta = {
+  id: z.string().regex(/^(GV-\d{3}|SRC-\d{2})$/),
   description: z.string().min(1),
   source: z.string().min(1),
   verifiedBy: z.string().min(1),
   verifiedAt: z.iso.date(),
   rules: z.array(z.string().regex(/^(BR|INV|DEC)-/)).min(1),
+};
+
+/** A tournament history with its expected standings. */
+const goldenCaseSchema = z.strictObject({
+  ...goldenMeta,
   input: z.strictObject({
     scoring: z
       .strictObject({
@@ -79,4 +85,34 @@ export function loadGoldenCase(json: unknown): GoldenCase {
     history: input.rounds.map((specs, i) => round(i + 1, specs)),
     expected: golden.expected,
   };
+}
+
+/** A pairing table as FIDE prints it: one string per round, `white-black` pairs from board 1 down. */
+const pairingTablesSchema = z.strictObject({
+  ...goldenMeta,
+  input: z.record(z.string(), z.unknown()),
+  expected: z.strictObject({
+    tables: z.record(z.string().regex(/^\d+$/), z.array(z.string().min(1)).min(1)),
+  }),
+});
+
+export interface PairingTables {
+  readonly id: string;
+  readonly source: string;
+  /** Participants → rounds → `[white, black]` pairs, board 1 first. */
+  readonly tables: ReadonlyMap<number, readonly (readonly [number, number])[][]>;
+}
+
+const PAIR = /(\d+)\s*[-–]\s*(\d+)/g;
+
+/** Parses a golden file of pairing tables; any separator between pairs is accepted (`,` or a stray `.`). */
+export function loadPairingTables(json: unknown): PairingTables {
+  const golden = pairingTablesSchema.parse(json);
+  const tables = new Map(
+    Object.entries(golden.expected.tables).map(([players, rounds]) => [
+      Number(players),
+      rounds.map((text) => [...text.matchAll(PAIR)].map((m) => [Number(m[1]), Number(m[2])] as const)),
+    ]),
+  );
+  return { id: golden.id, source: golden.source, tables };
 }
