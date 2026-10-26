@@ -324,7 +324,7 @@ Reglas:
 
 ### 6.4 Manejo de errores
 
-- Excepciones de dominio (`DomainError` con `code`) se traducen en un filtro global a `application/problem+json`.
+- Los fallos de dominio (`DomainError` con `code`) se convierten en `ApiError` con `fromDomainError` y un filtro global (`ProblemDetailsFilter`, `US-006`) los responde como `application/problem+json`; también los errores del *framework* (ruta inexistente, cuerpo ilegible, límite de tasa), solo con su código.
 - Códigos de error son **estables y por clave** (p. ej. `GAME_ALREADY_HAS_RESULT`), no textos; el front los traduce con i18n (`DEC-019`). Catálogo: `packages/contracts/src/errors.ts` (formato en `CONVENTIONS.md` §6).
 - Errores inesperados: `500` con `correlationId`, detalle solo en logs.
 
