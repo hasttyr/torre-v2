@@ -1,11 +1,12 @@
 import type { Server } from 'node:http';
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { stubExampleEnv } from '../__tests__/env.js';
 import { AppModule } from '../app.module.js';
-import { configureApp } from '../app.setup.js';
+import { APP_OPTIONS, configureApp } from '../app.setup.js';
 import { DATABASE_PROBE, REDIS_PROBE } from './probes.js';
 import type { Probe } from './probes.js';
 
@@ -26,7 +27,7 @@ async function start(probes: { database?: Probe; redis?: Probe } = {}, env: Reco
   });
   if (probes.database) builder = builder.overrideProvider(DATABASE_PROBE).useValue(probes.database);
   if (probes.redis) builder = builder.overrideProvider(REDIS_PROBE).useValue(probes.redis);
-  app = configureApp((await builder.compile()).createNestApplication({ bufferLogs: true }));
+  app = configureApp((await builder.compile()).createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();
   return request(app.getHttpServer() as Server);
 }
@@ -89,5 +90,11 @@ describe('health', () => {
     expect(ready.body).toMatchObject({ error: { database: { status: 'down' }, redis: { status: 'down' } } });
     expect(Date.now() - started).toBeLessThan(5_000);
     expect(ready.text + lines.join('\n')).not.toContain('closed-port-pw');
+    // Connection-refused errors may come without a message: the log still says why.
+    const reasons = lines
+      .filter((line) => line.includes('Dependency not ready'))
+      .map((line) => (JSON.parse(line) as { reason: string }).reason);
+    expect(reasons).toHaveLength(2);
+    for (const reason of reasons) expect(reason.length).toBeGreaterThan(0);
   }, 15_000);
 });

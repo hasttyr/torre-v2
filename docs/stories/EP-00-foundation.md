@@ -89,7 +89,7 @@
 - **Fuera de alcance:** gestor de secretos del entorno de producción.
 
 ### US-006 — Capa transversal de la API: logging, errores, salud y seguridad básica
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como operador quiero logs estructurados, errores uniformes y endpoints de salud para operar y depurar la API.
 - **Referencias:** DEC-024, DEC-019 · `ARCHITECTURE.md` §6.4, §14, §15 · `CONVENTIONS.md` §6
 - **Criterios de aceptación:**

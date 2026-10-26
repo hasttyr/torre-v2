@@ -1,13 +1,14 @@
 import type { Server } from 'node:http';
 import { Body, Controller, Get, Module, Post } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { DomainError } from '@torre/core';
 import { stubExampleEnv } from './__tests__/env.js';
 import { AppModule } from './app.module.js';
-import { configureApp } from './app.setup.js';
+import { APP_OPTIONS, configureApp } from './app.setup.js';
 import { apiError, fromDomainError } from './common/api-error.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -58,7 +59,7 @@ beforeAll(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ProbeModule],
   }).compile();
-  app = configureApp(moduleRef.createNestApplication({ logger: false }));
+  app = configureApp(moduleRef.createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();
 });
 

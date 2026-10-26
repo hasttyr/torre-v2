@@ -1,13 +1,14 @@
 import type { Server } from 'node:http';
 import { Body, Controller, Get, Module, Post } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { pino } from 'pino';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { stubExampleEnv } from '../__tests__/env.js';
 import { AppModule } from '../app.module.js';
-import { configureApp } from '../app.setup.js';
+import { APP_OPTIONS, configureApp } from '../app.setup.js';
 import { REDACT_PATHS, REDACTED, scrubCredentials } from './logging.module.js';
 
 @Controller('probe')
@@ -37,7 +38,7 @@ beforeAll(async () => {
       ProbeModule,
     ],
   }).compile();
-  app = configureApp(moduleRef.createNestApplication({ bufferLogs: true }));
+  app = configureApp(moduleRef.createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();
 });
 

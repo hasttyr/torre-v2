@@ -711,7 +711,7 @@ Como la SPA no ejecuta JS en los rastreadores de vista previa (WhatsApp, etc.), 
 | CORS | Lista explícita de orígenes por entorno; credenciales solo para el origen del front |
 | Cookies y CSRF | Refresh en la cookie `__Host-refresh` con `HttpOnly; Secure; SameSite=Strict; Path=/`. `/auth/refresh` y `/auth/logout` rechazan peticiones cross-site según `Sec-Fetch-Site`, con respaldo de `Origin`/`Referer`; ninguna operación cambia estado por `GET` (OWASP CSRF Prevention Cheat Sheet, `DEC-062`) |
 | Contraseñas | Política NIST SP 800-63B-4 (`BR-AUTH-09`); hash argon2id con 19 MiB, t=2, p=1 (OWASP Password Storage Cheat Sheet) |
-| Rate limiting | `@nestjs/throttler` con almacenamiento en Redis: 300/min por usuario o IP en general; 10 intentos cada 15 min en login, desafío 2FA, registro y recuperación (`DEC-062`) |
+| Rate limiting | `@nestjs/throttler` con almacenamiento en Redis: 300/min por usuario o IP en general; 10 intentos cada 15 min en login, desafío 2FA, registro y recuperación (`DEC-062`). Desde `US-006` rige el límite general con contadores en memoria (válido para una sola instancia); el almacenamiento en Redis y los límites por cuenta llegan con `US-022` |
 | Entrada | Zod en modo estricto (rechaza campos desconocidos). Límites (`DEC-075`): cuerpo JSON ≤ 1 MB; importaciones (CSV, TRF, PGN) ≤ 2 MB, y CSV ≤ 5 000 filas |
 | SQL | Parámetros siempre; `$queryRaw` solo con plantillas parametrizadas |
 | Secretos | Solo por variables de entorno/gestor de secretos; `.env.example` completo; escaneo (gitleaks) en CI |

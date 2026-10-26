@@ -21,6 +21,13 @@ class HealthUnavailableFilter implements ExceptionFilter {
   }
 }
 
+/** Why a probe failed, for the log: the message, or the error code when there is none (`ECONNREFUSED`). */
+function reasonOf(error: unknown): string {
+  if (!(error instanceof Error)) return 'unknown';
+  const { code } = error as { code?: unknown };
+  return scrubCredentials(error.message || (typeof code === 'string' ? code : error.name));
+}
+
 /** `/health/live` (the process answers) and `/health/ready` (database and Redis), US-006:AC4. */
 @Controller('health')
 @UseFilters(HealthUnavailableFilter)
@@ -53,8 +60,7 @@ export class HealthController {
       await probe();
       return indicator.up();
     } catch (error) {
-      const reason = error instanceof Error ? scrubCredentials(error.message) : 'unknown';
-      this.logger.warn({ dependency: key, reason }, 'Dependency not ready');
+      this.logger.warn({ dependency: key, reason: reasonOf(error) }, 'Dependency not ready');
       return indicator.down();
     }
   }
