@@ -45,6 +45,14 @@ export default defineConfig({
           provide: { benchMode: process.env['BENCH_MODE'] === 'full' ? 'full' : 'reduced' },
         },
       },
+      {
+        extends: true,
+        test: {
+          name: 'api',
+          include: ['apps/api/src/**/*.spec.ts'],
+          benchmark: { include: [] },
+        },
+      },
     ],
   },
 });

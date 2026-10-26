@@ -76,7 +76,7 @@
 - **Notas para la IA:** si `OQ-007` resulta en GitLab u otro, adapta sin cambiar las etapas.
 
 ### US-005 — Módulo de configuración con validación de entorno (API)
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** S · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** S · **Estado:** DONE
 - **Historia:** Como operador quiero que la API falle al arrancar si falta o es inválida una variable de entorno para evitar comportamientos silenciosos.
 - **Referencias:** DEC-037 · `ARCHITECTURE.md` §16.2
 - **Criterios de aceptación:**
