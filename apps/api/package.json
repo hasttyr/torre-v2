@@ -24,6 +24,9 @@
     "@nestjs/platform-express": "catalog:",
     "@torre/contracts": "workspace:*",
     "@torre/core": "workspace:*",
+    "nestjs-pino": "catalog:",
+    "pino": "catalog:",
+    "pino-http": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "zod": "catalog:"

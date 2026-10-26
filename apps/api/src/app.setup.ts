@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import { Logger } from 'nestjs-pino';
 import { correlationIdMiddleware } from './common/correlation-id.js';
 import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 
@@ -11,6 +12,7 @@ const OUTSIDE_PREFIX = ['health/live', 'health/ready'];
  * (US-006).
  */
 export function configureApp(app: INestApplication): INestApplication {
+  app.useLogger(app.get(Logger));
   app.use(correlationIdMiddleware);
   app.setGlobalPrefix(API_PREFIX, { exclude: OUTSIDE_PREFIX });
   app.useGlobalFilters(new ProblemDetailsFilter());

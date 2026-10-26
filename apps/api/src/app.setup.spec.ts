@@ -54,7 +54,7 @@ class ProbeModule {}
 let app: INestApplication;
 
 beforeAll(async () => {
-  stubExampleEnv();
+  stubExampleEnv({ LOG_LEVEL: 'silent' });
   const moduleRef = await Test.createTestingModule({
     imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ProbeModule],
   }).compile();
