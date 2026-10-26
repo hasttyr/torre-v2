@@ -151,7 +151,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 | US-011 | Tipos base del dominio y utilidades de medios puntos | F1 | MUST | M | DONE | US-001, US-002 |
 | US-012 | Cálculo de puntajes y clasificación base | F1 | MUST | M | DONE | US-010, US-011 |
 | US-013 | Motor de desempates | F1 | MUST | L | PARTIAL(OQ-023) | US-012, US-021 |
-| US-014 | Generador de todos contra todos (simple y doble) | F1 | MUST | M | READY | US-011 |
+| US-014 | Generador de todos contra todos (simple y doble) | F1 | MUST | M | DONE | US-011 |
 | US-015 | Motor Suizo v1 (base) con restricciones absolutas | F1 | MUST | XL | READY | US-012, US-014, US-021 |
 | US-016 | Validación del Suizo: propiedades a escala y motor de referencia | F1 | MUST | L | READY | US-015 |
 | US-017 | Motor Suizo basado en emparejamiento de peso máximo (Blossom) | F1 | SHOULD | XL | READY | US-015, US-016 |

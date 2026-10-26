@@ -106,7 +106,7 @@ Con *n* par (si *n* es impar se añade el número *n+1*, que significa descanso)
 - Mesa 1: la posición 0 contra el jugador *n*. El jugador *n* lleva negras en las rondas pares (contando desde 0) y blancas en las impares.
 - Mesas 2 en adelante: la posición *k* (con blancas) contra la posición *n−1−k*, para *k* = 1, …, *n/2 − 1*.
 
-Este algoritmo se comparó el 2026-10-26 con **todas** las tablas oficiales (3 a 16 jugadores): coinciden ronda por ronda y color por color. Para torneos de doble vuelta, FIDE recomienda invertir el orden de las dos últimas rondas del primer ciclo, para evitar tres partidas seguidas con el mismo color.
+Este algoritmo se comparó el 2026-10-26 con **todas** las tablas oficiales (3 a 16 jugadores): coinciden ronda por ronda y color por color. Las tablas están transcritas literalmente en `packages/pairing/test/golden/fide-berger-tables.json` y la prueba de `INV-RR-4` las compara en cada ejecución (`US-014`). Para torneos de doble vuelta, FIDE recomienda invertir el orden de las dos últimas rondas del primer ciclo, para evitar tres partidas seguidas con el mismo color.
 
 ### 5.3 Tablas de B.02 (`SRC-06`)
 

@@ -1,0 +1,16 @@
+{
+  "id": "GV-003",
+  "description": "Calendario todos contra todos, 4 jugadores (circular/Berger)",
+  "source": "manual: docs/CORE-BUSINESS.md §18 GV-003 (coincide con SRC-14)",
+  "verifiedBy": "cálculo manual registrado en CORE-BUSINESS.md §18",
+  "verifiedAt": "2026-10-25",
+  "rules": ["BR-RR-01", "INV-RR-1", "INV-RR-2"],
+  "input": {
+    "participants": 4
+  },
+  "expected": {
+    "tables": {
+      "4": ["1–4, 2–3", "4–3, 1–2", "2–4, 3–1"]
+    }
+  }
+}

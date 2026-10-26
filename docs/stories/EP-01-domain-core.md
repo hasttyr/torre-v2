@@ -76,7 +76,7 @@
 - **Notas para la IA:** el "oponente virtual" ya no existe en FIDE (desde 2023). Implementa el Art. 16 de C.07 2026 solo desde el texto oficial (`SRC-04`), nunca de memoria.
 
 ### US-014 — Generador de todos contra todos (simple y doble)
-- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como director quiero generar el calendario de un todos contra todos para torneos pequeños.
 - **Referencias:** BR-RR-01..03 · INV-RR-1..3 · GV-003
 - **Criterios de aceptación:**
