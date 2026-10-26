@@ -20,6 +20,14 @@ const NODE_GLOBALS = {
   fetch: 'readonly',
   setTimeout: 'readonly',
   clearTimeout: 'readonly',
+  setInterval: 'readonly',
+  clearInterval: 'readonly',
+  AbortController: 'readonly',
+  AbortSignal: 'readonly',
+  TextEncoder: 'readonly',
+  TextDecoder: 'readonly',
+  structuredClone: 'readonly',
+  performance: 'readonly',
 };
 
 // Node built-ins that perform I/O or provide entropy: forbidden in the pure domain (ARCHITECTURE.md §5 rule 1).

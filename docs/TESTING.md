@@ -198,7 +198,7 @@ La **regresión** no es un nivel aparte: es volver a ejecutar **todas** las suit
 
 ## 8. Integración, e2e, carga, seguridad y accesibilidad
 
-- **Integración de API:** Testcontainers (PostgreSQL con extensiones y roles reales, Redis, MinIO, Mailpit); cada suite parte de BD limpia; se prueba con el **rol de aplicación** (sin `BYPASSRLS`) para que RLS se ejerza.
+- **Integración de API:** Testcontainers (PostgreSQL con extensiones y roles reales, Redis, S3 local, Mailpit); cada suite parte de BD limpia; se prueba con el **rol de aplicación** (sin `BYPASSRLS`) para que RLS se ejerza.
 - **Concurrencia:** pruebas con varios escritores simultáneos sobre un mismo torneo (idempotencia, reintentos, `INV-E-1`).
 - **E2E (Playwright):** VS-1 completo; ronda solo con teclado (`US-068`); en vivo entre pestañas (`US-053`); suscripción + email (`US-062`).
 - **Carga (k6):** conexiones WebSocket y comandos (`US-054`).

@@ -122,7 +122,7 @@ sequenceDiagram
 | Tiempo real | WebSocket con Socket.IO + adaptador Redis (`DEC-012`) | `[DECIDIDO]` | Transporte detrás de una interfaz (puede cambiar a `ws`/SSE) |
 | PDF | pdfmake detrás de un puerto (`DEC-014`) | `[DECIDIDO]` | Sin Chromium; alternativa: Playwright→PDF si el diseño lo exige |
 | Email | Puerto `MailPort`; SMTP/Nodemailer en dev con Mailpit (`DEC-015`) | `[DECIDIDO]` puerto; Mailpit hasta desplegar (`OQ-006`) | |
-| Archivos | S3 compatible (MinIO en local) (`DEC-016`) | `[DECIDIDO]` | Solo PDFs y logos |
+| Archivos | S3 compatible (RustFS en local, `ADR-0003`) (`DEC-016`) | `[DECIDIDO]` | Solo PDFs y logos |
 | Frontend | Vue 3 + Vite + Composition API + `<script setup>` (`DEC-003`) | `[DECIDIDO]` | Sin SEO requerido; OG tags vía endpoint (`DEC-041`) |
 | Estado | Pinia (UI) + TanStack Vue Query (servidor) (`DEC-018`) | `[DECIDIDO]` | |
 | UI | shadcn-vue (Reka UI) + Tailwind (`DEC-017`) | `[DECIDIDO]` | Ver `UI-UX.md` |
@@ -211,7 +211,7 @@ Todos los paquetes extienden `packages/config/tsconfig.base.json`:
 ├── .nvmrc
 ├── package.json                 # workspaces, scripts raíz
 ├── pnpm-workspace.yaml
-├── docker-compose.yml           # postgres, redis, mailpit, minio (US-003)
+├── docker-compose.yml           # postgres, redis (Valkey), mailpit, s3 (RustFS) (US-003)
 ├── apps/
 │   ├── api/                     # NestJS
 │   │   ├── src/
@@ -737,7 +737,7 @@ Como la SPA no ejecuta JS en los rastreadores de vista previa (WhatsApp, etc.), 
 
 | Entorno | Propósito | Notas |
 |---|---|---|
-| `local` | Desarrollo | `docker-compose` con Postgres, Redis, Mailpit, MinIO |
+| `local` | Desarrollo | `docker-compose` con Postgres, Redis (Valkey), Mailpit y S3 (RustFS); sin Docker, Postgres nativo (`pnpm dev:infra`) |
 | `ci` | Pruebas automáticas | Testcontainers para BD |
 | `staging` | Demo en la nube (opcional) | Plan en §16.5 (`DEC-050`) |
 | `production` | Opcional, según el plan de §16.5 | `DEC-050` |
@@ -774,7 +774,7 @@ Como la SPA no ejecuta JS en los rastreadores de vista previa (WhatsApp, etc.), 
 ### 16.3 Docker
 
 - Dockerfiles multi-stage para `api` y `web` (build → runtime mínimo, usuario no root).
-- `docker-compose.yml` de desarrollo: `postgres` (con extensiones `pg_trgm`, `unaccent`), `redis`, `mailpit`, `minio`.
+- `docker-compose.yml` de desarrollo: `postgres` (con extensiones `pg_trgm`, `unaccent`), `redis` (Valkey 8), `mailpit`, `s3` (RustFS, `ADR-0003`) y el trabajo `s3-init` que crea el *bucket*.
 - Producción: imágenes versionadas por commit SHA.
 
 ### 16.4 CI/CD (`DEC-022`)
@@ -796,7 +796,7 @@ Además hay una ejecución **nocturna** (`pnpm test:nightly`). Cada ejecución p
 | Workers (BullMQ, *outbox relay*) | Render (Background Worker) o el mismo proceso con `WORKER=true` | Si la capa gratuita no incluye workers, el relay corre dentro de la API |
 | PostgreSQL | Neon | Postgres gestionado con RLS; `pg_trgm` y `unaccent` disponibles en PG14–PG18 (`SRC-20`). Migraciones por conexión directa; la app usa el *pooler* |
 | Redis | Render Key Value (Valkey 8) | BullMQ exige `maxmemory-policy noeviction` (Render lo admite) y recomienda persistencia AOF; el plan gratuito de Render no persiste, así que un reinicio puede perder trabajos en cola (`SRC-21`, `SRC-22`). Upstash no se ha verificado |
-| Archivos (PDF) | S3 compatible; el proveedor se elige al desplegar, igual que el email (MinIO en local) | Necesario desde EP-06 |
+| Archivos (PDF) | S3 compatible; el proveedor se elige al desplegar, igual que el email (RustFS en local, `ADR-0003`) | Necesario desde EP-06 |
 | Email | Proveedor transaccional (`OQ-006`) | Necesario desde EP-06 |
 
 Consideraciones (MUST si se despliega):
@@ -874,7 +874,7 @@ Estado: `DECIDIDO` = lo afirmó la persona responsable; `PROPUESTO` = recomendac
 | DEC-013 | BullMQ + Redis para trabajos | DECIDIDO (2026-10-26) | Reintentos, colas, métricas | pg-boss, cron simple | Medio |
 | DEC-014 | PDF con pdfmake tras `PdfPort` | DECIDIDO (2026-10-26) | Ligero, declarativo | Playwright→PDF, PDFKit | Bajo |
 | DEC-015 | Email por `MailPort`; Mailpit en dev; proveedor abierto | DECIDIDO (2026-10-26): Mailpit; proveedor real al desplegar (`OQ-006`) | Desacople | SES, SendGrid, Resend | Bajo |
-| DEC-016 | Almacenamiento S3 compatible (MinIO local; el proveedor se elige al desplegar) | DECIDIDO (2026-10-26) | Estándar | Disco local | Bajo |
+| DEC-016 | Almacenamiento S3 compatible (RustFS en local desde `ADR-0003`, porque MinIO dejó de publicar binarios; el proveedor se elige al desplegar) | DECIDIDO (2026-10-26) | Estándar | Disco local | Bajo |
 | DEC-017 | UI: shadcn-vue + Tailwind + TanStack Table + VeeValidate + Sonner + Lucide | DECIDIDO (2026-10-26) | Homogeneidad por tokens, código propio | PrimeVue, Nuxt UI, Vuetify | Medio |
 | DEC-018 | Pinia + TanStack Vue Query | DECIDIDO (2026-10-26) | Separar estado de UI y de servidor | Solo Pinia | Medio |
 | DEC-019 | i18n con vue-i18n; es → en → pt; códigos de error estables | DECIDIDO (2026-10-26) | Alcance por fases | Textos fijos | Medio |
