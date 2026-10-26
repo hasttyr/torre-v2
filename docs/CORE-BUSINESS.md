@@ -62,7 +62,7 @@ Regla madre: **`BR-GEN-03` — no se inventan reglas.** Ante una duda de reglame
 
 ## 3. `RuleSet` (esbozo no normativo)
 
-> El esquema definitivo lo fija `US-010` en `packages/rules` (Zod). Este esbozo existe para orientar el diseño. Los valores de ASCUN viven en el preset `ascun-chess` (ver `SOURCES.md` §3), no aquí.
+> **Implementado en `US-010`:** el esquema definitivo está en `packages/rules/src/schema.ts` (Zod) y su JSON Schema en `packages/rules/schema/ruleset.schema.json`; manda el código. Diferencias con este esbozo: `provenance` registra la fuente de cada valor y marca los no confirmados (`UNCONFIRMED`) o ausentes (`MISSING`); `roundsPolicy` es `FIXED`, `TABLE`, `ALL_PLAY_ALL` o `ELIMINATION`; `roundsPolicy` y `tiebreaks` pueden faltar en un borrador pero no al aprobar; hay un indicador `demo`. Los presets están en `packages/rules/src/presets.ts`: los valores de ASCUN salen de `SOURCES.md` §3 con su artículo.
 
 ```ts
 interface RuleSet {

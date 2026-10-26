@@ -5,7 +5,7 @@
 > Regla de oro (`BR-GEN-03`): lo `[PENDIENTE-ASCUN]` se parametriza; no se inventa.
 
 ### US-010 — Esquema de `RuleSet`, validación y ciclo de vida
-- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** PARTIAL(OQ-001)
+- **Epic:** EP-01 · **Fase:** F1 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** DONE
 - **Historia:** Como director quiero definir las reglas de una competencia como datos versionados para aplicar el reglamento correcto sin cambiar código.
 - **Contexto:** El esbozo está en `CORE-BUSINESS.md` §3. El `RuleSet` ASCUN no puede quedar `APPROVED` hasta recibir el reglamento.
 - **Referencias:** BR-GEN-02, BR-GEN-03, BR-GEN-04, BR-NUM-01 · DEC-027 · OQ-001

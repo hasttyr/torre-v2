@@ -1,0 +1,755 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "APPROVED",
+        "DEPRECATED"
+      ]
+    },
+    "organizationId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "demo": {
+      "type": "boolean"
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document": {
+          "type": "string",
+          "minLength": 1
+        },
+        "documentVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "sourceId": {
+          "type": "string",
+          "pattern": "^SRC-\\d{2}$"
+        }
+      },
+      "required": [
+        "authority",
+        "document"
+      ],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "UNCONFIRMED",
+              "MISSING"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "question": {
+            "type": "string",
+            "pattern": "^OQ-\\d{3}$"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "INDIVIDUAL",
+        "TEAM"
+      ]
+    },
+    "system": {
+      "type": "string",
+      "enum": [
+        "SWISS",
+        "ROUND_ROBIN",
+        "DOUBLE_ROUND_ROBIN",
+        "KNOCKOUT"
+      ]
+    },
+    "roundsPolicy": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "FIXED"
+            },
+            "rounds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "kind",
+            "rounds"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "TABLE"
+            },
+            "table": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "max": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "rounds": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "min",
+                  "max",
+                  "rounds"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "table"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "ALL_PLAY_ALL"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "ELIMINATION"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "gamesPerPairing": {
+      "anyOf": [
+        {
+          "type": "number",
+          "const": 1
+        },
+        {
+          "type": "number",
+          "const": 2
+        }
+      ]
+    },
+    "scoring": {
+      "type": "object",
+      "properties": {
+        "win": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "draw": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "loss": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "forfeitWin": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "forfeitLoss": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "doubleForfeit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "pairingBye": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "halfPointBye": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "zeroPointBye": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "win",
+        "draw",
+        "loss",
+        "forfeitWin",
+        "forfeitLoss",
+        "doubleForfeit",
+        "pairingBye",
+        "halfPointBye",
+        "zeroPointBye"
+      ],
+      "additionalProperties": false
+    },
+    "requestedByes": {
+      "type": "object",
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "HALF_POINT",
+            "ZERO_POINT"
+          ]
+        },
+        "allowedRounds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "maxPerPlayer": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "requiresJustification": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowed",
+        "requiresJustification"
+      ],
+      "additionalProperties": false
+    },
+    "swiss": {
+      "type": "object",
+      "properties": {
+        "variant": {
+          "type": "string",
+          "const": "FIDE_DUTCH"
+        },
+        "ruleVersion": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "initialColour": {
+          "type": "string",
+          "enum": [
+            "DRAW_LOTS",
+            "WHITE",
+            "BLACK"
+          ]
+        },
+        "maxByesPerPlayer": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "avoidSameInstitutionRounds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "required": [
+        "variant",
+        "ruleVersion",
+        "initialColour"
+      ],
+      "additionalProperties": false
+    },
+    "roundRobin": {
+      "type": "object",
+      "properties": {
+        "reverseLastTwoRoundsOfFirstCycle": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "reverseLastTwoRoundsOfFirstCycle"
+      ],
+      "additionalProperties": false
+    },
+    "tiebreaks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "WIN",
+              "WON",
+              "BUCHHOLZ",
+              "BUCHHOLZ_CUT1",
+              "BUCHHOLZ_CUT2",
+              "BUCHHOLZ_MEDIAN1",
+              "FORE_BUCHHOLZ",
+              "AVG_OPP_BUCHHOLZ",
+              "SONNEBORN_BERGER",
+              "KOYA",
+              "PROGRESSIVE",
+              "DIRECT_ENCOUNTER",
+              "BLACK_GAMES",
+              "BLACK_WINS",
+              "ELECTED_ROUNDS",
+              "STANDARD_POINTS",
+              "AVG_OPPONENT_RATING",
+              "TPR",
+              "APRO",
+              "APPO",
+              "PTP"
+            ]
+          },
+          "modifiers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CUT1",
+                "CUT2",
+                "MEDIAN1",
+                "MEDIAN2"
+              ]
+            }
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": [
+                "number",
+                "string",
+                "boolean"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tiebreakPolicy": {
+      "type": "object",
+      "properties": {
+        "unplayedRounds": {
+          "type": "string",
+          "enum": [
+            "FIDE_C07_2026",
+            "AS_AWARDED",
+            "CUSTOM"
+          ]
+        },
+        "restartOnPartialSplit": {
+          "type": "boolean"
+        },
+        "unresolved": {
+          "type": "string",
+          "enum": [
+            "SHARE_RANK",
+            "DRAW_LOTS",
+            "PLAYOFF"
+          ]
+        }
+      },
+      "required": [
+        "restartOnPartialSplit"
+      ],
+      "additionalProperties": false
+    },
+    "team": {
+      "type": "object",
+      "properties": {
+        "boardsPerMatch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "minPlayersToStart": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "boardOrder": {
+          "type": "string",
+          "enum": [
+            "RATING_DESC",
+            "FREE",
+            "FIXED"
+          ]
+        },
+        "primaryScore": {
+          "type": "string",
+          "enum": [
+            "MATCH_POINTS",
+            "GAME_POINTS"
+          ]
+        },
+        "matchScoring": {
+          "type": "object",
+          "properties": {
+            "win": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "draw": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "loss": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "win",
+            "draw",
+            "loss"
+          ],
+          "additionalProperties": false
+        },
+        "teamTiebreaks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "enum": [
+                  "WIN",
+                  "WON",
+                  "BUCHHOLZ",
+                  "BUCHHOLZ_CUT1",
+                  "BUCHHOLZ_CUT2",
+                  "BUCHHOLZ_MEDIAN1",
+                  "FORE_BUCHHOLZ",
+                  "AVG_OPP_BUCHHOLZ",
+                  "SONNEBORN_BERGER",
+                  "KOYA",
+                  "PROGRESSIVE",
+                  "DIRECT_ENCOUNTER",
+                  "BLACK_GAMES",
+                  "BLACK_WINS",
+                  "ELECTED_ROUNDS",
+                  "STANDARD_POINTS",
+                  "AVG_OPPONENT_RATING",
+                  "TPR",
+                  "APRO",
+                  "APPO",
+                  "PTP",
+                  "MPVGP",
+                  "EMMSB",
+                  "EMGSB",
+                  "EGMSB",
+                  "EGGSB",
+                  "EDE",
+                  "SSSC",
+                  "BOARD_COUNT",
+                  "TOP_BOARD_RESULTS",
+                  "BOTTOM_BOARD_ELIMINATION"
+                ]
+              },
+              "modifiers": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "CUT1",
+                    "CUT2",
+                    "MEDIAN1",
+                    "MEDIAN2"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "boardsPerMatch",
+        "minPlayersToStart",
+        "boardOrder",
+        "primaryScore",
+        "matchScoring",
+        "teamTiebreaks"
+      ],
+      "additionalProperties": false
+    },
+    "eligibility": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "EXTERNAL_VERIFICATION",
+            "NONE"
+          ]
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "entryQuota": {
+      "type": "object",
+      "properties": {
+        "perInstitution": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "perNode": {
+          "type": "object",
+          "properties": {
+            "male": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "female": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeControl": {
+      "type": "object",
+      "properties": {
+        "modality": {
+          "type": "string",
+          "enum": [
+            "CLASSICAL",
+            "RAPID",
+            "BLITZ"
+          ]
+        },
+        "baseMinutes": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "incrementSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forfeitToleranceMinutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "modality",
+        "baseMinutes",
+        "incrementSeconds",
+        "forfeitToleranceMinutes"
+      ],
+      "additionalProperties": false
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "maxRoundsPerDay": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false
+    },
+    "seeding": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "FIDE_RATING",
+              "NATIONAL_RATING",
+              "PLATFORM_RATING"
+            ]
+          }
+        }
+      },
+      "required": [
+        "order"
+      ],
+      "additionalProperties": false
+    },
+    "corrections": {
+      "type": "object",
+      "properties": {
+        "noticeDeadline": {
+          "type": "string",
+          "format": "duration",
+          "pattern": "^P(?:(\\d+W)|(?!.*W)(?=\\d|T\\d)(\\d+Y)?(\\d+M)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+([.,]\\d+)?S)?)?)$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rating": {
+      "type": "object",
+      "properties": {
+        "computePlatformElo": {
+          "type": "boolean"
+        },
+        "initialRating": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4000
+        }
+      },
+      "required": [
+        "computePlatformElo",
+        "initialRating"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "key",
+    "version",
+    "status",
+    "organizationId",
+    "demo",
+    "source",
+    "provenance",
+    "format",
+    "system",
+    "gamesPerPairing",
+    "scoring",
+    "requestedByes",
+    "tiebreakPolicy",
+    "eligibility",
+    "seeding",
+    "corrections",
+    "rating"
+  ],
+  "additionalProperties": false
+}
