@@ -6,3 +6,4 @@ coverage/
 reports/
 .tools/
 tools/fixtures/
+packages/rules/schema/

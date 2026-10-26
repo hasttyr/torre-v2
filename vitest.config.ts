@@ -1,9 +1,9 @@
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
-  resolve: {
-    // Workspace packages export their TypeScript sources under this condition (ADR-0001).
-    conditions: ['@torre/source'],
-  },
+  // Workspace packages export their TypeScript sources under this condition (ADR-0001). Vitest resolves
+  // modules on the server side, so the condition must also be declared for SSR.
+  resolve: { conditions: ['@torre/source', 'module', 'browser', 'development|production'] },
+  ssr: { resolve: { conditions: ['@torre/source', 'module', 'node', 'development|production'] } },
   test: {
     passWithNoTests: true,
     coverage: {

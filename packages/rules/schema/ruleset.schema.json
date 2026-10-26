@@ -13,7 +13,11 @@
     },
     "status": {
       "type": "string",
-      "enum": ["DRAFT", "APPROVED", "DEPRECATED"]
+      "enum": [
+        "DRAFT",
+        "APPROVED",
+        "DEPRECATED"
+      ]
     },
     "organizationId": {
       "anyOf": [
@@ -58,7 +62,10 @@
           "pattern": "^SRC-\\d{2}$"
         }
       },
-      "required": ["authority", "document"],
+      "required": [
+        "authority",
+        "document"
+      ],
       "additionalProperties": false
     },
     "provenance": {
@@ -72,7 +79,11 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["CONFIRMED", "UNCONFIRMED", "MISSING"]
+            "enum": [
+              "CONFIRMED",
+              "UNCONFIRMED",
+              "MISSING"
+            ]
           },
           "source": {
             "type": "string",
@@ -87,17 +98,27 @@
             "minLength": 1
           }
         },
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "additionalProperties": false
       }
     },
     "format": {
       "type": "string",
-      "enum": ["INDIVIDUAL", "TEAM"]
+      "enum": [
+        "INDIVIDUAL",
+        "TEAM"
+      ]
     },
     "system": {
       "type": "string",
-      "enum": ["SWISS", "ROUND_ROBIN", "DOUBLE_ROUND_ROBIN", "KNOCKOUT"]
+      "enum": [
+        "SWISS",
+        "ROUND_ROBIN",
+        "DOUBLE_ROUND_ROBIN",
+        "KNOCKOUT"
+      ]
     },
     "roundsPolicy": {
       "oneOf": [
@@ -114,7 +135,10 @@
               "maximum": 9007199254740991
             }
           },
-          "required": ["kind", "rounds"],
+          "required": [
+            "kind",
+            "rounds"
+          ],
           "additionalProperties": false
         },
         {
@@ -146,12 +170,19 @@
                     "maximum": 9007199254740991
                   }
                 },
-                "required": ["min", "max", "rounds"],
+                "required": [
+                  "min",
+                  "max",
+                  "rounds"
+                ],
                 "additionalProperties": false
               }
             }
           },
-          "required": ["kind", "table"],
+          "required": [
+            "kind",
+            "table"
+          ],
           "additionalProperties": false
         },
         {
@@ -162,7 +193,9 @@
               "const": "ALL_PLAY_ALL"
             }
           },
-          "required": ["kind"],
+          "required": [
+            "kind"
+          ],
           "additionalProperties": false
         },
         {
@@ -173,7 +206,9 @@
               "const": "ELIMINATION"
             }
           },
-          "required": ["kind"],
+          "required": [
+            "kind"
+          ],
           "additionalProperties": false
         }
       ]
@@ -260,7 +295,10 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["HALF_POINT", "ZERO_POINT"]
+          "enum": [
+            "HALF_POINT",
+            "ZERO_POINT"
+          ]
         },
         "allowedRounds": {
           "type": "array",
@@ -279,7 +317,10 @@
           "type": "boolean"
         }
       },
-      "required": ["allowed", "requiresJustification"],
+      "required": [
+        "allowed",
+        "requiresJustification"
+      ],
       "additionalProperties": false
     },
     "swiss": {
@@ -296,7 +337,11 @@
         },
         "initialColour": {
           "type": "string",
-          "enum": ["DRAW_LOTS", "WHITE", "BLACK"]
+          "enum": [
+            "DRAW_LOTS",
+            "WHITE",
+            "BLACK"
+          ]
         },
         "maxByesPerPlayer": {
           "type": "integer",
@@ -312,7 +357,11 @@
           }
         }
       },
-      "required": ["variant", "ruleVersion", "initialColour"],
+      "required": [
+        "variant",
+        "ruleVersion",
+        "initialColour"
+      ],
       "additionalProperties": false
     },
     "roundRobin": {
@@ -322,7 +371,9 @@
           "type": "boolean"
         }
       },
-      "required": ["reverseLastTwoRoundsOfFirstCycle"],
+      "required": [
+        "reverseLastTwoRoundsOfFirstCycle"
+      ],
       "additionalProperties": false
     },
     "tiebreaks": {
@@ -361,7 +412,12 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["CUT1", "CUT2", "MEDIAN1", "MEDIAN2"]
+              "enum": [
+                "CUT1",
+                "CUT2",
+                "MEDIAN1",
+                "MEDIAN2"
+              ]
             }
           },
           "params": {
@@ -370,11 +426,17 @@
               "type": "string"
             },
             "additionalProperties": {
-              "type": ["number", "string", "boolean"]
+              "type": [
+                "number",
+                "string",
+                "boolean"
+              ]
             }
           }
         },
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "additionalProperties": false
       }
     },
@@ -383,17 +445,27 @@
       "properties": {
         "unplayedRounds": {
           "type": "string",
-          "enum": ["FIDE_C07_2026", "AS_AWARDED", "CUSTOM"]
+          "enum": [
+            "FIDE_C07_2026",
+            "AS_AWARDED",
+            "CUSTOM"
+          ]
         },
         "restartOnPartialSplit": {
           "type": "boolean"
         },
         "unresolved": {
           "type": "string",
-          "enum": ["SHARE_RANK", "DRAW_LOTS", "PLAYOFF"]
+          "enum": [
+            "SHARE_RANK",
+            "DRAW_LOTS",
+            "PLAYOFF"
+          ]
         }
       },
-      "required": ["restartOnPartialSplit"],
+      "required": [
+        "restartOnPartialSplit"
+      ],
       "additionalProperties": false
     },
     "team": {
@@ -411,11 +483,18 @@
         },
         "boardOrder": {
           "type": "string",
-          "enum": ["RATING_DESC", "FREE", "FIXED"]
+          "enum": [
+            "RATING_DESC",
+            "FREE",
+            "FIXED"
+          ]
         },
         "primaryScore": {
           "type": "string",
-          "enum": ["MATCH_POINTS", "GAME_POINTS"]
+          "enum": [
+            "MATCH_POINTS",
+            "GAME_POINTS"
+          ]
         },
         "matchScoring": {
           "type": "object",
@@ -436,7 +515,11 @@
               "maximum": 1000
             }
           },
-          "required": ["win", "draw", "loss"],
+          "required": [
+            "win",
+            "draw",
+            "loss"
+          ],
           "additionalProperties": false
         },
         "teamTiebreaks": {
@@ -485,11 +568,18 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "enum": ["CUT1", "CUT2", "MEDIAN1", "MEDIAN2"]
+                  "enum": [
+                    "CUT1",
+                    "CUT2",
+                    "MEDIAN1",
+                    "MEDIAN2"
+                  ]
                 }
               }
             },
-            "required": ["id"],
+            "required": [
+              "id"
+            ],
             "additionalProperties": false
           }
         }
@@ -509,10 +599,15 @@
       "properties": {
         "mode": {
           "type": "string",
-          "enum": ["EXTERNAL_VERIFICATION", "NONE"]
+          "enum": [
+            "EXTERNAL_VERIFICATION",
+            "NONE"
+          ]
         }
       },
-      "required": ["mode"],
+      "required": [
+        "mode"
+      ],
       "additionalProperties": false
     },
     "entryQuota": {
@@ -547,7 +642,11 @@
       "properties": {
         "modality": {
           "type": "string",
-          "enum": ["CLASSICAL", "RAPID", "BLITZ"]
+          "enum": [
+            "CLASSICAL",
+            "RAPID",
+            "BLITZ"
+          ]
         },
         "baseMinutes": {
           "type": "number",
@@ -564,7 +663,12 @@
           "maximum": 9007199254740991
         }
       },
-      "required": ["modality", "baseMinutes", "incrementSeconds", "forfeitToleranceMinutes"],
+      "required": [
+        "modality",
+        "baseMinutes",
+        "incrementSeconds",
+        "forfeitToleranceMinutes"
+      ],
       "additionalProperties": false
     },
     "schedule": {
@@ -585,11 +689,17 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["FIDE_RATING", "NATIONAL_RATING", "PLATFORM_RATING"]
+            "enum": [
+              "FIDE_RATING",
+              "NATIONAL_RATING",
+              "PLATFORM_RATING"
+            ]
           }
         }
       },
-      "required": ["order"],
+      "required": [
+        "order"
+      ],
       "additionalProperties": false
     },
     "corrections": {
@@ -615,7 +725,10 @@
           "maximum": 4000
         }
       },
-      "required": ["computePlatformElo", "initialRating"],
+      "required": [
+        "computePlatformElo",
+        "initialRating"
+      ],
       "additionalProperties": false
     }
   },
