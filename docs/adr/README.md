@@ -1,0 +1,23 @@
+# ADR — Registros de decisiones de arquitectura
+
+Un ADR documenta una decisión significativa, su contexto, las alternativas y las consecuencias. Las decisiones tomadas en la fase de diseño están en `docs/ARCHITECTURE.md` §20 (`DEC-001..055`); aquí se registran las **nuevas** y las que requieren más desarrollo.
+
+## Cuándo escribir uno
+
+- Agregar o reemplazar una dependencia importante o una librería de UI.
+- Cambiar una decisión `DEC-*` existente.
+- Cambios de modelo de datos o de eventos con impacto amplio.
+- Decisiones de infraestructura, seguridad o rendimiento con alternativas reales.
+- Fijar versiones (`ADR-0001`).
+
+## Numeración y estados
+
+`ADR-0001-titulo-en-kebab-case.md`. Estados: `Propuesto`, `Aceptado`, `Reemplazado por ADR-nnnn`, `Rechazado`. Un ADR aceptado **no se edita** salvo para marcarlo reemplazado; se escribe uno nuevo.
+
+Plantilla: `docs/templates/adr-template.md`.
+
+## Índice
+
+| ADR | Título | Estado | Relacionado |
+|---|---|---|---|
+| ADR-0001 | Stack y versiones verificadas (se crea en `US-001`) | Pendiente | `DEC-001..`, `EP-00` |
