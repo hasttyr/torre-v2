@@ -1,0 +1,49 @@
+{
+  "name": "torre",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Plataforma de torneos de ajedrez universitarios (ASCUN).",
+  "type": "module",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=24.11.0 <25"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm -r --workspace-concurrency=4 run typecheck",
+    "test": "vitest run",
+    "test:e2e": "node tools/run-e2e.mjs",
+    "build": "pnpm -r run build",
+    "dev": "node tools/dev.mjs",
+    "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "secrets": "node tools/gitleaks.mjs",
+    "check:floor": "node tools/floor-guard.mjs",
+    "verify:fast": "node tools/verify-fast.mjs",
+    "verify": "pnpm lint && pnpm typecheck && pnpm depcruise && pnpm test",
+    "verify:full": "pnpm verify && pnpm test:e2e"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "dependency-cruiser": "catalog:",
+    "eslint": "catalog:",
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts,js,mjs,cjs,vue}": [
+      "eslint --max-warnings=0 --no-warn-ignored --fix",
+      "prettier --write"
+    ],
+    "*.{json,yaml,yml,css}": [
+      "prettier --write"
+    ]
+  }
+}

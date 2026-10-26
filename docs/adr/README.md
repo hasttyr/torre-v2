@@ -20,4 +20,4 @@ Plantilla: `docs/templates/adr-template.md`.
 
 | ADR | Título | Estado | Relacionado |
 |---|---|---|---|
-| ADR-0001 | Stack y versiones verificadas (se crea en `US-001`) | Pendiente | `DEC-001..`, `EP-00` |
+| [ADR-0001](ADR-0001-stack-and-versions.md) | Stack y versiones verificadas | Aceptado (2026-10-26) | `DEC-001`, `DEC-063`, `DEC-071`, `US-001` |

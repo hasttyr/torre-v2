@@ -1,0 +1,26 @@
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# test and run evidence (published as CI artifacts, not committed)
+reports/
+playwright-report/
+test-results/
+
+# local tooling downloaded on demand (gitleaks, local infra data)
+.tools/
+
+# environment and secrets: only .env.example is committed
+.env
+.env.*
+!.env.example
+
+# logs and OS/editor files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

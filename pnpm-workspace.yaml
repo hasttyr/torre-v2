@@ -1,0 +1,23 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Versions verified on 2026-10-26 and recorded in docs/adr/ADR-0001-stack-and-versions.md.
+# Every new dependency is added here first, with its ADR or story justification (CLAUDE.md rule 10).
+catalog:
+  '@commitlint/cli': 21.2.4
+  '@commitlint/config-conventional': 21.2.4
+  '@eslint/js': 10.0.1
+  '@types/node': 24.19.2
+  dependency-cruiser: 18.7.0
+  eslint: 10.13.0
+  husky: 9.1.7
+  lint-staged: 17.6.0
+  prettier: 3.9.10
+  typescript: 6.0.3
+  typescript-eslint: 8.72.0
+  vitest: 5.0.5
+
+# Dependency build scripts are blocked unless approved here after reading them
+# (security-and-hardening: block scripts before first execution).
+allowBuilds: {}

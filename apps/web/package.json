@@ -1,0 +1,13 @@
+{
+  "name": "@torre/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Aplicación web Vue (se configura en US-009).",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@torre/config": "workspace:*"
+  }
+}

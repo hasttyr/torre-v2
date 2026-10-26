@@ -64,10 +64,11 @@ Detalle del flujo, plantillas de prompts y criterios de revisión: `docs/AI-WORK
 | Términos del dominio | `docs/GLOSSARY.md` |
 | Dudas de reglas o alcance | `docs/OPEN-QUESTIONS.md` |
 | Visión y alcance del producto | `docs/PRODUCT.md` |
+| Qué está implementado y qué falta | `docs/PROGRESS.md` |
 
 ## 6. Comandos
 
-El monorepo aún no existe: la historia `US-001` crea los scripts. Los nombres objetivo son:
+Los comandos existen desde `US-001` (pnpm 12 por Corepack, Node 24). Los que dependen de historias posteriores lo dicen al ejecutarse. Avance real: `docs/PROGRESS.md`.
 
 ```
 pnpm install

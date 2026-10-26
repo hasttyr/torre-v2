@@ -1,0 +1,24 @@
+{
+  "name": "@torre/standings",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Puntos, desempates, equipos y ranking institucional.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@torre/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@torre/config": "workspace:*"
+  }
+}
