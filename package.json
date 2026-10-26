@@ -26,7 +26,7 @@
   "devDependencies": {
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
-    "@eslint/js": "catalog:",
+    "@torre/config": "workspace:*",
     "@types/node": "catalog:",
     "dependency-cruiser": "catalog:",
     "eslint": "catalog:",
@@ -34,7 +34,6 @@
     "lint-staged": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
     "vitest": "catalog:"
   },
   "lint-staged": {
