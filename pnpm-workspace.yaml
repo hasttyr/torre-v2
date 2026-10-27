@@ -15,6 +15,9 @@ catalog:
   '@nestjs/terminus': 12.1.0
   '@nestjs/testing': 12.2.0
   '@nestjs/throttler': 6.7.1
+  '@prisma/adapter-pg': 7.10.1
+  '@prisma/client': 7.10.1
+  '@testcontainers/postgresql': 12.2.1
   '@types/node': 24.19.2
   '@types/pg': 8.23.1
   '@types/supertest': 7.2.1
@@ -31,9 +34,11 @@ catalog:
   pino: 10.4.0
   pino-http: 11.0.0
   prettier: 3.9.10
+  prisma: 7.10.1
   reflect-metadata: 0.2.2
   rxjs: 7.8.2
   supertest: 7.3.1
+  testcontainers: 12.2.1
   typescript: 6.0.3
   typescript-eslint: 8.72.0
   vitest: 5.0.5
@@ -41,4 +46,16 @@ catalog:
 
 # Dependency build scripts are blocked unless approved here after reading them
 # (security-and-hardening: block scripts before first execution).
-allowBuilds: {}
+# - prisma (preinstall): only checks the Node version and prints a message (read 2026-10-27, 7.10.1).
+# - @prisma/engines (postinstall): downloads the schema engine that `prisma migrate` runs, from
+#   Prisma's binary CDN, and fails silently (read 2026-10-27, 7.10.1; US-007).
+# Denied (read 2026-10-27, dependencies of testcontainers, US-007): they are optional and the
+# packages work without them.
+# - ssh2 (install) and cpu-features (install): compile optional native bindings with node-gyp.
+# - protobufjs (postinstall): only warns about the version scheme of its dependents.
+allowBuilds:
+  prisma: true
+  '@prisma/engines': true
+  ssh2: false
+  cpu-features: false
+  protobufjs: false

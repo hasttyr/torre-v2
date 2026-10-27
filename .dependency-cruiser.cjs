@@ -89,7 +89,8 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
-    exclude: { path: '(^|/)(dist|coverage|node_modules)/' },
+    // The Prisma Client is generated on install (US-007) and is not our code; imports into it are still checked.
+    exclude: { path: '(^|/)(dist|coverage|node_modules)/|(^|/)apps/api/src/database/generated/' },
     tsPreCompilationDeps: true,
     tsConfig: { fileName: 'tsconfig.json' },
     enhancedResolveOptions: {

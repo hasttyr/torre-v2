@@ -48,7 +48,7 @@ Comprobación del 2026-10-26: una clase con un decorador de parámetros, compila
 
 ## Notas
 
-Versiones del registro de npm consultadas el 2026-10-26 (`SRC-18`). Las de "Herramientas del monorepo" se instalan en `US-001`; el resto se instala en la historia que lo necesita, que confirma la versión en ese momento.
+Versiones del registro de npm consultadas el 2026-10-26 (`SRC-18`). Las de Prisma (7.10.1; `latest` sigue en 8.0.0-rc.27) y Testcontainers (12.2.1) se volvieron a comprobar al instalarlas el 2026-10-27 (`US-007`). Las de "Herramientas del monorepo" se instalan en `US-001`; el resto se instala en la historia que lo necesita, que confirma la versión en ese momento.
 
 ### Herramientas del monorepo
 

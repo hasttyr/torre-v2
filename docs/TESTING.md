@@ -199,6 +199,9 @@ La **regresión** no es un nivel aparte: es volver a ejecutar **todas** las suit
 ## 8. Integración, e2e, carga, seguridad y accesibilidad
 
 - **Integración de API:** Testcontainers (PostgreSQL con extensiones y roles reales, Redis, S3 local, Mailpit); cada suite parte de BD limpia; se prueba con el **rol de aplicación** (sin `BYPASSRLS`) para que RLS se ejerza.
+  - Implementado en `US-007` (`apps/api/test/support`, `pnpm test:e2e` con `vitest.e2e.config.ts`): la preparación global arranca PostgreSQL y migra **una plantilla desde cero** con `prisma migrate deploy` y el rol de migraciones; cada suite llama a `createTestDatabase()`, que copia la plantilla (`CREATE DATABASE … TEMPLATE`) y entrega un Prisma Client con el rol de aplicación, y la borra al terminar.
+  - Sin Docker, `TEST_DATABASE_ADMIN_URL` (en `.env`, comentada en `.env.example`) apunta al superusuario de un servidor existente, como el clúster nativo de `pnpm dev:infra`, que ya tiene los roles. La CI usa siempre Testcontainers.
+  - Redis, S3 y Mailpit entran en la utilidad con las historias que los usan (`US-117`, `US-065`, `US-061`).
 - **Concurrencia:** pruebas con varios escritores simultáneos sobre un mismo torneo (idempotencia, reintentos, `INV-E-1`).
 - **E2E (Playwright):** VS-1 completo; ronda solo con teclado (`US-068`); en vivo entre pestañas (`US-053`); suscripción + email (`US-062`).
 - **Carga (k6):** conexiones WebSocket y comandos (`US-054`).

@@ -105,7 +105,7 @@
 - **Notas para la IA:** NUNCA registres cuerpos de petición con contraseñas ni tokens.
 
 ### US-007 — Base de datos: Prisma, migraciones, seeds y utilidades de prueba
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como desarrollador quiero un acceso a datos con migraciones versionadas y una base de pruebas aislada para evolucionar el esquema con seguridad.
 - **Referencias:** DEC-005, DEC-009 · `ARCHITECTURE.md` §8 · R1 (§18)
 - **Criterios de aceptación:**
@@ -116,13 +116,14 @@
   5. Utilidad de pruebas: arranca Postgres con Testcontainers, aplica migraciones y expone un cliente limpio por suite.
   6. Documentado cómo ejecutar SQL crudo parametrizado para el event store.
 - **Plan de división** (una parte por sesión y por PR; cada parte cierra los criterios indicados con sus pruebas y deja `pnpm verify` en verde):
-  - (a) Prisma, migraciones versionadas y los dos roles de conexión — criterios 1, 2 · M
+  - (a) Prisma, migraciones versionadas, los dos roles de conexión y la utilidad de pruebas (la prueba de integración exigida la necesita desde la primera migración) — criterios 1, 2, 5 · M
   - (b) `withTransaction` y guía de SQL crudo parametrizado — criterios 3, 6 · S
-  - (c) Seeds idempotentes y utilidad de Testcontainers — criterios 4, 5 · S
+  - (c) Seeds idempotentes — criterio 4 · S
 - **Pruebas requeridas:** prueba de integración que aplica migraciones desde cero y ejecuta un CRUD mínimo.
 - **Depende de:** US-003, US-005
 - **Fuera de alcance:** tablas de negocio (cada historia añade las suyas); RLS (`US-025`).
 - **Notas para la IA:** si Prisma estorba para el event store (R1), proponer un ADR antes de cambiar de herramienta.
+- **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. **Pendiente:** ejecutar la ruta de Testcontainers (sin Docker en esta máquina; lo hará el trabajo `integration` de la CI).
 
 ### US-008 — Contratos de API con oRPC (prueba previa) y OpenAPI
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY

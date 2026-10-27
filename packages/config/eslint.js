@@ -64,6 +64,8 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
         'reports/**',
         '.tools/**',
         'tools/fixtures/**',
+        // Prisma Client, generated on install (US-007).
+        '**/apps/api/src/database/generated/**',
         ...ignores,
       ],
     },

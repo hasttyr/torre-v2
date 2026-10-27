@@ -88,6 +88,9 @@ pnpm test:smoke      # casos de humo (TC-080…)
 pnpm test:nightly    # 5 000 ejecuciones por propiedad con semilla aleatoria + benchmarks completos
 pnpm bench           # benchmarks con presupuesto en modo completo (pnpm test ya los corre en modo reducido)
 pnpm dev:infra       # infraestructura local (Docker o Postgres nativo); infra:check la comprueba
+pnpm db:migrate      # crea y aplica una migración SQL en local (prisma migrate dev; nunca db push)
+pnpm db:deploy       # aplica las migraciones pendientes (prisma migrate deploy, rol de migraciones)
+pnpm db:status       # estado de las migraciones
 pnpm secrets         # gitleaks sobre el diff (--all: todo el historial)
 pnpm build
 pnpm dev             # levanta api + web con docker compose para dependencias
