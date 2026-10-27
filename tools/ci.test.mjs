@@ -51,7 +51,9 @@ describe('CI workflow (US-004)', () => {
     const readme = read('README.md');
 
     expect(readme).toContain('Require status checks to pass');
-    for (const job of ['quality', 'security', 'infra', 'integration']) expect(readme).toContain(`\`${job}\``);
+    for (const job of ['quality', 'security', 'infra']) expect(readme).toContain(`\`${job}\``);
+    // Required too: it runs the integration tests and the traceability check.
+    expect(readme).toContain('`integration`');
   });
 
   it('[US-004:AC8] should check traceability once unit and integration results both exist', () => {
