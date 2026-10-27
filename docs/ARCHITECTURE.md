@@ -125,7 +125,7 @@ sequenceDiagram
 | Archivos | S3 compatible (RustFS en local, `ADR-0003`) (`DEC-016`) | `[DECIDIDO]` | Solo PDFs y logos |
 | Frontend | Vue 3 + Vite + Composition API + `<script setup>` (`DEC-003`) | `[DECIDIDO]` | Sin SEO requerido; OG tags vía endpoint (`DEC-041`) |
 | Estado | Pinia (UI) + TanStack Vue Query (servidor) (`DEC-018`) | `[DECIDIDO]` | |
-| UI | shadcn-vue (Reka UI) + Tailwind (`DEC-017`) | `[DECIDIDO]` | Ver `UI-UX.md` |
+| UI | shadcn-vue (Reka UI) + Tailwind, estilo 100 % Tailwind con superficies de vidrio (`DEC-017`, `DEC-085`) | `[DECIDIDO]` | Ver `UI-UX.md` |
 | Formularios | VeeValidate + Zod | `[DECIDIDO]` | |
 | Tablas | TanStack Table (+ Virtual) | `[DECIDIDO]` | |
 | i18n | vue-i18n (`DEC-019`) | `[DECIDIDO]` | es → en → pt |
@@ -945,3 +945,4 @@ Estado: `DECIDIDO` = lo afirmó la persona responsable; `PROPUESTO` = recomendac
 | DEC-082 | Fuentes autoalojadas con `@fontsource` | DECIDIDO (2026-10-26) | Sin terceros y compatible con la CSP | Google Fonts por CDN; fuente del sistema | Bajo |
 | DEC-083 | URL públicas con la organización: `/t/:orgSlug/:tournamentSlug` (y `/public`, `/share`); el *slug* del torneo sigue siendo único por organización | DECIDIDO (2026-10-26) | Dos organizaciones pueden repetir un *slug* | *Slug* único global | Bajo |
 | DEC-084 | Campeonatos con visibilidad propia (`PUBLIC`, `UNLISTED`, `PRIVATE`) y página pública del ranking institucional; solo puede ser `PUBLIC` o `UNLISTED` si todos sus torneos lo son | DECIDIDO (2026-10-26) | No revelar resultados de torneos privados | Todo campeonato público | Bajo |
+| DEC-085 | Superficies de vidrio estilo *Liquid Glass* en el cromo y las capas flotantes (barras, diálogos, menús, toasts, tarjetas sobre el fondo); tablas densas y proyector opacos; estilo 100 % con utilidades de Tailwind v4 y tokens `--glass-*` sobre la paleta de `DEC-081`; fallback opaco con `prefers-reduced-transparency`, `prefers-contrast: more` o la preferencia del usuario; contraste medido sobre el peor fondo (`UI-UX.md` §3.3) | DECIDIDO (2026-10-27) | Identidad visual actual sin perder legibilidad ni WCAG AA | Vidrio en todo, incluidas tablas; solo el cromo; paleta nueva estilo iOS; quitar shadcn-vue o Reka UI | Medio |

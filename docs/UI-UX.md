@@ -1,6 +1,6 @@
 # UI-UX.md — Librerías, diseño homogéneo y experiencia de usuario
 
-> Estado: `[DECIDIDO]` (2026-10-26), sistema visual incluido (§3, `DEC-081`). Pantallas y rutas: `SCREENS.md`. Decisión de librerías: `DEC-017`. Historias: `US-009`, `US-066..US-079`, `US-053`.
+> Estado: `[DECIDIDO]` (2026-10-26), sistema visual incluido (§3, `DEC-081`) y superficies de vidrio estilo *Liquid Glass* (§3.3, `DEC-085`, 2026-10-27). Pantallas y rutas: `SCREENS.md`. Decisión de librerías: `DEC-017`. Historias: `US-009`, `US-066..US-079`, `US-053`.
 > Lo marcado "verificado" proviene de la documentación pública consultada al redactar; el resto es criterio de diseño. **Antes de instalar, confirmar versión y licencia.**
 
 ## 1. Principios
@@ -10,7 +10,7 @@
 3. **Explicable.** Cada número importante (puesto, desempate) puede explicarse con un clic.
 4. **Accesible por defecto.** Teclado, foco visible, contraste AA, `aria-live` para avisos.
 5. **Honesto con el estado.** Provisional vs oficial; en línea vs sin conexión; guardado vs pendiente.
-6. **Simple antes que vistoso.** Sin funciones de adorno (ver §8).
+6. **Simple antes que vistoso.** Sin funciones de adorno (ver §8). El vidrio de §3.3 es el único recurso decorativo y se limita a las superficies flotantes; nunca va detrás de datos densos.
 
 ## 2. Librerías y capa de UI (`DEC-017`)
 
@@ -19,6 +19,7 @@
 - **shadcn-vue** copia los componentes a tu repositorio (código propio) sobre **Reka UI** (primitivas accesibles sin estilo) y Tailwind. Verificado: su Calendar usa Reka UI y `@internationalized/date`; incluye Range Calendar, Date Picker (con rangos), Combobox, Command, Data Table (basada en TanStack Table) y Sonner.
 - Desde febrero de 2025 la CLI instala Reka UI (reemplazó a Radix Vue); no seguir guías antiguas con Radix Vue.
 - **Por qué:** homogeneidad por tokens, control total del código, buen soporte de accesibilidad, sin estilo "impuesto".
+- **Estilo 100 % Tailwind** (`DEC-085`): shadcn-vue y Reka UI aportan el comportamiento accesible (foco, teclado, ARIA); **todo** el estilo sale de utilidades de Tailwind v4 y de los tokens declarados en `@theme`. El único CSS escrito a mano es la hoja de entrada de Tailwind (`@import`, `@theme`, `@custom-variant` y las variables de los tres temas). Sin librerías de vidrio, sin filtros SVG y sin hojas `.css` por componente.
 
 ### 2.2 Alternativas evaluadas
 
@@ -63,6 +64,7 @@ Sistema visual aprobado el 2026-10-26: estilo minimalista y suizo, denso, pensad
 | Forma y sombra | `--radius-*`, `--shadow-*` |
 | Espaciado y tipografía | escala base 4 px; tamaños `--text-*`; tabular nums en tablas de puntos |
 | Movimiento | `--duration-*`; se anulan con `prefers-reduced-motion` |
+| Vidrio (§3.3) | `--glass-bg`, `--glass-bg-strong`, `--glass-border`, `--glass-highlight`, `--glass-shadow`, `--glass-blur`, `--backdrop` |
 
 - Se definen como variables CSS con tres conjuntos: claro, oscuro y **proyector** (§7). Los nombres siguen los de shadcn-vue (`--primary-foreground`, `--input`…).
 - Los puntos usan **numerales tabulares** y el símbolo `½`.
@@ -107,6 +109,39 @@ Contraste verificado el 2026-10-26 (WCAG 2.x): texto ≥ 4.5:1 en claro y oscuro
 - Movimiento: solo transiciones CSS de 150–200 ms en *hover*, foco y cambios de estado; sin librerías de animación; todo se anula con `prefers-reduced-motion`.
 - Densidad alta: escala de espaciado de 4 px con pasos de 8 a 32 px en tablas y paneles; objetivos táctiles de 44 px en móvil (§9).
 - Proyector: mismos tokens de color de su columna, tipografía y espaciado aumentados (§5, §7).
+
+### 3.3 Superficies de vidrio (*Liquid Glass*, `DEC-085`)
+
+Decidido el 2026-10-27 por el responsable: superficies translúcidas como en las últimas versiones de iOS, escritas solo con Tailwind. **Estado: especificado, sin implementar** (lo implementa `US-069a`; la web aún no existe, `US-009`).
+
+**Dónde va el vidrio**
+
+| Superficie | Vidrio | Por qué |
+|---|---|---|
+| Barra superior, navegación lateral y barra de pestañas móvil | Sí | Cromo de la app; el contenido pasa por debajo al desplazarse |
+| Diálogos, *drawers*, *popovers*, menús, *tooltips*, paleta de comandos | Sí (`--glass-bg-strong`) | Flotan sobre el contenido; el desenfoque separa capas sin oscurecer todo |
+| Toasts (Sonner) | Sí (`--glass-bg-strong`) | Flotan; llevan texto e icono |
+| Tarjetas y paneles sobre el fondo de la página (portada del torneo, resumen, formularios cortos) | Sí | Muestran el fondo de marca |
+| Tablas densas (clasificación, mesas, registro de resultados del árbitro) | **No**: `--card` opaco | Un fondo que se mueve detrás de números baja la legibilidad (principio 2) |
+| Modo proyector (§7) | **No**: todo opaco | Alto contraste ≥ 7:1 a distancia |
+| Campos de formulario | No: fondo `--background` opaco y borde `--input` | El contraste de controles (≥ 3:1) no depende del fondo |
+
+**Receta con Tailwind** (sin CSS propio fuera de la hoja de entrada):
+
+- Fondo de página: `bg-backdrop` con `--backdrop` = degradado suave de `--primary` y `--accent` sobre `--background`, fijo (`bg-fixed`) para que el vidrio tenga algo que desenfocar.
+- Superficie de vidrio: `bg-glass backdrop-blur-glass backdrop-saturate-150 border border-glass shadow-glass` más un brillo superior con `inset-ring` o `before:` de `--glass-highlight`. Las variantes `-strong` suben la opacidad del fondo.
+- Sin soporte de `backdrop-filter`: el fondo cae a `--card` opaco (variante `supports-[backdrop-filter]:` para activar el vidrio solo donde existe).
+- Movimiento: solo transiciones CSS de §3.2; el vidrio no anima el desenfoque.
+
+**Accesibilidad (fallback opaco, obligatorio)**
+
+- Variante propia `reduced-transparency:` declarada con `@custom-variant`: se activa con `@media (prefers-reduced-transparency: reduce)`, con `prefers-contrast: more` (variante `contrast-more:` de Tailwind) o con la preferencia "Reducir transparencia" del usuario (atributo `data-transparency="reduced"` en `<html>`, `US-074`). En los tres casos el vidrio pasa a `--card` / `--popover` opacos y el desenfoque se quita.
+- El texto sobre vidrio usa los colores de primer plano de §3.1. El contraste se mide **sobre el peor fondo posible**: la superficie de vidrio compuesta sobre el color más claro y el más oscuro de `--backdrop` en cada tema; debe cumplir los mínimos de §3.1 (texto ≥ 4.5:1, controles y foco ≥ 3:1). Si no cumple, se sube la opacidad de `--glass-bg`, nunca se baja el umbral.
+- El catálogo (`US-069c`) incluye una historia por superficie de vidrio sobre fondos claros, oscuros y con imagen, con axe y la verificación de contraste.
+
+**Valores de los tokens de vidrio:** los fija `US-069a` a partir de la medición de contraste anterior y se escriben en esta sección al implementarse (hoy no hay valores aprobados; no se inventan aquí).
+
+**Pendiente de verificar al implementar (`US-069a`):** soporte real de `prefers-reduced-transparency` en los navegadores de `DEC-066` (por eso existe la preferencia manual) y la sintaxis exacta de `@custom-variant` y de las utilidades `inset-ring` y `backdrop-*` en la versión de Tailwind v4 que fije `ADR-0001`.
 
 ## 4. Patrones de componentes y pantallas
 
@@ -155,6 +190,7 @@ Reglas: los atajos se **desactivan** al escribir en campos de texto; no colision
 ## 7. Temas
 
 - **Claro, oscuro, proyector.** El tema se aplica antes del primer render para evitar parpadeo. Respeta `prefers-color-scheme`.
+- El vidrio (§3.3) existe en claro y oscuro; el proyector es siempre opaco. La preferencia "Reducir transparencia" se guarda junto al tema.
 - Persistencia: perfil (con sesión) o `localStorage` con `try/catch` (puede venir vacío o lanzar).
 - **Modo proyector** reemplaza al "tamaño de texto ajustable": cambia tamaños, espaciado y contraste mediante tokens.
 - Contraste AA verificado por tema en el catálogo.
@@ -191,6 +227,7 @@ Reglas: los atajos se **desactivan** al escribir en campos de texto; no colision
 - Tablas con roles y encabezados correctos (también virtualizadas).
 - Color nunca es el único canal de información (resultados, pendiente, provisional).
 - Objetivos táctiles amplios; `prefers-reduced-motion`.
+- Transparencia: `prefers-reduced-transparency`, `prefers-contrast: more` y la preferencia manual quitan el vidrio (§3.3).
 - axe en CI; Playwright en Chromium, Firefox y WebKit, más perfiles móviles (`DEC-066`).
 
 ## 10. Idioma, formatos y zona horaria
