@@ -128,7 +128,7 @@
 - **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. **Pendiente:** ejecutar la ruta de Testcontainers (sin Docker en esta máquina; lo hará el trabajo `integration` de la CI).
 
 ### US-008 — Contratos de API con oRPC (prueba previa) y OpenAPI
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como desarrollador quiero contratos tipados compartidos (servidor, cliente y OpenAPI desde un solo origen) para que API y web no se desincronicen.
 - **Contexto:** `DEC-060`: oRPC con una prueba previa. Si la prueba falla, se usa `nestjs-zod` + cliente propio (`DEC-020`) y queda en un ADR.
 - **Referencias:** DEC-060, DEC-020, DEC-037 · `ARCHITECTURE.md` §9 · R2
@@ -141,6 +141,7 @@
 - **Pruebas requeridas:** prueba que falla si una operación de la API no proviene de `contracts`; rechazo de campos desconocidos; formato de errores; cliente tipado contra el servidor real (TC-046).
 - **Depende de:** US-006
 - **Fuera de alcance:** cliente HTTP del front (`US-009`).
+- **Resultado (2026-10-27):** prueba superada (`ADR-0002`). El punto del cliente Vue con `@orpc/vue-query` pasa a `US-009` porque la web aún no existe; el cliente tipado se probó contra el servidor real con `@orpc/client`. Los mensajes WebSocket del criterio 1 llegan con `US-050`. El punto "compilación con SWC" se cumple con `tsc` y oxc (`ADR-0004`).
 
 ### US-117 — Módulo de colas y proceso *worker* (BullMQ)
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
@@ -166,7 +167,7 @@
 - **Criterios de aceptación:**
   1. Vue 3 + Vite + TypeScript estricto con la estructura de `ARCHITECTURE.md` §13.1.
   2. Vue Router (rutas con carga diferida), Pinia, TanStack Vue Query y `vue-i18n` (solo `es` inicialmente) configurados como *providers*.
-  3. Cliente central (oRPC + `@orpc/vue-query`, o el alternativo que decida `US-008`): base URL por entorno, `X-Correlation-Id`, mapeo de errores `problem+json` a mensajes i18n por `code`, manejo de 401 (refresh) preparado.
+  3. Cliente central (oRPC + `@orpc/vue-query`, `ADR-0002`): base URL por entorno, `X-Correlation-Id`, mapeo de errores `problem+json` a mensajes i18n por `code`, manejo de 401 (refresh) preparado. Incluye el punto pendiente de la prueba de `US-008`: claves de consulta de `@orpc/vue-query` invalidables, con prueba.
   4. Páginas 404/403/500 y *layout* base; `app.config.errorHandler` global.
   5. Regla ESLint `no-restricted-imports` que impide importar librerías de UI fuera de `shared/ui` (se verifica con fixture).
   6. `pnpm --filter web dev` y `build` funcionan; pruebas con Vitest + Vue Test Utils configuradas.

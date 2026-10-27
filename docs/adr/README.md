@@ -21,6 +21,6 @@ Plantilla: `docs/templates/adr-template.md`.
 | ADR | Título | Estado | Relacionado |
 |---|---|---|---|
 | [ADR-0001](ADR-0001-stack-and-versions.md) | Stack y versiones verificadas | Aceptado (2026-10-26) | `DEC-001`, `DEC-063`, `DEC-071`, `US-001` |
-| ADR-0002 | Prueba de oRPC (se escribe en `US-008`) | Pendiente | `DEC-060`, `DEC-020` |
+| [ADR-0002](ADR-0002-orpc-contracts.md) | Contratos de API con oRPC: resultado de la prueba previa | Aceptado (2026-10-27) | `DEC-060`, `DEC-020`, `US-008` |
 | [ADR-0003](ADR-0003-local-s3-rustfs.md) | S3 local: RustFS en lugar de MinIO | Aceptado (2026-10-26) | `DEC-016`, `US-003` |
 | [ADR-0004](ADR-0004-api-tests-without-swc.md) | Pruebas de la API sin SWC | Aceptado (2026-10-26) | `DEC-021`, `ADR-0001`, `US-005` |

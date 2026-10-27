@@ -6,9 +6,12 @@ import { correlationIdMiddleware } from './common/correlation-id.js';
 import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 import { AppConfig } from './config/app-config.js';
 
-/** Health checks stay at the root, where load balancers look for them (ARCHITECTURE.md §9). */
+/**
+ * Health checks stay at the root, where load balancers look for them (ARCHITECTURE.md §9); the OpenAPI
+ * document lives at `/api/docs`, outside the versioned prefix (US-008:AC4).
+ */
 export const API_PREFIX = 'api/v1';
-const OUTSIDE_PREFIX = ['health/live', 'health/ready'];
+export const OUTSIDE_PREFIX = ['health/live', 'health/ready', 'api/docs'];
 
 /**
  * Options to create the application with, in `main.ts` and in the tests. Nest's own JSON parser is
