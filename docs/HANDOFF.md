@@ -4,43 +4,36 @@
 
 ## Estado actual
 
-- **Fecha:** 2026-10-26
-- **Fase / rebanada en curso:** F0 · VS-1 (sin iniciar). Los tiempos y el alcance de cada entrega los gestiona el responsable (`DEC-055` anulado).
-- **Última sesión:** auditoría de preparación para implementar (sin código). Repositorio Git inicializado en esta carpeta, rama `main`, **sin commits** (el primero lo decide el responsable).
-- **Siguiente historia recomendada:** `US-001` — monorepo ESM, TypeScript estricto, scripts de `CONSTRAINTS.md` y `ADR-0001`.
+- **Fecha:** 2026-10-27
+- **Rebanada en curso:** VS-1 (esqueleto andante). Detalle por historia en `docs/PROGRESS.md`.
+- **Terminadas en esta sesión:** `US-008` (contratos oRPC, `ADR-0002`), `US-117` (colas y *worker*), `US-009` (esqueleto web). Avanzadas: `US-007` (a, b, c; solo falta ejecutar la ruta de Testcontainers con Docker), `US-003` (Valkey nativo en WSL), `US-069` (a: tokens y vidrio; b1: primitivas).
+- **Siguiente historia recomendada:** `US-069b2` (Dialog, Drawer, Tooltip, Toast, Tabs, Select, Combobox múltiple, DatePicker/RangeCalendar en `shared/ui`, con `ADR-0005`). Después, la ruta del backend de VS-1: `US-022` (registro e inicio de sesión), `US-023`, `US-024`, `US-025`, `US-045`, `US-046`.
 
-## Hecho en la última sesión
+## Decisiones de esta sesión
 
-- Todas las decisiones técnicas confirmadas: `[PROPUESTO]` → `[DECIDIDO]`; decisiones nuevas `DEC-062`…`DEC-084` (`ARCHITECTURE.md` §20).
-- **Seguridad** (`DEC-062`): contraseña NIST SP 800-63B-4, argon2id 19 MiB/t=2/p=1, acceso de 5 min y sesión de 24 h, cookie `__Host-refresh` `Strict` con Fetch Metadata, límites de tasa, idempotencia con 409 y 7 días, secreto TOTP con AES-256-GCM; 2FA obligatorio para `platform_admin`.
-- **FIDE leído completo** y contrastado (`SOURCES.md` §5): C.07 2026 (Arts. 15–16 reescritos en `BR-TIE-03`), C.04.3 (procedimiento de *brackets* en `BR-PAIR-04`), C.04.1, C.04.2 (orden de mesas, correcciones, orden inicial con título), C.04.6 y Olimpiada 2026 (colores de equipos), tablas de Berger (algoritmo verificado de 3 a 16), tablas 8.1.1 y 8.1.2 de B.02 transcritas, Leyes del Ajedrez Art. 6.7.1. Caso dorado nuevo `GV-005`.
-- **Licencias y compatibilidad** (`SOURCES.md` §6): Nest 12 (solo ESM), TypeScript 7 frente a 6, oRPC 1.16, Vitest 5 sin SWC (`ADR-0004`), `@casl/prisma` hasta Prisma 7, Neon, Render, BullMQ; TRF26 localizado.
-- **Artefactos nuevos:** `CONSTRAINTS.md` (todo bloquea; control rápido ≤ 90 s), `docs/THREAT-MODEL.md`, `docs/SCREENS.md` (aprobado), `docs/requests/SOLICITUD-ASCUN.md`, ejemplo de estilo en `CONVENTIONS.md` §2.1, sistema visual en `UI-UX.md` §3 (aprobado).
-- **Historias nuevas:** `US-115` (check-in), `US-116` (logo), `US-117` (colas y *worker*). Total: 102. Las 34 historias L y XL tienen plan de división.
-- `OPEN-QUESTIONS.md` reescrito: lo pendiente es de ASCUN y el motor de análisis de `US-093`.
+- **`DEC-085`** *Liquid Glass* con estilo 100 % Tailwind: vidrio en barras, diálogos, menús, toasts y tarjetas; tablas densas y proyector opacos; respaldo opaco con `prefers-reduced-transparency`, `prefers-contrast: more`, `data-transparency="reduced"` y proyector (`UI-UX.md` §3.3).
+- **`DEC-086`** colas: retroceso exponencial desde 1 s; completados 24 h / 1 000; fallidos 7 días; concurrencia 1 en `pairing` y 5 en el resto; 30 s de gracia al apagar.
+- **`DEC-087`** vidrio: 35 % / 55 % en claro y 40 % / 60 % en oscuro; desenfoque 24 / 40 px; fondo de marca al 18 %; radios 12 / 16 / 24 px.
+- **`ADR-0002`** oRPC confirmado; errores de los *handlers* vuelven a Nest con `experimental_RethrowHandlerPlugin` (riesgo anotado).
+- **`ADR-0005`** shadcn-vue portado a mano sobre Reka UI (sin CLI, sin `vaul-vue`, sin `tw-animate-css`).
+- **Excepción `W1`** (`CONSTRAINTS.md` §4): contraseña ficticia en el commit `b2fb8ac`; vence el 2027-01-25.
+- **Redis local:** Valkey de los paquetes de Ubuntu dentro de WSL, sin `sudo` (`pnpm dev:infra`).
 
-## Decisiones de esta sesión que conviene recordar
+## Entorno de esta máquina (lo que conviene saber)
 
-- Correcciones según FIDE C.04.2 Art. 4.3: tras el final de la ronda siguiente, solo cuentan para el rating (`DEC-051`, `INV-S-5`).
-- El emparejamiento corre en la cola `pairing` (`202` + estado del trabajo); la clasificación sigue síncrona (`DEC-079`). Por eso `US-117` está en VS-1.
-- Los *workers* fijan el tenant como la API; solo la cola `maintenance` tiene un rol con `BYPASSRLS` y es la única que purga datos técnicos vencidos (`DEC-078`, `CLAUDE.md` regla 13).
-- URL públicas con la organización: `/t/:orgSlug/:slug` (`DEC-083`); campeonatos con visibilidad propia y tope (`DEC-084`).
+- `pnpm dev:infra` levanta Postgres nativo (`127.0.0.1:55432`) y Valkey en WSL (`127.0.0.1:6379`). Si la herramienta de la sesión mata el Postgres al terminar un comando, se arranca aparte con `Start-Process pg_ctl …` (PowerShell).
+- `.env` local tiene `TEST_DATABASE_ADMIN_URL` y `TEST_REDIS_URL=redis://127.0.0.1:6379/15`, que usan `pnpm test:e2e` sin Docker.
+- `pnpm test:trace` lee `reports/vitest.json` (de `pnpm test:ci`) y `reports/vitest-e2e.json` (de `pnpm test:e2e`): correr los dos antes.
+- Los *heredocs* largos en bash fallan con comillas: escribir archivos con la herramienta de escritura.
 
 ## Deuda y riesgos
 
-- **Enviar la solicitud a ASCUN** (`docs/requests/SOLICITUD-ASCUN.md`): `OQ-001`, `OQ-023`, `OQ-009`, `OQ-013`, `OQ-016`, `OQ-017`, `OQ-024`, `OQ-026`, `OQ-028`. Mientras tanto, presets ASCUN en `DRAFT`.
-- La política `FIDE_C07_2026` devuelve `NOT_IMPLEMENTED_POLICY` hasta tener casos dorados verificados con el texto 2026 (los de `SRC-07` son de 2023).
-- `ADR-0001` debe elegir TypeScript 6 o 7 (comprobando los decoradores de Nest), la LTS de Node vigente, Prisma 7.x y la lista de contraseñas comunes con su licencia.
-- La prueba de oRPC (`US-008`) decide entre `DEC-060` y `DEC-020`; resultado en `ADR-0002`.
-- Riesgos residuales de seguridad `RR-1`…`RR-5` (`THREAT-MODEL.md` §6).
-
-## Preguntas abiertas que más importan
-
-- `OQ-001` (reglamento ASCUN vigente) y `OQ-023` (desempates de ASCUN): bloquean la aprobación de los presets ASCUN, no el arranque.
-- `OQ-018`: motor de análisis de `US-093` (Stockfish es GPL-3.0); se decide al llegar a F6.
+- Sin Docker: Mailpit y S3 (`US-061`, `US-065`) y la ruta de Testcontainers (`US-007`) siguen pendientes. Repositorio sin remoto: la CI no ha corrido (`US-004`).
+- `experimental_RethrowHandlerPlugin` de oRPC puede cambiar (`ADR-0002`).
+- Respuestas de ASCUN pendientes (`docs/requests/SOLICITUD-ASCUN.md`); `OQ-033`, `OQ-034`, `OQ-035` antes de `US-015`, `US-035`, `US-042`.
 
 ## Antes de empezar la próxima sesión
 
-1. Leer `CLAUDE.md`, `CONSTRAINTS.md`, este archivo y `US-001` (con su plan de trabajo: es M y no necesita división).
-2. Hacer el primer commit de la documentación si el responsable lo aprueba.
-3. Al crear el monorepo, volver a comprobar las versiones de `SOURCES.md` §6 y registrarlas en `ADR-0001`.
+1. Leer `CLAUDE.md`, `CONSTRAINTS.md`, este archivo y la historia elegida.
+2. `pnpm dev:infra` y `pnpm infra:check --only postgres,redis`.
+3. Trabajar en una rama por historia; `pnpm verify:fast` antes de cada commit.
