@@ -3,7 +3,7 @@
 > Fase F2. Seguridad por diseño: autenticación, aislamiento entre organizaciones (RLS) y permisos con condiciones sobre el recurso. Ver `AUTHORIZATION.md`.
 
 ### US-022 — Registro, inicio de sesión y sesiones con refresh rotativo
-- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como usuario quiero crear una cuenta e iniciar sesión de forma segura para acceder a mis torneos.
 - **Contexto:** Núcleo del módulo `auth` estilo Fortify (`AUTHORIZATION.md` §11). **Dividir:** (a) registro, login y tokens; (b) sesiones y suspensión.
 - **Referencias:** BR-AUTH-01..04, BR-AUTH-07..09, BR-ROLE-01 · DEC-010, DEC-057, DEC-062 · `ARCHITECTURE.md` §12, §14 · INV-A-1, INV-A-2, INV-A-4
@@ -20,12 +20,13 @@
   10. Una cuenta suspendida o anonimizada no inicia sesión ni renueva (`ACCOUNT_SUSPENDED`, `BR-AUTH-08`).
   11. CSRF: `/auth/refresh` y `/auth/logout` rechazan peticiones cross-site según `Sec-Fetch-Site`, con respaldo de `Origin`/`Referer` (`INV-A-4`).
 - **Plan de división** (una parte por sesión y por PR; cada parte cierra los criterios indicados con sus pruebas y deja `pnpm verify` en verde):
-  - (a) Registro, login, tokens, límites de tasa y CSRF — criterios 1–6, 8, 11 · M
+  - (a) Registro, login, tokens, límites de tasa y CSRF — criterios 1–6, 8, 11 · M. Se divide al empezar (2026-10-27): **(a1)** registro, contraseñas, login con *access token* y cookie, guard global — criterios 1, 2, 3, 8; **(a2)** rotación del *refresh* con detección de reuso, logout, límites con bloqueo y CSRF — criterios 4, 5, 6, 11.
   - (b) Sesiones, auditoría y cuentas suspendidas — criterios 7, 9, 10 · M
 - **Pruebas requeridas:** e2e: flujo completo, reutilización de refresh, expiración, cookies con flags correctos, enumeración de usuarios, límites de tasa; `TEST-PLAN.md` TC-036, TC-104, TC-207.
 - **Depende de:** US-006, US-007, US-008
 - **Fuera de alcance:** verificación de email y recuperación (`US-027`), 2FA y confirmación de contraseña (`US-107`), SSO.
 - **Notas para la IA:** el refresh **no** es un JWT; es aleatorio y se guarda **hasheado**.
+- **Implementación (a1), 2026-10-27:** contratos `auth.register`, `auth.login` y `auth.me` (`GET /me`); tablas `users` (email en minúsculas con índice único parcial entre cuentas vivas, `display_name`, versión de la política aceptada), `auth_sessions` y `refresh_tokens` (el rol de mantenimiento puede purgar los vencidos); política de `BR-AUTH-09` con la lista de SecLists fijada (47 317 entradas de 8 a 64 caracteres, `apps/api/assets/common-passwords.txt`); argon2id con `ARGON2_*`; login sin `passport-local` y guard global `passport-jwt` con `@Public()` (detalle en `AUTHORIZATION.md` §11). El nombre se guarda como `display_name` (`DEC-089`) y la versión de la política es `PRIVACY_POLICY_VERSION` (`DEC-088`). `ip_hash` de la sesión queda vacío hasta (b), que lista las sesiones.
 
 ### US-023 — Organizaciones y membresías
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY

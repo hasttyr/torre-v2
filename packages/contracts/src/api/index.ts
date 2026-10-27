@@ -1,4 +1,5 @@
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract';
+import { authContract } from './auth.js';
 import { systemContract } from './system.js';
 
 /**
@@ -8,6 +9,7 @@ import { systemContract } from './system.js';
  */
 export const apiContract = {
   system: systemContract,
+  auth: authContract,
 };
 
 export type ApiContract = typeof apiContract;

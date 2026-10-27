@@ -10,10 +10,12 @@ import { stubExampleEnv } from './__tests__/env.js';
 import { AppModule } from './app.module.js';
 import { APP_OPTIONS, configureApp } from './app.setup.js';
 import { apiError, fromDomainError } from './common/api-error.js';
+import { Public } from './auth/public.decorator.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 /** Routes that fail on purpose, to see what the client receives. */
+@Public()
 @Controller('probe')
 class ProbeController {
   @Get('expected')
