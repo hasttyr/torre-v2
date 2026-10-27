@@ -9,6 +9,8 @@ export interface TestDatabase {
   readonly appUrl: string;
   /** Migration role (`DATABASE_MIGRATION_URL`). */
   readonly migrationUrl: string;
+  /** Maintenance role (`DATABASE_MAINTENANCE_URL`, DEC-078). */
+  readonly maintenanceUrl: string;
   /** Prisma Client as the application role. */
   readonly prisma: PrismaClient;
   /** Disconnects the client and drops the database. */
@@ -29,6 +31,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     name,
     appUrl,
     migrationUrl: databaseUrl(adminUrl, name, ROLES.migration),
+    maintenanceUrl: databaseUrl(adminUrl, name, ROLES.maintenance),
     prisma,
     dispose: async () => {
       await prisma.$disconnect();

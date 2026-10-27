@@ -13,7 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
-    "db:seed": "tsc -p tsconfig.build.json && node dist/database/seed.main.js"
+    "db:seed": "tsc -p tsconfig.build.json && node dist/database/seed.main.js",
+    "jobs:retry": "tsc -p tsconfig.build.json && node dist/jobs/retry.main.js"
   },
   "devDependencies": {
     "@nestjs/testing": "catalog:",
@@ -30,6 +31,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@nestjs/bullmq": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/core": "catalog:",
@@ -45,6 +47,7 @@
     "@prisma/client": "catalog:",
     "@torre/contracts": "workspace:*",
     "@torre/core": "workspace:*",
+    "bullmq": "catalog:",
     "helmet": "catalog:",
     "ioredis": "catalog:",
     "nestjs-pino": "catalog:",

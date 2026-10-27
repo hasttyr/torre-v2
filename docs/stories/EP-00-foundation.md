@@ -145,7 +145,7 @@
 - **Resultado (2026-10-27):** prueba superada (`ADR-0002`). El punto del cliente Vue con `@orpc/vue-query` pasa a `US-009` porque la web aún no existe; el cliente tipado se probó contra el servidor real con `@orpc/client`. Los mensajes WebSocket del criterio 1 llegan con `US-050`. El punto "compilación con SWC" se cumple con `tsc` y oxc (`ADR-0004`).
 
 ### US-117 — Módulo de colas y proceso *worker* (BullMQ)
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como sistema quiero un módulo de colas común y un proceso *worker* para hacer en segundo plano el trabajo pesado o con efectos externos.
 - **Contexto:** Lo necesitan el emparejamiento asíncrono (`DEC-079`, VS-1), los emails, los reportes y el mantenimiento (`ARCHITECTURE.md` §11).
 - **Referencias:** DEC-013, DEC-078, DEC-079 · `ARCHITECTURE.md` §11 · `SRC-22` · INV-T-9
@@ -160,6 +160,7 @@
 - **Depende de:** US-003, US-005, US-006
 - **Depende (parcial):** US-025 (`withTransaction` y RLS)
 - **Fuera de alcance:** panel de colas (Bull Board) y métricas de colas (`US-114`).
+- **Implementación (2026-10-27):** BullMQ 6.4.2 con `@nestjs/bullmq` 12; parámetros de `DEC-086`. El contexto del trabajo se pasa explícito a `withTransaction` (fija `app.organization_id` y `app.user_id`); `US-025` lo llevará también a `nestjs-cls` y activará RLS, y entonces se prueba "cero filas sin tenant" (`TC-209`, `INV-T-9`). El rol `torre_maintenance` nace en `infra/postgres/init/01-roles.sql` con `BYPASSRLS` y sin privilegios sobre tablas: cada tabla que purga la cola `maintenance` (idempotencia `US-045`, tokens `US-022`, solicitudes de rol `US-029`) le concede los suyos en su migración. En producción el rol se crea con el plan de despliegue (`US-105`).
 
 ### US-009 — Esqueleto de la aplicación web
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY

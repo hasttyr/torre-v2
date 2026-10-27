@@ -6,7 +6,9 @@ import { AppConfig } from './app-config.js';
 import { parseEnv } from './env.schema.js';
 
 /** `.env` in the API folder, then at the repository root (local runs); the same depth from `src` and `dist`. */
-const ENV_FILES = ['../../.env', '../../../../.env'].map((path) => fileURLToPath(new URL(path, import.meta.url)));
+export const ENV_FILES = ['../../.env', '../../../../.env'].map((path) =>
+  fileURLToPath(new URL(path, import.meta.url)),
+);
 
 export interface AppConfigOptions {
   /** Tests read only the process environment. */

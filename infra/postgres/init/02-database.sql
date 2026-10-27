@@ -4,7 +4,7 @@
 DO $$
 BEGIN
   EXECUTE format('ALTER DATABASE %I OWNER TO torre_migrator', current_database());
-  EXECUTE format('GRANT CONNECT ON DATABASE %I TO torre_app', current_database());
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO torre_app, torre_maintenance', current_database());
 END
 $$;
 ALTER SCHEMA public OWNER TO torre_migrator;
@@ -14,7 +14,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
-GRANT USAGE ON SCHEMA public TO torre_app;
+GRANT USAGE ON SCHEMA public TO torre_app, torre_maintenance;
 
 -- Tables created later by the migration role are readable and writable by the app,
 -- but never deletable: deletion is logical (DEC-059, ARCHITECTURE.md §8.4).
