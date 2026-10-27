@@ -38,7 +38,7 @@
 | Selección múltiple / etiquetas | Combobox en modo múltiple + input de etiquetas |
 | Formularios y validación | VeeValidate + esquemas Zod de `packages/contracts` |
 | Tablas | TanStack Table (+ TanStack Virtual) |
-| Notificaciones | Sonner |
+| Notificaciones | Sonner (`vue-sonner` en modo `unstyled` con el vidrio; su hoja solo posiciona la lista, `US-069b2`) |
 | Paleta de comandos | Command |
 | Iconos | Lucide (único set) |
 | Atajos y utilidades | VueUse |

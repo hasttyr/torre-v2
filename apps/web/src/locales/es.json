@@ -2,7 +2,8 @@
   "app": {
     "name": "Torre",
     "skipToContent": "Saltar al contenido",
-    "home": "Inicio"
+    "home": "Inicio",
+    "notifications": "Avisos"
   },
   "home": {
     "title": "Torneos de ajedrez universitarios",
