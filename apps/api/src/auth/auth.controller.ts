@@ -34,20 +34,23 @@ export class AuthController {
 
   /**
    * Wrong email and wrong password answer the same 401 (no account enumeration, US-022:AC1), and both
-   * count toward the lock of that email (US-022:AC6).
+   * count toward the lock of that email (US-022:AC6). Only whoever has the password learns that the
+   * account is suspended or anonymized (US-022:AC10).
    */
   @Public()
   @Implement(auth.login)
   login() {
     return implement(auth.login).handler(async ({ input, context }) => {
       await this.limiter.attempt('login', this.context.clientAddress(), input.email);
-      const account = await this.service.verifyCredentials(input.email, input.password);
-      if (!account) {
+      const credentials = await this.service.verifyCredentials(input.email, input.password);
+      if (!credentials) {
         await this.limiter.failed(input.email);
         throw apiError('UNAUTHENTICATED');
       }
       await this.limiter.succeeded(input.email);
-      const session = await this.service.startSession(account.id, context.reqHeaders?.get('user-agent') ?? null);
+      if (!credentials.active) return this.service.refuseLogin(credentials.userId);
+      const userAgent = context.reqHeaders?.get('user-agent') ?? null;
+      const session = await this.service.startSession(credentials.userId, userAgent);
       return this.signedIn(context.resHeaders, session);
     });
   }

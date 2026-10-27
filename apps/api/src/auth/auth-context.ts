@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { normalizeIp } from '@nestjs/throttler';
 import { CLS_REQ, ClsService } from 'nestjs-cls';
 import { apiError } from '../common/api-error.js';
+import { clientAddressOf } from '../common/request-meta.js';
 
 /** Who made the request, as the access token says (US-022:AC8). */
 export interface Principal {
@@ -30,11 +30,8 @@ export class AuthContext {
     return principal;
   }
 
-  /**
-   * The client address as Express sees it (`trust proxy` decides it behind a proxy, US-105), with
-   * IPv6 grouped by /64 like the general limit (BR-AUTH-07).
-   */
+  /** The client address of the request (see `clientAddressOf`). */
   clientAddress(): string {
-    return normalizeIp(this.cls.get<{ ip?: string } | undefined>(CLS_REQ)?.ip ?? 'unknown');
+    return clientAddressOf(this.cls.get<{ ip?: string } | undefined>(CLS_REQ));
   }
 }

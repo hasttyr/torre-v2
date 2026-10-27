@@ -297,6 +297,82 @@
           }
         }
       }
+    },
+    "/user/sessions": {
+      "get": {
+        "operationId": "listSessions",
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "lastSeenAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "userAgent": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "current": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "lastSeenAt",
+                      "expiresAt",
+                      "userAgent",
+                      "current"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/other-sessions": {
+      "delete": {
+        "operationId": "revokeOtherSessions",
+        "tags": [
+          "user"
+        ],
+        "responses": {
+          "204": {
+            "description": "Other sessions ended"
+          }
+        }
+      }
     }
   }
 }

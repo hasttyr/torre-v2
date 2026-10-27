@@ -1,6 +1,7 @@
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract';
 import { authContract } from './auth.js';
 import { systemContract } from './system.js';
+import { userContract } from './user.js';
 
 /**
  * Every operation of the HTTP API (DEC-060). Paths are relative to `/api/v1`. The API implements them
@@ -10,6 +11,7 @@ import { systemContract } from './system.js';
 export const apiContract = {
   system: systemContract,
   auth: authContract,
+  user: userContract,
 };
 
 export type ApiContract = typeof apiContract;
