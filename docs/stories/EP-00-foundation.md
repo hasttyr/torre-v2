@@ -56,9 +56,9 @@
 - **Avance sin Docker (2026-10-27):** el modo nativo levanta Postgres y, en Windows con WSL, Valkey 7.2 desempaquetado de los paquetes firmados de Ubuntu sin `sudo` (decisión del responsable). `pnpm infra:check` da verde para `postgres` y `redis`; Mailpit y S3 siguen pendientes de Docker.
 
 ### US-004 — Pipeline de integración continua
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** IN_PROGRESS
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como equipo quiero un pipeline que bloquee cambios que rompan calidad para detectar problemas antes de integrar.
-- **Contexto:** Etapas definidas en `ARCHITECTURE.md` §16.4. Plataforma: GitHub Actions (`OQ-007` pendiente de confirmar).
+- **Contexto:** Etapas definidas en `ARCHITECTURE.md` §16.4. Plataforma: GitHub Actions (`OQ-007` resuelta, `DEC-063`).
 - **Referencias:** DEC-022 · `ARCHITECTURE.md` §16.4 · `TESTING.md` §9
 - **Criterios de aceptación:**
   1. Workflow ejecuta: instalar con lockfile congelado → lint → typecheck → pruebas unitarias → build.
@@ -75,6 +75,7 @@
 - **Depende de:** US-001, US-002
 - **Fuera de alcance:** despliegue (`OQ-004`), e2e de UI (se añade con US-067/US-068).
 - **Notas para la IA:** si `OQ-007` resulta en GitLab u otro, adapta sin cambiar las etapas.
+- **Cierre en GitHub (2026-10-27):** repositorio `hasttyr/torre-v2`. La primera ejecución sobre `main` falló por dos diferencias con la máquina local (resolución SSR de los paquetes del *workspace* en las pruebas de la web y GHSA-q7qp-rjg7-q26m en `multer`); el PR #1 las corrige y deja los cuatro trabajos en verde ([ejecución 40554155024](https://github.com/hasttyr/torre-v2/actions/runs/40554155024)). Protección de `main` activa: PR obligatorio, `quality`, `security`, `infra` e `integration` obligatorios, rama al día y `enforce_admins`. El PR #2 (fallo deliberado en una prueba) quedó `BLOCKED` con solo `quality` en rojo y se cerró sin fusionar ([ejecución 40569807383](https://github.com/hasttyr/torre-v2/actions/runs/40569807383)).
 
 ### US-005 — Módulo de configuración con validación de entorno (API)
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** S · **Estado:** DONE
@@ -106,7 +107,7 @@
 - **Notas para la IA:** NUNCA registres cuerpos de petición con contraseñas ni tokens.
 
 ### US-007 — Base de datos: Prisma, migraciones, seeds y utilidades de prueba
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** DONE
 - **Historia:** Como desarrollador quiero un acceso a datos con migraciones versionadas y una base de pruebas aislada para evolucionar el esquema con seguridad.
 - **Referencias:** DEC-005, DEC-009 · `ARCHITECTURE.md` §8 · R1 (§18)
 - **Criterios de aceptación:**
@@ -126,7 +127,7 @@
 - **Notas para la IA:** si Prisma estorba para el event store (R1), proponer un ADR antes de cambiar de herramienta.
 - **Implementación (c), 2026-10-27:** `pnpm db:seed` compila la API y ejecuta `dist/database/seed.main.js` con el rol de aplicación; las instituciones demo tienen ids fijos y se insertan solo si faltan (no se pisan los cambios hechos a mano); se niega a correr con `NODE_ENV=production`.
 - **Implementación (b), 2026-10-27:** `withTransaction` en `apps/api/src/database/transaction.ts` (y `DatabaseService.withTransaction`) recibe `{ organizationId, userId }` explícitos; `US-025` los sacará del contexto de la petición. Guía de SQL crudo en `CONVENTIONS.md` §9.1.
-- **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. **Pendiente:** ejecutar la ruta de Testcontainers (sin Docker en esta máquina; lo hará el trabajo `integration` de la CI).
+- **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. La ruta de Testcontainers corrió por primera vez en el trabajo `integration` de la CI de GitHub (2026-10-27, [ejecución 40554155024](https://github.com/hasttyr/torre-v2/actions/runs/40554155024): 8 archivos y 42 pruebas en verde con `postgres:18` y `valkey/valkey:8.1.10`).
 
 ### US-008 — Contratos de API con oRPC (prueba previa) y OpenAPI
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
