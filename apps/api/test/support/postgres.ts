@@ -18,6 +18,7 @@ export const VALKEY_IMAGE = 'valkey/valkey:8.1.10';
 export const ROLES = {
   app: { user: 'torre_app', password: 'torre_app_dev' },
   migration: { user: 'torre_migrator', password: 'torre_migrator_dev' },
+  maintenance: { user: 'torre_maintenance', password: 'torre_maintenance_dev' },
 } as const;
 
 export interface PostgresServer {
@@ -111,6 +112,8 @@ export const uniqueDatabaseName = (prefix: string): string => `${prefix}_${rando
  * with the migration role, exactly as a deployment does (`prisma migrate deploy`).
  */
 export async function createMigratedDatabase(adminUrl: string, name: string): Promise<void> {
+  // Idempotent: an existing server also gets the roles added after it was created.
+  await execute(adminUrl, readFileSync(`${INIT_DIR}01-roles.sql`, 'utf8'));
   await execute(adminUrl, `CREATE DATABASE "${name}" OWNER torre_migrator`);
   const prepare = initScripts().filter((f) => !f.startsWith('01-'));
   for (const script of prepare)

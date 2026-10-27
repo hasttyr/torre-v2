@@ -101,9 +101,10 @@ async function nativeValkeyUp() {
   mkdirSync(join(VALKEY_DIR, 'debs'), { recursive: true });
   mkdirSync(join(VALKEY_DIR, 'data'), { recursive: true });
   const dir = wsl('wslpath -a "$1"', [resolve(VALKEY_DIR)]).trim();
-  if (!existsSync(join(VALKEY_DIR, 'root', 'usr', 'bin', 'valkey-server'))) {
+  // valkey-server is a Linux symlink that Windows cannot follow: a marker records the unpacked packages.
+  if (!existsSync(join(VALKEY_DIR, 'installed.txt'))) {
     wsl(
-      'd="$1"; shift; cd "$d/debs" && apt-get download "$@" && for p in "$d"/debs/*.deb; do dpkg -x "$p" "$d/root"; done',
+      'd="$1"; shift; rm -rf "$d/debs" "$d/root" && mkdir -p "$d/debs" && cd "$d/debs" && apt-get download "$@" && for p in "$d"/debs/*.deb; do dpkg -x "$p" "$d/root"; done && ls "$d/debs" > "$d/installed.txt"',
       [dir, ...VALKEY_PACKAGES],
     );
   }
@@ -130,7 +131,7 @@ async function nativeValkeyUp() {
 }
 
 function nativeValkeyDown() {
-  if (!existsSync(join(VALKEY_DIR, 'root', 'usr', 'bin', 'valkey-cli')) || !hasWsl()) return;
+  if (!existsSync(join(VALKEY_DIR, 'installed.txt')) || !hasWsl()) return;
   const dir = wsl('wslpath -a "$1"', [resolve(VALKEY_DIR)]).trim();
   spawnSync(
     'wsl',
@@ -141,6 +142,32 @@ function nativeValkeyDown() {
     },
   );
   console.log('infra (nativo): Valkey detenido');
+}
+
+/** Runs one script of infra/postgres/init as the superuser of the native cluster. */
+function runInitScript(bin, script, database) {
+  execFileSync(
+    exe(bin, 'psql'),
+    [
+      '-h',
+      '127.0.0.1',
+      '-p',
+      String(PORTS.postgres),
+      '-U',
+      'postgres',
+      '-d',
+      database,
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-f',
+      join(INIT_DIR, script),
+    ],
+    {
+      env: { ...process.env, PGPASSWORD: SUPERUSER_PASSWORD },
+      stdio: ['ignore', 'ignore', 'inherit'],
+      timeout: 15_000,
+    },
+  );
 }
 
 async function nativeUp() {
@@ -208,34 +235,15 @@ async function nativeUp() {
   }
   if (!ready)
     throw new Error(`PostgreSQL no quedó listo en 127.0.0.1:${PORTS.postgres}; revisa .tools/infra/postgres.log`);
+  // Idempotent: an existing cluster also gets the roles added after it was created (US-117).
+  runInitScript(bin, '01-roles.sql', 'postgres');
   if (psql("select 1 from pg_database where datname = 'torre'", { database: 'postgres' }).trim() !== '1') {
     psql('create database torre', { database: 'postgres' });
     // Same order as the Docker entrypoint: every init script, sorted by name.
     for (const script of readdirSync(INIT_DIR)
       .filter((f) => f.endsWith('.sql'))
       .sort()) {
-      execFileSync(
-        exe(bin, 'psql'),
-        [
-          '-h',
-          '127.0.0.1',
-          '-p',
-          String(PORTS.postgres),
-          '-U',
-          'postgres',
-          '-d',
-          'torre',
-          '-v',
-          'ON_ERROR_STOP=1',
-          '-f',
-          join(INIT_DIR, script),
-        ],
-        {
-          env: { ...process.env, PGPASSWORD: SUPERUSER_PASSWORD },
-          stdio: ['ignore', 'ignore', 'inherit'],
-          timeout: 15_000,
-        },
-      );
+      runInitScript(bin, script, 'torre');
     }
   }
   console.log(`infra (nativo): PostgreSQL en 127.0.0.1:${PORTS.postgres} (datos en .tools/infra/postgres)`);
