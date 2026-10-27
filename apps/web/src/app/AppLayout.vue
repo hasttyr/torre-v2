@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { glassSurfaceStrong } from '../shared/ui/index.js';
+import { glassSurfaceStrong, Toaster } from '../shared/ui/index.js';
 
 const { t } = useI18n();
 </script>
@@ -30,5 +30,6 @@ const { t } = useI18n();
     <main id="content" tabindex="-1" class="mx-auto max-w-6xl px-4 py-10 focus:outline-none">
       <RouterView />
     </main>
+    <Toaster :label="t('app.notifications')" />
   </div>
 </template>

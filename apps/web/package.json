@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@fontsource/fira-sans": "catalog:",
+    "@internationalized/date": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/contract": "catalog:",
     "@orpc/openapi-client": "catalog:",
@@ -40,6 +41,7 @@
     "tailwind-merge": "catalog:",
     "vue": "catalog:",
     "vue-i18n": "catalog:",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "vue-sonner": "catalog:"
   }
 }
