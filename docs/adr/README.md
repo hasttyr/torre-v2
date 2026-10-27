@@ -24,3 +24,4 @@ Plantilla: `docs/templates/adr-template.md`.
 | [ADR-0002](ADR-0002-orpc-contracts.md) | Contratos de API con oRPC: resultado de la prueba previa | Aceptado (2026-10-27) | `DEC-060`, `DEC-020`, `US-008` |
 | [ADR-0003](ADR-0003-local-s3-rustfs.md) | S3 local: RustFS en lugar de MinIO | Aceptado (2026-10-26) | `DEC-016`, `US-003` |
 | [ADR-0004](ADR-0004-api-tests-without-swc.md) | Pruebas de la API sin SWC | Aceptado (2026-10-26) | `DEC-021`, `ADR-0001`, `US-005` |
+| [ADR-0005](ADR-0005-shared-ui-without-shadcn-cli.md) | Capa `shared/ui`: componentes de shadcn-vue portados a mano | Aceptado (2026-10-27) | `DEC-017`, `DEC-081`, `DEC-085`, `US-069` |

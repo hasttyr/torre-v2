@@ -164,6 +164,12 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
       },
     },
     {
+      // The design layer keeps shadcn-vue's names (Button, Input, Table…): in single-file components the
+      // PascalCase tag never clashes with the HTML element, which is what the rule guards against.
+      files: ['**/apps/web/src/shared/ui/**/*.vue'],
+      rules: { 'vue/multi-word-component-names': 'off' },
+    },
+    {
       files: ['**/apps/**/*.{ts,vue}'],
       ignores: TEST_FILES,
       rules: { 'no-restricted-syntax': ['error', ...ROLE_DECISIONS] },
