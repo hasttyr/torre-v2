@@ -11,23 +11,27 @@
     "typecheck": "vue-tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
     "@torre/config": "workspace:*",
     "@vitejs/plugin-vue": "catalog:",
     "@vue/test-utils": "catalog:",
     "happy-dom": "catalog:",
     "msw": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue-tsc": "catalog:"
   },
   "dependencies": {
+    "@fontsource/fira-sans": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/contract": "catalog:",
     "@orpc/openapi-client": "catalog:",
     "@orpc/vue-query": "catalog:",
     "@tanstack/vue-query": "catalog:",
     "@torre/contracts": "workspace:*",
+    "lucide-vue-next": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-i18n": "catalog:",

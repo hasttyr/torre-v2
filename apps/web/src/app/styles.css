@@ -1,0 +1,289 @@
+/*
+ * The only hand-written CSS of the web app (DEC-085): Tailwind's entry point with the design tokens of
+ * UI-UX.md §3 as CSS variables, in three themes, and the glass surfaces of §3.3. Every other style is a
+ * Tailwind utility. Values: colours DEC-081, glass and radii DEC-087.
+ */
+@import 'tailwindcss';
+@import '@fontsource/fira-sans/400.css';
+@import '@fontsource/fira-sans/500.css';
+@import '@fontsource/fira-sans/600.css';
+@import '@fontsource/fira-sans/700.css';
+
+/* Themes are chosen with data-theme on <html>; without it the system preference applies (UI-UX.md §7). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant projector (&:where([data-theme='projector'], [data-theme='projector'] *));
+/* Opaque surfaces: the user asked for less transparency or more contrast, or the projector (§3.3). */
+@custom-variant reduced-transparency {
+  @media (prefers-reduced-transparency: reduce) {
+    @slot;
+  }
+  @media (prefers-contrast: more) {
+    @slot;
+  }
+  &:where(
+    [data-transparency='reduced'],
+    [data-transparency='reduced'] *,
+    [data-theme='projector'],
+    [data-theme='projector'] *
+  ) {
+    @slot;
+  }
+}
+
+/* Light theme (default). */
+:root {
+  --background: #f8fafc;
+  --foreground: #1e3a8a;
+  --card: #ffffff;
+  --card-foreground: #1e3a8a;
+  --popover: #ffffff;
+  --popover-foreground: #1e3a8a;
+  --muted: #e9eef6;
+  --muted-foreground: #475569;
+  --secondary: #e9eef6;
+  --secondary-foreground: #1e3a8a;
+  --primary: #1e40af;
+  --primary-foreground: #ffffff;
+  --accent: #d97706;
+  --accent-foreground: #000000;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --border: #dbeafe;
+  --input: #64748b;
+  --ring: #1e40af;
+  --result-win: #15803d;
+  --result-draw: #475569;
+  --result-loss: #b91c1c;
+  --provisional: #b45309;
+  --official: #1e40af;
+  --stale: #c2410c;
+
+  /* Brand backdrop the glass blurs: primary and accent at 18 % over the background (§3.3). */
+  --backdrop-primary: rgb(30 64 175 / 0.18);
+  --backdrop-accent: rgb(217 119 6 / 0.18);
+  /* Glass (DEC-087): cards 35 %, floating layers 55 %; blur 24 px and 40 px. */
+  --glass-bg: rgb(255 255 255 / 0.35);
+  --glass-bg-strong: rgb(255 255 255 / 0.55);
+  --glass-border: rgb(255 255 255 / 0.6);
+  --glass-highlight: rgb(255 255 255 / 0.7);
+  --glass-shadow: 0 8px 32px rgb(15 23 42 / 0.12);
+  --glass-blur: 24px;
+  --glass-blur-strong: 40px;
+
+  /* Motion (the radii are fixed theme values, in @theme below). */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+
+  color-scheme: light;
+}
+
+/* Dark theme: the same block twice, for the system preference and for the explicit choice (a test keeps
+   them equal). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --background: #020617;
+    --foreground: #f8fafc;
+    --card: #0e1223;
+    --card-foreground: #f8fafc;
+    --popover: #0e1223;
+    --popover-foreground: #f8fafc;
+    --muted: #1a1e2f;
+    --muted-foreground: #94a3b8;
+    --secondary: #1a1e2f;
+    --secondary-foreground: #f8fafc;
+    --primary: #60a5fa;
+    --primary-foreground: #0f172a;
+    --accent: #f59e0b;
+    --accent-foreground: #0f172a;
+    --destructive: #ef4444;
+    --destructive-foreground: #000000;
+    --success: #22c55e;
+    --success-foreground: #0f172a;
+    --warning: #f59e0b;
+    --warning-foreground: #0f172a;
+    --border: #334155;
+    --input: #64748b;
+    --ring: #93c5fd;
+    --result-win: #4ade80;
+    --result-draw: #cbd5e1;
+    --result-loss: #f87171;
+    --provisional: #fbbf24;
+    --official: #93c5fd;
+    --stale: #fb923c;
+    --backdrop-primary: rgb(96 165 250 / 0.18);
+    --backdrop-accent: rgb(245 158 11 / 0.18);
+    --glass-bg: rgb(14 18 35 / 0.4);
+    --glass-bg-strong: rgb(14 18 35 / 0.6);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-highlight: rgb(255 255 255 / 0.16);
+    --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+    color-scheme: dark;
+  }
+}
+
+[data-theme='dark'] {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0e1223;
+  --card-foreground: #f8fafc;
+  --popover: #0e1223;
+  --popover-foreground: #f8fafc;
+  --muted: #1a1e2f;
+  --muted-foreground: #94a3b8;
+  --secondary: #1a1e2f;
+  --secondary-foreground: #f8fafc;
+  --primary: #60a5fa;
+  --primary-foreground: #0f172a;
+  --accent: #f59e0b;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #000000;
+  --success: #22c55e;
+  --success-foreground: #0f172a;
+  --warning: #f59e0b;
+  --warning-foreground: #0f172a;
+  --border: #334155;
+  --input: #64748b;
+  --ring: #93c5fd;
+  --result-win: #4ade80;
+  --result-draw: #cbd5e1;
+  --result-loss: #f87171;
+  --provisional: #fbbf24;
+  --official: #93c5fd;
+  --stale: #fb923c;
+  --backdrop-primary: rgb(96 165 250 / 0.18);
+  --backdrop-accent: rgb(245 158 11 / 0.18);
+  --glass-bg: rgb(14 18 35 / 0.4);
+  --glass-bg-strong: rgb(14 18 35 / 0.6);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-highlight: rgb(255 255 255 / 0.16);
+  --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}
+
+/* Projector: contrast ≥ 7:1, larger type, no glass (§3.3, §5). */
+[data-theme='projector'] {
+  --background: #ffffff;
+  --foreground: #0b1220;
+  --card: #ffffff;
+  --card-foreground: #0b1220;
+  --popover: #ffffff;
+  --popover-foreground: #0b1220;
+  --muted: #f1f5f9;
+  --muted-foreground: #1f2937;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0b1220;
+  --primary: #1e3a8a;
+  --primary-foreground: #ffffff;
+  --accent: #92400e;
+  --accent-foreground: #ffffff;
+  --destructive: #991b1b;
+  --destructive-foreground: #ffffff;
+  --success: #166534;
+  --success-foreground: #ffffff;
+  --warning: #92400e;
+  --warning-foreground: #ffffff;
+  --border: #334155;
+  --input: #0b1220;
+  --ring: #1e3a8a;
+  --result-win: #166534;
+  --result-draw: #1f2937;
+  --result-loss: #991b1b;
+  --provisional: #92400e;
+  --official: #1e3a8a;
+  --stale: #9a3412;
+  --backdrop-primary: transparent;
+  --backdrop-accent: transparent;
+  font-size: 125%;
+  color-scheme: light;
+}
+
+/* Opaque fallback (§3.3): glass becomes the card and popover colours, without blur or highlight. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--card);
+    --glass-bg-strong: var(--popover);
+    --glass-highlight: transparent;
+    --glass-blur: 0px;
+    --glass-blur-strong: 0px;
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --glass-bg: var(--card);
+    --glass-bg-strong: var(--popover);
+    --glass-highlight: transparent;
+    --glass-blur: 0px;
+    --glass-blur-strong: 0px;
+  }
+}
+[data-transparency='reduced'],
+[data-theme='projector'] {
+  --glass-bg: var(--card);
+  --glass-bg-strong: var(--popover);
+  --glass-highlight: transparent;
+  --glass-blur: 0px;
+  --glass-blur-strong: 0px;
+}
+
+/* Motion only as short CSS transitions, removed with reduced motion (UI-UX.md §3.2). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}
+
+/* Tailwind utilities from the tokens: bg-background, text-foreground, bg-glass, backdrop-blur-glass… */
+@theme inline {
+  --font-sans: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-result-win: var(--result-win);
+  --color-result-draw: var(--result-draw);
+  --color-result-loss: var(--result-loss);
+  --color-provisional: var(--provisional);
+  --color-official: var(--official);
+  --color-stale: var(--stale);
+  --color-glass: var(--glass-bg);
+  --color-glass-strong: var(--glass-bg-strong);
+  --color-glass-border: var(--glass-border);
+  --color-glass-highlight: var(--glass-highlight);
+  --color-backdrop-primary: var(--backdrop-primary);
+  --color-backdrop-accent: var(--backdrop-accent);
+  --blur-glass: var(--glass-blur);
+  --blur-glass-strong: var(--glass-blur-strong);
+  --shadow-glass: var(--glass-shadow);
+}
+
+/* Radii (DEC-087): controls 12 px, cards 16 px, dialogs and panels 24 px; the same in every theme. */
+@theme {
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+}

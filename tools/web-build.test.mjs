@@ -27,4 +27,31 @@ describe('web build (US-009)', () => {
       ).toBe(true);
     }
   });
+
+  const stylesheet = () => {
+    const css = readdirSync(join(outDir, 'assets')).find((file) => file.endsWith('.css'));
+    return readFileSync(join(outDir, 'assets', css), 'utf8');
+  };
+
+  it('[US-069:AC1][US-069:AC8] should compile the tokens, the glass utilities and their opaque fallback', () => {
+    const styles = stylesheet();
+
+    for (const utility of [
+      '.bg-glass{',
+      '.bg-glass-strong{',
+      '.backdrop-blur-glass{',
+      '.backdrop-blur-glass-strong{',
+    ]) {
+      expect(styles, utility).toContain(utility);
+    }
+    expect(styles).toContain('@media (prefers-reduced-transparency:reduce){:root{--glass-bg:var(--card)');
+    expect(styles).toContain('[data-transparency=reduced],[data-theme=projector]{--glass-bg:var(--card)');
+  });
+
+  it('[US-069:AC4] should serve Fira Sans from the app itself, not from a third party', () => {
+    const fonts = readdirSync(join(outDir, 'assets')).filter((file) => /^fira-sans-.*\.woff2$/.test(file));
+
+    expect(fonts.length).toBeGreaterThan(0);
+    expect(stylesheet()).not.toMatch(/fonts\.googleapis|fonts\.gstatic/);
+  });
 });

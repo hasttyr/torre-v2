@@ -60,7 +60,7 @@
 - **Fuera de alcance:** modo offline (`US-091`).
 
 ### US-069 — Sistema de diseño: tokens, capa `shared/ui` y catálogo
-- **Epic:** EP-07 · **Fase:** F0/F4 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-07 · **Fase:** F0/F4 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como equipo quiero una capa de UI homogénea para que nada parezca "pegado".
 - **Referencias:** DEC-017, DEC-081, DEC-085 · `UI-UX.md` §2–§4
 - **Criterios de aceptación:**
@@ -79,6 +79,7 @@
 - **Pruebas requeridas:** capturas visuales; pruebas de accesibilidad automáticas (axe) por componente; contraste del texto sobre cada superficie de vidrio compuesta sobre el color más claro y el más oscuro del fondo; capturas con la transparencia reducida.
 - **Depende de:** US-009
 - **Fuera de alcance:** pantallas de negocio.
+- **Implementación (a), 2026-10-27:** Tailwind 4.3.3 con `@tailwindcss/vite`; `apps/web/src/app/styles.css` es el único CSS propio (tokens de §3.1 en claro, oscuro —también por preferencia del sistema— y proyector; vidrio con los valores de `DEC-087`; respaldo opaco; variantes `dark:`, `projector:` y `reduced-transparency:`; transiciones de 150/200 ms anuladas con *reduced motion*); Fira Sans autoalojada con `@fontsource` y Lucide instalado (solo `shared/ui` puede importarlo, `US-009c`); `shared/ui` arranca con `glassSurface`, `glassSurfaceStrong` y `GlassPanel`; el *layout* y la portada usan el vidrio. El selector de tema y la preferencia "Reducir transparencia" son de `US-074`; los componentes de shadcn-vue, de (b).
 
 ### US-070 — Páginas públicas del torneo y enlaces compartibles
 - **Epic:** EP-07 · **Fase:** F4 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
