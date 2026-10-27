@@ -8,7 +8,7 @@
 - **Referencias:** DEC-010, DEC-019 · `UI-UX.md` §4, §8 (mostrar/ocultar contraseña)
 - **Criterios de aceptación:**
   1. Páginas de registro, inicio de sesión, recuperación de contraseña, verificación de email e invitación aceptada.
-  2. Refresh transparente: ante 401 se intenta un refresh; si falla, redirige al login conservando la ruta destino.
+  2. Refresh transparente: ante 401 se intenta un refresh; si falla, redirige al login conservando la ruta destino. Una sola renovación a la vez entre pestañas, con Web Locks (`navigator.locks`): la API revoca la sesión si dos pestañas gastan el mismo *refresh* (`DEC-092`).
   3. Selector de organización activo; preferencias de idioma y tema persistidas en el perfil.
   4. Campo de contraseña con mostrar/ocultar accesible; mensajes de error por `code` traducidos.
   5. Guards de rutas por autenticación y permisos (`can()` solo para UI).

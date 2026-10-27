@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ClsService } from 'nestjs-cls';
+import { normalizeIp } from '@nestjs/throttler';
+import { CLS_REQ, ClsService } from 'nestjs-cls';
 import { apiError } from '../common/api-error.js';
 
 /** Who made the request, as the access token says (US-022:AC8). */
@@ -27,5 +28,13 @@ export class AuthContext {
     const principal = this.cls.get<Principal | undefined>(PRINCIPAL);
     if (!principal) throw apiError('UNAUTHENTICATED');
     return principal;
+  }
+
+  /**
+   * The client address as Express sees it (`trust proxy` decides it behind a proxy, US-105), with
+   * IPv6 grouped by /64 like the general limit (BR-AUTH-07).
+   */
+  clientAddress(): string {
+    return normalizeIp(this.cls.get<{ ip?: string } | undefined>(CLS_REQ)?.ip ?? 'unknown');
   }
 }

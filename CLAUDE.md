@@ -83,6 +83,7 @@ pnpm verify:full     # verify + humo + integración + e2e (lo que corre la CI en
 pnpm test:trace      # matriz criterio de aceptación → prueba (TEST-PLAN.md §6.2.1)
 pnpm test:report     # informe de pruebas desde los resultados JSON y el manifiesto
 pnpm test:ci         # pruebas con cobertura y reportes JSON/JUnit (lo que usa la CI)
+pnpm test:coverage   # cobertura de apps/api con unitarias + integración (tras test:ci y test:e2e, DEC-094)
 pnpm test:manifest   # reports/run-manifest.json (commit, versiones, semillas)
 pnpm test:smoke      # casos de humo (TC-080…)
 pnpm test:nightly    # 5 000 ejecuciones por propiedad con semilla aleatoria + benchmarks completos

@@ -21,6 +21,10 @@ const suites = [
       '--reporter=default',
       '--reporter=json',
       '--outputFile.json=reports/vitest-e2e.json',
+      // Coverage for `pnpm test:coverage`, merged with the unit run's blob (DEC-094).
+      '--coverage',
+      '--reporter=blob',
+      '--outputFile.blob=reports/blob/e2e.json',
     ],
   },
   { dir: 'apps/web/e2e', label: 'UI (Playwright)', args: null },

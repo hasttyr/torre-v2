@@ -217,7 +217,7 @@ Los comandos se crean en `US-001` y `US-004` (`CLAUDE.md` §6).
 **Criterios de salida de una versión `vX.Y.Z`** (sobre las historias incluidas en ella):
 1. 100 % de los casos de prioridad **A** aprueban.
 2. ≥ 90 % de los casos de prioridad **M** aprueban; los que fallen quedan registrados como defectos con su análisis.
-3. Cobertura de los paquetes de dominio ≥ 90 % de líneas y ramas; `apps/api` ≥ 80 % de líneas (`TESTING.md` §9).
+3. Cobertura de los paquetes de dominio ≥ 90 % de líneas y ramas; `apps/api` ≥ 80 % de líneas, unitarias e integración combinadas (`pnpm test:coverage`, `DEC-094`; `TESTING.md` §9).
 4. 0 defectos abiertos de severidad **Crítica** o **Alta** (§12).
 5. Lint, typecheck, límites de dependencias y auditoría de seguridad en verde.
 6. **Trazabilidad completa** (TC-090): ningún criterio de aceptación de las historias incluidas queda sin prueba etiquetada y verde.

@@ -37,6 +37,14 @@ export const register = oc
   )
   .output(account);
 
+// What login and refresh answer: the access token in the body, the refresh token only in the cookie.
+const accessToken = z.strictObject({
+  accessToken: z.string(),
+  tokenType: z.literal('Bearer'),
+  /** Seconds until the access token expires. */
+  expiresIn: z.number().int().positive(),
+});
+
 /**
  * `POST /auth/login` (US-022:AC3): a 5-minute access token in the body and the refresh token in the
  * `__Host-refresh` cookie, never in the body.
@@ -44,16 +52,28 @@ export const register = oc
 export const login = oc
   .route({ method: 'POST', path: '/auth/login', operationId: 'login', tags: ['auth'] })
   .input(z.strictObject({ email, password }))
-  .output(
-    z.strictObject({
-      accessToken: z.string(),
-      tokenType: z.literal('Bearer'),
-      /** Seconds until the access token expires. */
-      expiresIn: z.number().int().positive(),
-    }),
-  );
+  .output(accessToken);
+
+/**
+ * `POST /auth/refresh` (US-022:AC4): trades the refresh cookie for a new access token and a new refresh
+ * cookie. The old refresh token stops working, and using it again revokes the whole session (INV-A-1).
+ * The session still ends 24 hours after the login (DEC-062). Same-site requests only (INV-A-4).
+ */
+export const refresh = oc
+  .route({ method: 'POST', path: '/auth/refresh', operationId: 'refresh', tags: ['auth'] })
+  .output(accessToken);
 
 /** `GET /me`: the signed-in account (US-022:AC8, the first route behind the access token). */
 export const me = oc.route({ method: 'GET', path: '/me', operationId: 'me', tags: ['auth'] }).output(account);
 
-export const authContract = { register, login, me };
+/**
+ * `POST /auth/logout` (US-022:AC5): ends the session of the refresh cookie, its whole family, and clears
+ * the cookie. It answers 204 even without a session, so repeating it is harmless. Same-site requests
+ * only (INV-A-4).
+ */
+export const logout = oc
+  // Detailed output: a 204 without a body, so the OpenAPI document declares no content.
+  .route({ method: 'POST', path: '/auth/logout', outputStructure: 'detailed', operationId: 'logout', tags: ['auth'] })
+  .output(z.strictObject({ status: z.literal(204).describe('Signed out') }));
+
+export const authContract = { register, login, refresh, logout, me };

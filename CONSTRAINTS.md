@@ -33,7 +33,7 @@ El guardia de piso (`pnpm check:floor`, script `tools/floor-guard.mjs`, solo Nod
 | Secretos | 0 hallazgos | `gitleaks` con `--redact` | rápido (diff), PR | Un secreto publicado está comprometido |
 | Pruebas unitarias y de propiedades | 0 fallos; ≥ 200 casos por propiedad con semilla fija | `pnpm test` (Vitest + fast-check) | rápido (pruebas relacionadas), verify, PR | `TESTING.md` §9 |
 | Cobertura del dominio | ≥ 90 % de líneas y de ramas en `packages/*` | Vitest con cobertura v8 | verify, PR | `TESTING.md` §9 |
-| Cobertura de la API | ≥ 80 % de líneas en `apps/api` | Vitest con cobertura v8 | verify, PR | `TESTING.md` §9 |
+| Cobertura de la API | ≥ 80 % de líneas en `apps/api` | Vitest con cobertura v8, unitarias e integración combinadas (`pnpm test:coverage`) | verify, PR | `TESTING.md` §9; medición en `DEC-094` |
 | Contrato | 0 diferencias entre la API y `packages/contracts` (OpenAPI) | pruebas de contrato | verify, PR | `US-008` |
 | Trazabilidad | 0 criterios de aceptación sin prueba etiquetada y en verde en historias `DONE` | `pnpm test:trace` | verify, PR | `TEST-PLAN.md` TC-090 |
 | Código sin uso | 0 hallazgos | `knip` | PR | Evita código muerto escrito por la IA |

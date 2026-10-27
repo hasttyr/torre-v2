@@ -5,6 +5,7 @@ import type { ApiInputs } from '@torre/contracts';
 import { apiError } from '../common/api-error.js';
 import { AppConfig } from '../config/app-config.js';
 import { DatabaseService } from '../database/database.service.js';
+import type { Transaction } from '../database/transaction.js';
 import type { AccessClaims } from './jwt.strategy.js';
 import { passwordProblems } from './password-policy.js';
 import { PasswordService } from './password.service.js';
@@ -105,13 +106,59 @@ export class AuthService {
       });
       return created;
     });
-    const claims: AccessClaims = { sub: userId, sid: session.id };
-    return {
-      accessToken: await this.jwt.signAsync({ ...claims }),
-      expiresIn: Math.floor(this.config.get('JWT_ACCESS_TTL') / 1000),
-      refreshToken,
-      refreshExpiresAt,
-    };
+    return this.issue(userId, session.id, refreshToken, refreshExpiresAt);
+  }
+
+  /**
+   * Spends a refresh token and issues its successor (US-022:AC4). The successor expires with the
+   * session, 24 hours after the login (DEC-062). Spending is a compare-and-set, so of two requests with
+   * the same token only one wins; a token that was already spent leaked or raced, and the whole family
+   * is revoked (INV-A-1, DEC-092). Unknown, expired, revoked and reused tokens all answer the same 401.
+   */
+  async rotate(refreshToken: string | undefined): Promise<IssuedSession> {
+    if (!refreshToken) throw apiError('UNAUTHENTICATED');
+    const successorToken = newRefreshToken();
+    const session = await this.db.withTransaction(async (tx) => {
+      const now = new Date();
+      const current = await tx.refreshToken.findUnique({
+        where: { tokenHash: hashRefreshToken(refreshToken) },
+        include: { family: true },
+      });
+      if (!current || current.family.revokedAt !== null || current.family.expiresAt <= now) return undefined;
+      const spent = await tx.refreshToken.updateMany({
+        where: { id: current.id, revokedAt: null },
+        data: { revokedAt: now },
+      });
+      if (spent.count === 0) {
+        // The revocation commits: this transaction returns instead of throwing.
+        await revokeFamily(tx, current.familyId, now);
+        return undefined;
+      }
+      const successor = await tx.refreshToken.create({
+        data: {
+          userId: current.userId,
+          familyId: current.familyId,
+          tokenHash: hashRefreshToken(successorToken),
+          expiresAt: current.family.expiresAt,
+        },
+      });
+      await tx.refreshToken.update({ where: { id: current.id }, data: { replacedBy: successor.id } });
+      return tx.authSession.update({ where: { id: current.familyId }, data: { lastSeenAt: now } });
+    });
+    if (!session) throw apiError('UNAUTHENTICATED');
+    return this.issue(session.userId, session.id, successorToken, session.expiresAt);
+  }
+
+  /** Ends the session of a refresh token in any state, revoking its whole family (US-022:AC5). */
+  async endSession(refreshToken: string | undefined): Promise<void> {
+    if (!refreshToken) return;
+    await this.db.withTransaction(async (tx) => {
+      const token = await tx.refreshToken.findUnique({
+        where: { tokenHash: hashRefreshToken(refreshToken) },
+        select: { familyId: true },
+      });
+      if (token) await revokeFamily(tx, token.familyId, new Date());
+    });
   }
 
   async account(userId: string): Promise<Account> {
@@ -119,4 +166,25 @@ export class AuthService {
     if (!user) throw apiError('UNAUTHENTICATED');
     return toAccount(user);
   }
+
+  private async issue(
+    userId: string,
+    sessionId: string,
+    refreshToken: string,
+    refreshExpiresAt: Date,
+  ): Promise<IssuedSession> {
+    const claims: AccessClaims = { sub: userId, sid: sessionId };
+    return {
+      accessToken: await this.jwt.signAsync({ ...claims }),
+      expiresIn: Math.floor(this.config.get('JWT_ACCESS_TTL') / 1000),
+      refreshToken,
+      refreshExpiresAt,
+    };
+  }
+}
+
+/** Ends a session: the session row and every refresh token of its family still alive (INV-A-1). */
+async function revokeFamily(tx: Transaction, familyId: string, now: Date): Promise<void> {
+  await tx.authSession.updateMany({ where: { id: familyId, revokedAt: null }, data: { revokedAt: now } });
+  await tx.refreshToken.updateMany({ where: { familyId, revokedAt: null }, data: { revokedAt: now } });
 }

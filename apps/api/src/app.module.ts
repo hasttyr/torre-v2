@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClsModule } from 'nestjs-cls';
 import type { DynamicModule } from '@nestjs/common';
+import { CountersModule } from './common/counters.module.js';
+import type { CountersOptions } from './common/counters.module.js';
 import { LoggingModule } from './common/logging.module.js';
 import { ApiOrpcModule } from './common/orpc.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -14,7 +16,12 @@ import type { JobsOptions } from './jobs/jobs.module.js';
 import { SystemModule } from './system/system.module.js';
 import type { AppConfigOptions } from './config/config.module.js';
 
-export type AppOptions = AppConfigOptions & LoggingOptions & Partial<JobsOptions>;
+export type AppOptions = AppConfigOptions &
+  LoggingOptions &
+  Partial<JobsOptions> & {
+    /** Where the rate-limit counters live: Redis unless a unit test runs without it. */
+    readonly counters?: CountersOptions['store'];
+  };
 
 /**
  * Root module: configuration (US-005), cross-cutting layer (US-006), database (US-007), contracts
@@ -30,6 +37,7 @@ export class AppModule {
         LoggingModule.forRoot(options),
         // Request context (ARCHITECTURE.md §6.3): the principal today, the tenant with US-025.
         ClsModule.forRoot({ global: true, middleware: { mount: true } }),
+        CountersModule.forRoot({ store: options.counters ?? 'redis', prefix: options.prefix ?? 'torre' }),
         ThrottlingModule,
         DatabaseModule,
         JobsModule.forRoot({
