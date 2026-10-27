@@ -234,6 +234,7 @@ export function defineAbilitiesFor(user: AuthUser, grants: readonly Grant[]): Ap
 | Borrados que se pierden o no se pueden explicar | Borrado lógico con razón, lote y papelera; el rol de la app no tiene `DELETE` (§10) |
 | Comprobar solo en la UI | La API siempre autoriza; la UI solo refleja |
 | Olvidar el contexto de tenant | RLS falla cerrado: sin tenant, cero filas (`US-025`) |
+| Decidir por el nombre del rol (`if (role === 'arbiter')`) | ESLint lo prohíbe en `apps/*` y `packages/*` (comparar con una clave de rol o usarla en un `case`); definir los roles en el catálogo o en los *seeds* sí se permite (`TC-064`) |
 
 ## 9. Cuentas, cambio de rol y solicitudes de rol (`DEC-056`)
 

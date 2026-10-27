@@ -142,7 +142,7 @@
 - **Pruebas requeridas:** prueba que falla si una operación de la API no proviene de `contracts`; rechazo de campos desconocidos; formato de errores; cliente tipado contra el servidor real (TC-046).
 - **Depende de:** US-006
 - **Fuera de alcance:** cliente HTTP del front (`US-009`).
-- **Resultado (2026-10-27):** prueba superada (`ADR-0002`). El punto del cliente Vue con `@orpc/vue-query` pasa a `US-009` porque la web aún no existe; el cliente tipado se probó contra el servidor real con `@orpc/client`. Los mensajes WebSocket del criterio 1 llegan con `US-050`. El punto "compilación con SWC" se cumple con `tsc` y oxc (`ADR-0004`).
+- **Resultado (2026-10-27):** prueba superada (`ADR-0002`). El punto del cliente Vue con `@orpc/vue-query` pasó a `US-009` porque la web aún no existía y quedó comprobado en `US-009b` (`apps/web/src/shared/api/client.spec.ts`); el cliente tipado se probó contra el servidor real con `@orpc/client`. Los mensajes WebSocket del criterio 1 llegan con `US-050`. El punto "compilación con SWC" se cumple con `tsc` y oxc (`ADR-0004`).
 
 ### US-117 — Módulo de colas y proceso *worker* (BullMQ)
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
@@ -163,7 +163,7 @@
 - **Implementación (2026-10-27):** BullMQ 6.4.2 con `@nestjs/bullmq` 12; parámetros de `DEC-086`. El contexto del trabajo se pasa explícito a `withTransaction` (fija `app.organization_id` y `app.user_id`); `US-025` lo llevará también a `nestjs-cls` y activará RLS, y entonces se prueba "cero filas sin tenant" (`TC-209`, `INV-T-9`). El rol `torre_maintenance` nace en `infra/postgres/init/01-roles.sql` con `BYPASSRLS` y sin privilegios sobre tablas: cada tabla que purga la cola `maintenance` (idempotencia `US-045`, tokens `US-022`, solicitudes de rol `US-029`) le concede los suyos en su migración. En producción el rol se crea con el plan de despliegue (`US-105`).
 
 ### US-009 — Esqueleto de la aplicación web
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** DONE
 - **Historia:** Como usuario quiero una aplicación que cargue, navegue y muestre errores de forma consistente para tener una base sobre la cual construir pantallas.
 - **Referencias:** DEC-003, DEC-017, DEC-018, DEC-019, DEC-040 · `ARCHITECTURE.md` §13 · `UI-UX.md`
 - **Criterios de aceptación:**
@@ -180,3 +180,6 @@
 - **Pruebas requeridas:** unitarias del cliente (mapeo de errores) y de un componente de ejemplo, con MSW simulando el API.
 - **Depende de:** US-002, US-008
 - **Fuera de alcance:** sistema de diseño (`US-069`), pantallas de negocio.
+- **Implementación (a), 2026-10-27:** Vite 8 + Vue 3.5 con `vue-tsc`; `installProviders` instala router (rutas con `import()`), Pinia, Vue Query y `vue-i18n` (`es`) igual en la app y en las pruebas; Vitest corre la web como proyecto propio (`apps/web/vite.config.ts`) con `happy-dom`; ESLint revisa los `.vue` con `eslint-plugin-vue` y las reglas de TypeScript sin tipos (el tipado lo da `vue-tsc`); `pnpm dev` levanta infraestructura, API con recarga y web. Las carpetas `shared/*` de `ARCHITECTURE.md` §13.1 llegan con (b) y (c), cuando tienen contenido.
+- **Implementación (b), 2026-10-27:** `shared/api` crea el cliente tipado (`createApiClient` con `OpenAPILink`, base `VITE_API_BASE_URL` del `.env` de la raíz, `X-Correlation-Id` nuevo por petición, `credentials: 'include'` y un gancho `refreshSession` que ante un 401 renueva una vez y repite) y `orpc` con `@orpc/vue-query`. `toApiProblem` convierte cualquier fallo en `{ code, status, correlationId, errors }` (`NETWORK_ERROR` si no llegó a la API) y `errors.<CODE>` tiene mensaje en español para todos los códigos del catálogo. Hallazgo: el cliente oRPC solo lee como JSON `application/json`; el `fetch` del cliente reetiqueta `application/problem+json` y el cuerpo llega en `ORPCError.data.body`. *Layout* base con enlace para saltar al contenido, páginas 404/403/500 (la 500 muestra el `correlationId`) y `app.config.errorHandler`. Las pruebas del cliente corren en entorno `node` porque MSW no intercepta el `fetch` de `happy-dom`. Queda cerrado el punto pendiente de `US-008`: las claves de `@orpc/vue-query` se invalidan por contrato.
+- **Implementación (c), 2026-10-27:** `no-restricted-imports` prohíbe en `apps/web/src` (salvo `shared/ui`) las librerías de UI de `UI-UX.md` §2.3 (`reka-ui`, `lucide-vue-next`, `vue-sonner`, `@tanstack/vue-table`, `@tanstack/vue-virtual`, `echarts`, `vue-echarts`, `cm-chessboard`, `@fullcalendar/*`), con *fixtures* que deben fallar y pasar. `shared/ui`, `shared/lib` y `shared/composables` nacen con `US-069` y las historias de pantallas.

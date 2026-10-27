@@ -7,8 +7,14 @@ import { describe, expect, it } from 'vitest';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = (path) => readFileSync(join(root, path), 'utf8');
 const json = (path) => JSON.parse(read(path));
+// TORRE_DRY_RUN: scripts with side effects (dev, test:e2e) only check their prerequisites and exit.
 const run = (script, args = [], input) =>
-  spawnSync(process.execPath, [join(root, script), ...args], { cwd: root, encoding: 'utf8', input });
+  spawnSync(process.execPath, [join(root, script), ...args], {
+    cwd: root,
+    encoding: 'utf8',
+    input,
+    env: { ...process.env, TORRE_DRY_RUN: '1' },
+  });
 
 const PACKAGES = ['config', 'core', 'rules', 'standings', 'pairing', 'ratings', 'tournament', 'contracts', 'testing'];
 

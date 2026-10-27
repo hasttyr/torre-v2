@@ -30,14 +30,24 @@ if (present.length === 0) {
   console.log('test:e2e: todavía no hay suites e2e (llegan con US-007 y US-066).');
   process.exit(0);
 }
+// --check (or TORRE_DRY_RUN=1): lists what would run, without needing the services.
+if (process.argv.includes('--check') || process.env.TORRE_DRY_RUN === '1') {
+  for (const suite of present)
+    console.log(`test:e2e: ${suite.label} en ${suite.dir}${suite.args ? '' : ' (sin ejecutor)'}`);
+  process.exit(0);
+}
 for (const suite of present) {
   if (!suite.args) {
     console.error(`test:e2e: hay suites en ${suite.dir} pero este script aún no las ejecuta.`);
     process.exit(1);
   }
   console.log(`\n▶ test:e2e — ${suite.label}`);
-  const run = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', ...suite.args, ...process.argv.slice(2)], {
-    stdio: 'inherit',
-  });
+  const run = spawnSync(
+    process.execPath,
+    ['node_modules/vitest/vitest.mjs', ...suite.args, ...process.argv.slice(2).filter((a) => a !== '--check')],
+    {
+      stdio: 'inherit',
+    },
+  );
   if (run.status !== 0) process.exit(run.status ?? 2);
 }

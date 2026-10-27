@@ -2,12 +2,35 @@
   "name": "@torre/web",
   "version": "0.0.0",
   "private": true,
-  "description": "Aplicación web Vue (se configura en US-009).",
+  "description": "Aplicación web Vue (US-009).",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "dev": "vite",
+    "build": "vue-tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "@torre/config": "workspace:*"
+    "@torre/config": "workspace:*",
+    "@vitejs/plugin-vue": "catalog:",
+    "@vue/test-utils": "catalog:",
+    "happy-dom": "catalog:",
+    "msw": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  },
+  "dependencies": {
+    "@orpc/client": "catalog:",
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi-client": "catalog:",
+    "@orpc/vue-query": "catalog:",
+    "@tanstack/vue-query": "catalog:",
+    "@torre/contracts": "workspace:*",
+    "pinia": "catalog:",
+    "vue": "catalog:",
+    "vue-i18n": "catalog:",
+    "vue-router": "catalog:"
   }
 }

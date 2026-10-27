@@ -1,0 +1,67 @@
+{
+  "app": {
+    "name": "Torre",
+    "skipToContent": "Saltar al contenido",
+    "home": "Inicio"
+  },
+  "home": {
+    "title": "Torneos de ajedrez universitarios",
+    "description": "Emparejamientos, resultados y clasificaciones correctos, reproducibles y auditables."
+  },
+  "pages": {
+    "notFound": {
+      "title": "Página no encontrada",
+      "body": "La dirección no existe o ya no está disponible."
+    },
+    "forbidden": {
+      "title": "Sin permiso",
+      "body": "Tu cuenta no tiene permiso para ver esta página."
+    },
+    "serverError": {
+      "title": "Algo salió mal",
+      "body": "No pudimos completar la operación. Inténtalo de nuevo en unos minutos.",
+      "reference": "Código para soporte"
+    },
+    "backHome": "Volver al inicio"
+  },
+  "errors": {
+    "NETWORK_ERROR": "No hay conexión con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+    "VALIDATION_FAILED": "Hay datos inválidos. Revisa los campos marcados.",
+    "UNAUTHENTICATED": "Tu sesión terminó. Inicia sesión de nuevo.",
+    "FORBIDDEN": "No tienes permiso para hacer esto.",
+    "NOT_FOUND": "No encontramos lo que buscas.",
+    "VERSION_CONFLICT": "Alguien cambió estos datos al mismo tiempo. Recarga e inténtalo de nuevo.",
+    "IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_PAYLOAD": "Esta operación ya se envió con otros datos. Recarga la página.",
+    "INVALID_TRANSITION": "El torneo no está en un estado que permita esta acción.",
+    "ROUND_NOT_PUBLISHED": "La ronda aún no está publicada.",
+    "ROUND_CLOSED": "La ronda ya está cerrada.",
+    "GAME_ALREADY_HAS_RESULT": "La partida ya tiene resultado. Usa la corrección de resultados.",
+    "NO_VALID_PAIRING": "No hay un emparejamiento válido con las reglas del torneo.",
+    "RULESET_NOT_APPROVED": "El reglamento elegido no está aprobado.",
+    "RULESET_PARAMETER_MISSING": "Al reglamento le falta un parámetro.",
+    "NOT_IMPLEMENTED_POLICY": "Esta regla del reglamento todavía no está disponible.",
+    "ELIGIBILITY_NOT_VERIFIED": "Falta confirmar la elegibilidad del jugador.",
+    "ENTRY_QUOTA_EXCEEDED": "Se superó el cupo de inscripción.",
+    "CLAIM_OUT_OF_TIME": "La reclamación está fuera de plazo.",
+    "ROLE_REQUEST_DUPLICATE": "Ya tienes una solicitud pendiente para ese rol.",
+    "ROLE_ALREADY_GRANTED": "La cuenta ya tiene ese rol.",
+    "ROLE_REQUEST_NOT_PENDING": "La solicitud ya no está pendiente.",
+    "PASSWORD_CONFIRMATION_REQUIRED": "Confirma tu contraseña para continuar.",
+    "TWO_FACTOR_CODE_INVALID": "El código de verificación no es válido.",
+    "ACCOUNT_SUSPENDED": "La cuenta está suspendida.",
+    "RESERVED_PERMISSION": "Ese permiso está reservado a la administración de la plataforma.",
+    "RESTORE_CONFLICT": "No se puede restaurar: ya existe un registro igual.",
+    "HAS_ACTIVE_TOURNAMENTS": "La organización tiene torneos en curso.",
+    "IDEMPOTENCY_REQUEST_IN_PROGRESS": "La operación anterior sigue en curso. Espera un momento.",
+    "TWO_FACTOR_REQUIRED": "Activa la verificación en dos pasos para continuar.",
+    "PASSWORD_POLICY_VIOLATION": "La contraseña no cumple la política: entre 15 y 64 caracteres y que no sea común.",
+    "UNSUPPORTED_MEDIA_TYPE": "El tipo de archivo no está permitido.",
+    "PAYLOAD_TOO_LARGE": "El archivo o los datos superan el tamaño permitido.",
+    "VISIBILITY_EXCEEDS_TOURNAMENTS": "El campeonato no puede ser más visible que sus torneos.",
+    "TPN_LOCKED": "El orden inicial ya no se puede cambiar.",
+    "CHECK_IN_NOT_CLOSED": "Cierra el check-in antes de emparejar la ronda.",
+    "CHECK_IN_CLOSED": "El check-in de esta ronda ya está cerrado.",
+    "RATE_LIMITED": "Demasiados intentos. Espera unos minutos.",
+    "INTERNAL_ERROR": "Ocurrió un error inesperado. Inténtalo de nuevo."
+  }
+}
