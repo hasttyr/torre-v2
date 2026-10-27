@@ -36,7 +36,11 @@ beforeAll(async () => {
   stubExampleEnv({ LOG_LEVEL: 'info' });
   const moduleRef = await Test.createTestingModule({
     imports: [
-      await AppModule.forRoot({ ignoreEnvFile: true, stream: { write: (line: string) => lines.push(line) } }),
+      await AppModule.forRoot({
+        ignoreEnvFile: true,
+        counters: 'memory',
+        stream: { write: (line: string) => lines.push(line) },
+      }),
       ProbeModule,
     ],
   }).compile();

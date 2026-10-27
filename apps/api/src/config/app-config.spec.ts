@@ -24,7 +24,7 @@ class ConsumerModule {}
 
 const compile = async () => {
   const moduleRef = await Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ConsumerModule],
+    imports: [await AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' }), ConsumerModule],
   }).compile();
   return moduleRef.get(NeedsConfig).config;
 };
@@ -47,7 +47,7 @@ describe('AppConfig', () => {
   it('[US-005:AC2] should be injectable by its type, without an explicit token', async () => {
     stubExample();
     const moduleRef = await Test.createTestingModule({
-      imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ConsumerModule],
+      imports: [await AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' }), ConsumerModule],
     }).compile();
 
     expect(moduleRef.get(NeedsConfigByType).config).toBeInstanceOf(AppConfig);
@@ -56,7 +56,7 @@ describe('AppConfig', () => {
   it('[US-005:AC1] should stop the application from starting when the environment is invalid', async () => {
     stubExample({ PORT: 'eighty', JWT_ACCESS_SECRET: '' });
 
-    const start = AppModule.forRoot({ ignoreEnvFile: true });
+    const start = AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' });
 
     await expect(start).rejects.toBeInstanceOf(InvalidEnvironmentError);
     await expect(start).rejects.toThrow(/PORT: must be a whole number\n {2}- JWT_ACCESS_SECRET: is required/);

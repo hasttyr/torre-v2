@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AppConfig } from '../config/app-config.js';
+import { accessTokenOptions } from './access-token.js';
 import { AuthContext } from './auth-context.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -15,16 +16,7 @@ import { PasswordService } from './password.service.js';
  * checked on every request by a global guard, and refresh sessions (US-022).
  */
 @Module({
-  imports: [
-    PassportModule,
-    JwtModule.registerAsync({
-      inject: [AppConfig],
-      useFactory: (config: AppConfig) => ({
-        secret: config.get('JWT_ACCESS_SECRET'),
-        signOptions: { algorithm: 'HS256', expiresIn: Math.floor(config.get('JWT_ACCESS_TTL') / 1000) },
-      }),
-    }),
-  ],
+  imports: [PassportModule, JwtModule.registerAsync({ inject: [AppConfig], useFactory: accessTokenOptions })],
   controllers: [AuthController],
   providers: [AuthContext, AuthService, PasswordService, JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }],
   exports: [AuthContext],

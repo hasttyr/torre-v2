@@ -59,7 +59,7 @@ let app: INestApplication;
 beforeAll(async () => {
   stubExampleEnv({ LOG_LEVEL: 'silent' });
   const moduleRef = await Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ProbeModule],
+    imports: [await AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' }), ProbeModule],
   }).compile();
   app = configureApp(moduleRef.createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();

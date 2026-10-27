@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 import type { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -18,7 +19,7 @@ beforeAll(async () => {
   // The documented local configuration, pointed at the services of this run.
   stubExampleEnv({ DATABASE_URL: db.appUrl, REDIS_URL: inject('redis').url, LOG_LEVEL: 'silent' });
   const moduleRef = await Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true })],
+    imports: [await AppModule.forRoot({ ignoreEnvFile: true, prefix: `torre-test-${randomUUID()}` })],
   }).compile();
   app = configureApp(moduleRef.createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();

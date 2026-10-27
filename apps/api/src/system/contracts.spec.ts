@@ -103,7 +103,7 @@ let app: INestApplication | undefined;
 async function start(options: { probe?: boolean; env?: Record<string, string> } = {}) {
   stubExampleEnv({ LOG_LEVEL: 'silent', ...options.env });
   const moduleRef = await Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true })],
+    imports: [await AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' })],
     controllers: options.probe ? [ProbeController] : [],
     providers: options.probe ? [DenyGuard] : [],
   }).compile();

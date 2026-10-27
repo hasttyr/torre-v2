@@ -23,7 +23,13 @@ const lines: string[] = [];
 async function start(probes: { database?: Probe; redis?: Probe } = {}, env: Record<string, string> = {}) {
   stubExampleEnv({ LOG_LEVEL: 'info', ...env });
   let builder = Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true, stream: { write: (line: string) => lines.push(line) } })],
+    imports: [
+      await AppModule.forRoot({
+        ignoreEnvFile: true,
+        counters: 'memory',
+        stream: { write: (line: string) => lines.push(line) },
+      }),
+    ],
   });
   if (probes.database) builder = builder.overrideProvider(DATABASE_PROBE).useValue(probes.database);
   if (probes.redis) builder = builder.overrideProvider(REDIS_PROBE).useValue(probes.redis);

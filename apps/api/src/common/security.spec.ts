@@ -30,7 +30,7 @@ let app: NestExpressApplication | undefined;
 async function start(env: Record<string, string> = {}) {
   stubExampleEnv({ LOG_LEVEL: 'silent', CORS_ORIGINS: 'https://torre.example', ...env });
   const moduleRef = await Test.createTestingModule({
-    imports: [await AppModule.forRoot({ ignoreEnvFile: true }), ProbeModule],
+    imports: [await AppModule.forRoot({ ignoreEnvFile: true, counters: 'memory' }), ProbeModule],
   }).compile();
   app = configureApp(moduleRef.createNestApplication<NestExpressApplication>(APP_OPTIONS));
   await app.init();

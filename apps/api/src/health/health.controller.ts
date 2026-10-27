@@ -3,6 +3,7 @@ import { Public } from '../auth/public.decorator.js';
 import { Catch, Controller, Get, Inject, Logger, ServiceUnavailableException, UseFilters } from '@nestjs/common';
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, HealthIndicatorService } from '@nestjs/terminus';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { HealthCheckResult, HealthIndicatorResult } from '@nestjs/terminus';
 import { scrubCredentials } from '../common/logging.module.js';
 import { DATABASE_PROBE, REDIS_PROBE } from './probes.js';
@@ -29,8 +30,12 @@ function reasonOf(error: unknown): string {
   return scrubCredentials(error.message || (typeof code === 'string' ? code : error.name));
 }
 
-/** `/health/live` (the process answers) and `/health/ready` (database and Redis), US-006:AC4. */
+/**
+ * `/health/live` (the process answers) and `/health/ready` (database and Redis), US-006:AC4. Outside
+ * the rate limit: probes must answer even when the counters (Redis) are down.
+ */
 @Public()
+@SkipThrottle()
 @Controller('health')
 @UseFilters(HealthUnavailableFilter)
 export class HealthController {
