@@ -39,7 +39,7 @@
 - **Notas para la IA:** si una regla genera demasiado ruido, **no** la desactives: propón la excepción puntual con comentario y razón.
 
 ### US-003 — Entorno local con Docker Compose
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** IN_PROGRESS
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como desarrollador quiero levantar las dependencias de infraestructura con un comando para trabajar sin instalar nada a mano.
 - **Contexto:** PostgreSQL con extensiones (`pg_trgm`, `unaccent`), Redis (Valkey), Mailpit (SMTP de pruebas) y un S3 local (RustFS, `ADR-0003`; MinIO dejó de publicar binarios).
 - **Referencias:** DEC-023, DEC-016, DEC-015 · `ARCHITECTURE.md` §16.3
@@ -54,6 +54,7 @@
 - **Fuera de alcance:** Dockerfiles de producción de api/web (se hacen con `US-004`/despliegue).
 - **Notas para la IA:** no pongas credenciales reales; usa valores de desarrollo claramente identificables.
 - **Avance sin Docker (2026-10-27):** el modo nativo levanta Postgres y, en Windows con WSL, Valkey 7.2 desempaquetado de los paquetes firmados de Ubuntu sin `sudo` (decisión del responsable). `pnpm infra:check` da verde para `postgres` y `redis`; Mailpit y S3 siguen pendientes de Docker.
+- **Cierre con Docker en la CI (2026-10-27):** el trabajo `infra` de GitHub copia `.env.example` a `.env`, ejecuta `pnpm dev:infra` con Docker y `pnpm infra:check` da verde para los cuatro servicios, con el *bucket* `torre-dev` creado por `s3-init` ([ejecución 40554155024](https://github.com/hasttyr/torre-v2/actions/runs/40554155024)). Pruebas etiquetadas: `tools/compose.test.mjs` (criterios 1 y 3) y `apps/api/test/database.spec.ts` (criterio 2, contra el Postgres que preparan los scripts de `infra/postgres/init`).
 
 ### US-004 — Pipeline de integración continua
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
