@@ -198,6 +198,7 @@ La **regresión** no es un nivel aparte: es volver a ejecutar **todas** las suit
 
 ## 8. Integración, e2e, carga, seguridad y accesibilidad
 
+- **Web (unitarias y componentes):** Vitest con `happy-dom` y Vue Test Utils, proyecto `web` de `vitest.config.ts` definido en `apps/web/vite.config.ts` (`US-009`); los componentes se montan con `installProviders`, igual que la app.
 - **Integración de API:** Testcontainers (PostgreSQL con extensiones y roles reales, Redis, S3 local, Mailpit); cada suite parte de BD limpia; se prueba con el **rol de aplicación** (sin `BYPASSRLS`) para que RLS se ejerza.
   - Implementado en `US-007` (`apps/api/test/support`, `pnpm test:e2e` con `vitest.e2e.config.ts`): la preparación global arranca PostgreSQL y migra **una plantilla desde cero** con `prisma migrate deploy` y el rol de migraciones; cada suite llama a `createTestDatabase()`, que copia la plantilla (`CREATE DATABASE … TEMPLATE`) y entrega un Prisma Client con el rol de aplicación, y la borra al terminar.
   - Sin Docker, `TEST_DATABASE_ADMIN_URL` (en `.env`, comentada en `.env.example`) apunta al superusuario de un servidor existente, como el clúster nativo de `pnpm dev:infra`, que ya tiene los roles. La CI usa siempre Testcontainers.

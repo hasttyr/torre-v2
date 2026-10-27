@@ -20,5 +20,9 @@
   },
   "peerDependencies": {
     "eslint": "catalog:"
+  },
+  "devDependencies": {
+    "eslint-plugin-vue": "catalog:",
+    "vue-eslint-parser": "catalog:"
   }
 }

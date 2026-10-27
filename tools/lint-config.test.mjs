@@ -62,6 +62,19 @@ describe('shared ESLint config (US-002, ARCHITECTURE.md §3.1)', () => {
     expect(inside.messages).toEqual([]);
   });
 
+  it('[US-002:AC3][US-009:AC6] should lint Vue components with the Vue and TypeScript rules', async () => {
+    const [result] = await eslint.lintFiles(['tools/fixtures/lint/apps/web/src/Loose.vue']);
+    const rules = result.messages.map((m) => m.ruleId);
+
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        '@typescript-eslint/no-explicit-any',
+        'vue/require-v-for-key',
+        'vue/multi-word-component-names',
+      ]),
+    );
+  });
+
   it('[US-002:AC3] should allow `!`, the clock and randomness in test files', async () => {
     expect(await rulesHit('allowed.spec.ts')).toEqual([]);
   });

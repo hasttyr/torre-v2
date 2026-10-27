@@ -1,0 +1,9 @@
+{
+  "app": {
+    "name": "Torre"
+  },
+  "home": {
+    "title": "Torneos de ajedrez universitarios",
+    "description": "Emparejamientos, resultados y clasificaciones correctos, reproducibles y auditables."
+  }
+}

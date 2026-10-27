@@ -51,6 +51,8 @@ export default defineConfig({
           provide: { benchMode: process.env['BENCH_MODE'] === 'full' ? 'full' : 'reduced' },
         },
       },
+      // The web app brings its own config (Vue plugin, happy-dom): apps/web/vite.config.ts (US-009).
+      'apps/web/vite.config.ts',
       {
         extends: true,
         test: {

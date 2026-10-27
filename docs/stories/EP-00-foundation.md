@@ -163,7 +163,7 @@
 - **Implementación (2026-10-27):** BullMQ 6.4.2 con `@nestjs/bullmq` 12; parámetros de `DEC-086`. El contexto del trabajo se pasa explícito a `withTransaction` (fija `app.organization_id` y `app.user_id`); `US-025` lo llevará también a `nestjs-cls` y activará RLS, y entonces se prueba "cero filas sin tenant" (`TC-209`, `INV-T-9`). El rol `torre_maintenance` nace en `infra/postgres/init/01-roles.sql` con `BYPASSRLS` y sin privilegios sobre tablas: cada tabla que purga la cola `maintenance` (idempotencia `US-045`, tokens `US-022`, solicitudes de rol `US-029`) le concede los suyos en su migración. En producción el rol se crea con el plan de despliegue (`US-105`).
 
 ### US-009 — Esqueleto de la aplicación web
-- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como usuario quiero una aplicación que cargue, navegue y muestre errores de forma consistente para tener una base sobre la cual construir pantallas.
 - **Referencias:** DEC-003, DEC-017, DEC-018, DEC-019, DEC-040 · `ARCHITECTURE.md` §13 · `UI-UX.md`
 - **Criterios de aceptación:**
@@ -180,3 +180,4 @@
 - **Pruebas requeridas:** unitarias del cliente (mapeo de errores) y de un componente de ejemplo, con MSW simulando el API.
 - **Depende de:** US-002, US-008
 - **Fuera de alcance:** sistema de diseño (`US-069`), pantallas de negocio.
+- **Implementación (a), 2026-10-27:** Vite 8 + Vue 3.5 con `vue-tsc`; `installProviders` instala router (rutas con `import()`), Pinia, Vue Query y `vue-i18n` (`es`) igual en la app y en las pruebas; Vitest corre la web como proyecto propio (`apps/web/vite.config.ts`) con `happy-dom`; ESLint revisa los `.vue` con `eslint-plugin-vue` y las reglas de TypeScript sin tipos (el tipado lo da `vue-tsc`); `pnpm dev` levanta infraestructura, API con recarga y web. Las carpetas `shared/*` de `ARCHITECTURE.md` §13.1 llegan con (b) y (c), cuando tienen contenido.

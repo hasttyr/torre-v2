@@ -4,7 +4,9 @@
 //   export default torreConfig({ tsconfigRootDir: import.meta.dirname });
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import pluginVue from 'eslint-plugin-vue';
 import tseslint from 'typescript-eslint';
+import vueParser from 'vue-eslint-parser';
 
 const TS_FILES = ['**/*.ts', '**/*.mts', '**/*.cts'];
 const JS_FILES = ['**/*.js', '**/*.mjs', '**/*.cjs'];
@@ -105,6 +107,26 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
         '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
         '@typescript-eslint/no-import-type-side-effects': 'error',
         '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      },
+    },
+    {
+      // Vue single-file components (US-009): Vue's recommended rules, layout left to Prettier, and the
+      // TypeScript rules that need no type information; vue-tsc type-checks the components and the logic
+      // lives in .ts files, which get the type-aware rules.
+      files: ['**/*.vue'],
+      extends: [
+        pluginVue.configs['flat/recommended'],
+        pluginVue.configs['no-layout-rules'],
+        tseslint.configs.recommended,
+      ],
+      languageOptions: {
+        parser: vueParser,
+        parserOptions: { parser: tseslint.parser, extraFileExtensions: ['.vue'], sourceType: 'module' },
+      },
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
       },
     },
     {
