@@ -18,6 +18,7 @@ import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { stubExampleEnv } from '../__tests__/env.js';
+import { Public } from '../auth/public.decorator.js';
 import { apiError } from '../common/api-error.js';
 import { etagMatches } from '../common/orpc.module.js';
 import { AppModule } from '../app.module.js';
@@ -54,6 +55,7 @@ class DenyGuard implements CanActivate {
   }
 }
 
+@Public()
 @Controller()
 class ProbeController {
   @Implement(probe.read)

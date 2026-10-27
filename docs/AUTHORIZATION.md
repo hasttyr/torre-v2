@@ -308,7 +308,9 @@ El autor **nunca** resuelve su propia solicitud, aunque tenga un rol que se lo p
 
 ## 11. Autenticación estilo Fortify (`DEC-057`)
 
-> `[DECIDIDO]` el 2026-10-25. Módulo `auth` propio y *headless* sobre `@nestjs/passport` (`passport-local` para el login, `passport-jwt` en cada petición), `@nestjs/jwt`, `argon2` y `@nestjs/throttler`; 2FA con `otplib` + `qrcode`. Historias: `US-022`, `US-027`, `US-107`.
+> `[DECIDIDO]` el 2026-10-25. Módulo `auth` propio y *headless* sobre `@nestjs/passport` (`passport-jwt` en cada petición), `@nestjs/jwt`, `argon2` y `@nestjs/throttler`; 2FA con `otplib` + `qrcode`. Historias: `US-022`, `US-027`, `US-107`.
+>
+> **Implementación (`US-022a1`, 2026-10-27):** el login no usa `passport-local`: la ruta es un contrato oRPC (`ADR-0002`), cuyo *handler* solo ve cabeceras y no recibe el `req.user` de un guard; la entrada la valida el contrato y las credenciales `AuthService.verifyCredentials`, con el mismo tiempo de respuesta exista o no la cuenta. `passport-jwt` sí es el guard global (`JwtAuthGuard`, rutas abiertas con `@Public()`), y deja la identidad en el contexto de la petición (`nestjs-cls`) para los *handlers*. Con `COOKIE_SECURE=false` (solo local) la cookie se llama `torre-refresh-dev`, porque los navegadores rechazan el prefijo `__Host-` sin `Secure`. La lista de contraseñas comunes se compara sin distinguir mayúsculas.
 
 **BR-AUTH-01 — Funciones activables.** Como en Fortify, el módulo expone funciones que se activan por configuración (`AUTH_FEATURES`): `registration`, `emailVerification`, `resetPasswords`, `updatePasswords`, `updateProfileInformation`, `passwordConfirmation`, `twoFactorAuthentication` y `sessions`. Cada función se implementa como una **acción** reemplazable (`CreateNewUser`, `ResetUserPassword`, `UpdateUserPassword`, `UpdateUserProfileInformation`, `ConfirmPassword`, `EnableTwoFactorAuthentication`…), sin UI propia.
 

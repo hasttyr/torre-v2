@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ClsModule } from 'nestjs-cls';
 import type { DynamicModule } from '@nestjs/common';
 import { LoggingModule } from './common/logging.module.js';
 import { ApiOrpcModule } from './common/orpc.module.js';
+import { AuthModule } from './auth/auth.module.js';
 import { ThrottlingModule } from './common/throttling.module.js';
 import type { LoggingOptions } from './common/logging.module.js';
 import { AppConfigModule } from './config/config.module.js';
@@ -16,7 +18,7 @@ export type AppOptions = AppConfigOptions & LoggingOptions & Partial<JobsOptions
 
 /**
  * Root module: configuration (US-005), cross-cutting layer (US-006), database (US-007), contracts
- * (US-008) and queues (US-117). With `worker: true` it is the worker process.
+ * (US-008), queues (US-117) and authentication (US-022). With `worker: true` it is the worker process.
  */
 @Module({})
 export class AppModule {
@@ -26,6 +28,8 @@ export class AppModule {
       imports: [
         await AppConfigModule.forRoot(options),
         LoggingModule.forRoot(options),
+        // Request context (ARCHITECTURE.md §6.3): the principal today, the tenant with US-025.
+        ClsModule.forRoot({ global: true, middleware: { mount: true } }),
         ThrottlingModule,
         DatabaseModule,
         JobsModule.forRoot({
@@ -33,6 +37,7 @@ export class AppModule {
           ...(options.prefix === undefined ? {} : { prefix: options.prefix }),
         }),
         ApiOrpcModule,
+        AuthModule,
         HealthModule,
         SystemModule,
       ],

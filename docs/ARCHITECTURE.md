@@ -162,7 +162,7 @@ Todos los paquetes extienden `packages/config/tsconfig.base.json`:
 |---|---|---|---|
 | Compilación de Nest y pruebas con decoradores | `tsc` para compilar; el transformador de Vitest para las pruebas (sin SWC, `ADR-0004`) | api | US-005 |
 | Configuración tipada | `@nestjs/config` + esquema Zod | api | US-005 |
-| Contexto por petición (tenant, usuario, correlación) | `nestjs-cls` | api | US-025 |
+| Contexto por petición (tenant, usuario, correlación) | `nestjs-cls` | api | US-022 (usuario), US-025 (tenant) |
 | Logs estructurados | `nestjs-pino` + `pino-http` | api | US-006 |
 | Salud | `@nestjs/terminus` | api | US-006 |
 | Límites de tasa compartidos entre instancias | `@nestjs/throttler` + almacenamiento Redis (`@nest-lab/throttler-storage-redis`) | api | US-006, US-022 |
@@ -489,7 +489,7 @@ Convenciones: `snake_case`, claves primarias UUID v7, `timestamptz` en UTC, `cre
 |---|---|
 | `organizations` | Tenant: `name`, `slug`, `logo_key` (nullable, `US-116`) |
 | `institutions` | Universidades: `name`, `snies_code` (nullable), `city`. Global (sin RLS por tenant) |
-| `users` | `email` (único entre cuentas no borradas), `password_hash`, `locale`, `theme`, `email_verified_at`, `status` (`ACTIVE`/`SUSPENDED`/`ANONYMIZED`), `two_factor_secret` (cifrado), `two_factor_confirmed_at`, `privacy_policy_version`, `privacy_accepted_at` |
+| `users` | `email` (en minúsculas, único entre cuentas no borradas), `display_name` (1 a 100 caracteres, `DEC-089`), `password_hash`, `locale`, `theme`, `email_verified_at`, `status` (`ACTIVE`/`SUSPENDED`/`ANONYMIZED`), `two_factor_secret` (cifrado), `two_factor_confirmed_at`, `privacy_policy_version`, `privacy_accepted_at` |
 | `auth_sessions` | `id` (= familia de refresh), `user_id`, `created_at`, `last_seen_at`, `user_agent`, `ip_hash`, `password_confirmed_at`, `two_factor_passed_at`, `revoked_at` (`BR-AUTH-02`, `BR-AUTH-05`) |
 | `refresh_tokens` | `user_id`, `token_hash`, `family_id` (→ `auth_sessions`), `expires_at`, `revoked_at`, `replaced_by` (rotación y detección de reutilización) |
 | `two_factor_recovery_codes` | `user_id`, `code_hash`, `used_at` (`BR-AUTH-06`) |
@@ -956,3 +956,5 @@ Estado: `DECIDIDO` = lo afirmó la persona responsable; `PROPUESTO` = recomendac
 | DEC-085 | Superficies de vidrio estilo *Liquid Glass* en el cromo y las capas flotantes (barras, diálogos, menús, toasts, tarjetas sobre el fondo); tablas densas y proyector opacos; estilo 100 % con utilidades de Tailwind v4 y tokens `--glass-*` sobre la paleta de `DEC-081`; fallback opaco con `prefers-reduced-transparency`, `prefers-contrast: more` o la preferencia del usuario; contraste medido sobre el peor fondo (`UI-UX.md` §3.3) | DECIDIDO (2026-10-27) | Identidad visual actual sin perder legibilidad ni WCAG AA | Vidrio en todo, incluidas tablas; solo el cromo; paleta nueva estilo iOS; quitar shadcn-vue o Reka UI | Medio |
 | DEC-086 | Parámetros operativos de las colas: retroceso exponencial desde 1 s; completados 24 h o los últimos 1 000; fallidos 7 días; concurrencia 1 en `pairing` y 5 en el resto; 30 s de gracia al apagar | DECIDIDO (2026-10-27) | Reintentos rápidos ante fallos pasajeros, memoria de Redis acotada (`noeviction` no libera nada) y el tiempo de apagado de Render | Retroceso desde 5 s o fijo de 10 s; fallidos sin vencimiento; más concurrencia | Bajo |
 | DEC-087 | Valores del vidrio: tarjetas al 35 % y capas flotantes al 55 % en claro (40 % y 60 % en oscuro); desenfoque de 24 px y 40 px con saturación 150 %; fondo de marca al 18 %; radios de 12, 16 y 24 px (`UI-UX.md` §3.3) | DECIDIDO (2026-10-27) | Lo más cercano a iOS que el responsable pidió ("bien transparente"); el contraste AA se cumple en todos los casos medidos | Opacidad media o leve; desenfoque 16/24 o 32/48; radios 8/12/16 o 16/24/32 | Bajo |
+| DEC-088 | Versión de la política de tratamiento: constante `PRIVACY_POLICY_VERSION` en `@torre/contracts`, con el texto en `docs/legal/`; el registro envía la versión que mostró y la API rechaza otra | DECIDIDO (2026-10-27) | La versión viaja con el código y la web la conoce sin otro endpoint | Tabla de políticas en la base; variable de entorno | Bajo |
+| DEC-089 | Nombre de la cuenta: `display_name` obligatorio (1 a 100 caracteres), sin separar nombres y apellidos | DECIDIDO (2026-10-27) | Mínimo de datos personales en una cuenta que puede ser solo espectadora (`BR-PRIV-01`) | `first_name` + `last_name`; sin nombre | Bajo |

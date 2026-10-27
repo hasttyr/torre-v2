@@ -10,7 +10,9 @@ import { stubExampleEnv } from '../__tests__/env.js';
 import { AppModule } from '../app.module.js';
 import { APP_OPTIONS, configureApp } from '../app.setup.js';
 import { REDACT_PATHS, REDACTED, scrubCredentials } from './logging.module.js';
+import { Public } from '../auth/public.decorator.js';
 
+@Public()
 @Controller('probe')
 class ProbeController {
   @Post('login')

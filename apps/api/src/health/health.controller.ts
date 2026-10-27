@@ -1,4 +1,5 @@
 import type { ServerResponse } from 'node:http';
+import { Public } from '../auth/public.decorator.js';
 import { Catch, Controller, Get, Inject, Logger, ServiceUnavailableException, UseFilters } from '@nestjs/common';
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, HealthIndicatorService } from '@nestjs/terminus';
@@ -29,6 +30,7 @@ function reasonOf(error: unknown): string {
 }
 
 /** `/health/live` (the process answers) and `/health/ready` (database and Redis), US-006:AC4. */
+@Public()
 @Controller('health')
 @UseFilters(HealthUnavailableFilter)
 export class HealthController {
