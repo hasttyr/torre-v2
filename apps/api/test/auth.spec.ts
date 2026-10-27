@@ -273,3 +273,60 @@ describe('refresh rotation (US-022a2)', () => {
     expect(sameOrigin.status).toBe(200);
   });
 });
+
+describe('logout (US-022a2)', () => {
+  beforeAll(async () => {
+    await http.post('/api/v1/auth/register').send(account('logout@example.org'));
+  });
+
+  const logout = (cookie: string | undefined, headers: Record<string, string> = { origin: WEB_ORIGIN }) => {
+    const req = http.post('/api/v1/auth/logout').set(headers);
+    return cookie === undefined ? req : req.set('cookie', cookie);
+  };
+
+  it('[US-022:AC5] should revoke the whole current family, clear the cookie and leave other sessions alone', async () => {
+    const current = await signIn('logout@example.org');
+    const other = await signIn('logout@example.org');
+    const rotated = refreshCookieOf(await refresh(current.cookie));
+
+    const res = await logout(rotated);
+    const cleared = String(res.headers['set-cookie']);
+    const session = await db.prisma.authSession.findUniqueOrThrow({ where: { id: current.sessionId } });
+    const alive = await db.prisma.refreshToken.count({ where: { familyId: current.sessionId, revokedAt: null } });
+
+    expect(res.status).toBe(204);
+    expect(res.text).toBe('');
+    expect(cleared).toMatch(/^__Host-refresh=;/);
+    expect(cleared).toMatch(/Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+    expect(cleared).toMatch(/Secure/i);
+    expect(cleared).toMatch(/Path=\//);
+    expect(session.revokedAt).toBeInstanceOf(Date);
+    expect(alive).toBe(0);
+    expect((await refresh(rotated)).status).toBe(401);
+    expect((await refresh(other.cookie)).status).toBe(200);
+  });
+
+  it('[US-022:AC5] should answer 204 without a session, so repeating it is harmless', async () => {
+    const session = await signIn('logout@example.org');
+
+    const first = await logout(session.cookie);
+    const again = await logout(session.cookie);
+    const anonymous = await logout(undefined);
+
+    expect([first.status, again.status, anonymous.status]).toEqual([204, 204, 204]);
+  });
+
+  it('[US-022:AC11][INV-A-4][TC-207] should reject cross-site logouts and keep the session', async () => {
+    const session = await signIn('logout@example.org');
+
+    const crossSite = await logout(session.cookie, { 'sec-fetch-site': 'cross-site' });
+    const foreignOrigin = await logout(session.cookie, { origin: 'https://evil.example' });
+    const noHeaders = await logout(session.cookie, {});
+    const row = await db.prisma.authSession.findUniqueOrThrow({ where: { id: session.sessionId } });
+
+    expect([crossSite.status, foreignOrigin.status, noHeaders.status]).toEqual([403, 403, 403]);
+    expect(crossSite.body).toMatchObject({ code: 'FORBIDDEN' });
+    expect(row.revokedAt).toBeNull();
+    expect((await refresh(session.cookie)).status).toBe(200);
+  });
+});

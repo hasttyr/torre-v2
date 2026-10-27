@@ -149,6 +149,18 @@ export class AuthService {
     return this.issue(session.userId, session.id, successorToken, session.expiresAt);
   }
 
+  /** Ends the session of a refresh token in any state, revoking its whole family (US-022:AC5). */
+  async endSession(refreshToken: string | undefined): Promise<void> {
+    if (!refreshToken) return;
+    await this.db.withTransaction(async (tx) => {
+      const token = await tx.refreshToken.findUnique({
+        where: { tokenHash: hashRefreshToken(refreshToken) },
+        select: { familyId: true },
+      });
+      if (token) await revokeFamily(tx, token.familyId, new Date());
+    });
+  }
+
   async account(userId: string): Promise<Account> {
     const user = await this.db.client.user.findFirst({ where: { id: userId, deletedAt: null } });
     if (!user) throw apiError('UNAUTHENTICATED');

@@ -239,6 +239,19 @@
         }
       }
     },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "204": {
+            "description": "Signed out"
+          }
+        }
+      }
+    },
     "/me": {
       "get": {
         "operationId": "me",

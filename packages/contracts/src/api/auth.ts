@@ -66,4 +66,14 @@ export const refresh = oc
 /** `GET /me`: the signed-in account (US-022:AC8, the first route behind the access token). */
 export const me = oc.route({ method: 'GET', path: '/me', operationId: 'me', tags: ['auth'] }).output(account);
 
-export const authContract = { register, login, refresh, me };
+/**
+ * `POST /auth/logout` (US-022:AC5): ends the session of the refresh cookie, its whole family, and clears
+ * the cookie. It answers 204 even without a session, so repeating it is harmless. Same-site requests
+ * only (INV-A-4).
+ */
+export const logout = oc
+  // Detailed output: a 204 without a body, so the OpenAPI document declares no content.
+  .route({ method: 'POST', path: '/auth/logout', outputStructure: 'detailed', operationId: 'logout', tags: ['auth'] })
+  .output(z.strictObject({ status: z.literal(204).describe('Signed out') }));
+
+export const authContract = { register, login, refresh, logout, me };

@@ -1,6 +1,6 @@
 import { Controller, Inject, UseGuards } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
-import { getCookie, setCookie } from '@orpc/server/helpers';
+import { deleteCookie, getCookie, setCookie } from '@orpc/server/helpers';
 import { apiContract } from '@torre/contracts';
 import { apiError } from '../common/api-error.js';
 import { AppConfig } from '../config/app-config.js';
@@ -47,6 +47,19 @@ export class AuthController {
     return implement(auth.refresh).handler(async ({ context }) => {
       const session = await this.service.rotate(getCookie(context.reqHeaders, this.cookie().name));
       return this.signedIn(context.resHeaders, session);
+    });
+  }
+
+  /** Public like refresh, so a user whose access token expired can still sign out; same-site only. */
+  @Public()
+  @UseGuards(SameSiteGuard)
+  @Implement(auth.logout)
+  logout() {
+    return implement(auth.logout).handler(async ({ context }) => {
+      const cookie = this.cookie();
+      await this.service.endSession(getCookie(context.reqHeaders, cookie.name));
+      deleteCookie(context.resHeaders, cookie.name, cookie.options);
+      return { status: 204 as const };
     });
   }
 
