@@ -5,6 +5,7 @@ import { apiContract } from '@torre/contracts';
 import { apiError } from '../common/api-error.js';
 import { AppConfig } from '../config/app-config.js';
 import { AuthContext } from './auth-context.js';
+import { AuthLimiter } from './auth-limiter.js';
 import { AuthService } from './auth.service.js';
 import type { IssuedSession } from './auth.service.js';
 import { Public } from './public.decorator.js';
@@ -18,22 +19,34 @@ export class AuthController {
   constructor(
     @Inject(AuthService) private readonly service: AuthService,
     @Inject(AuthContext) private readonly context: AuthContext,
+    @Inject(AuthLimiter) private readonly limiter: AuthLimiter,
     @Inject(AppConfig) private readonly config: AppConfig,
   ) {}
 
   @Public()
   @Implement(auth.register)
   register() {
-    return implement(auth.register).handler(({ input }) => this.service.register(input));
+    return implement(auth.register).handler(async ({ input }) => {
+      await this.limiter.attempt('register', this.context.clientAddress(), input.email);
+      return this.service.register(input);
+    });
   }
 
-  /** Wrong email and wrong password answer the same 401 (no account enumeration, US-022:AC1). */
+  /**
+   * Wrong email and wrong password answer the same 401 (no account enumeration, US-022:AC1), and both
+   * count toward the lock of that email (US-022:AC6).
+   */
   @Public()
   @Implement(auth.login)
   login() {
     return implement(auth.login).handler(async ({ input, context }) => {
+      await this.limiter.attempt('login', this.context.clientAddress(), input.email);
       const account = await this.service.verifyCredentials(input.email, input.password);
-      if (!account) throw apiError('UNAUTHENTICATED');
+      if (!account) {
+        await this.limiter.failed(input.email);
+        throw apiError('UNAUTHENTICATED');
+      }
+      await this.limiter.succeeded(input.email);
       const session = await this.service.startSession(account.id, context.reqHeaders?.get('user-agent') ?? null);
       return this.signedIn(context.resHeaders, session);
     });

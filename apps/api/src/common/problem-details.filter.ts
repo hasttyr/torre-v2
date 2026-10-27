@@ -23,6 +23,7 @@ interface Mapped {
   readonly code: ErrorCode;
   readonly detail?: string;
   readonly errors?: readonly FieldError[];
+  readonly retryAfterSeconds?: number;
   /** Unexpected: logged with its stack, answered without details. */
   readonly unexpected?: true;
 }
@@ -105,6 +106,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     res.statusCode = status;
     res.setHeader('content-type', `${PROBLEM_CONTENT_TYPE}; charset=utf-8`);
     res.setHeader('x-correlation-id', correlationId);
+    if (mapped.retryAfterSeconds !== undefined) res.setHeader('retry-after', String(mapped.retryAfterSeconds));
     res.end(JSON.stringify(body));
   }
 }

@@ -6,6 +6,8 @@ export interface ApiErrorOptions {
   /** Shown to the client: never internal details, personal data or secrets. */
   readonly detail?: string;
   readonly errors?: readonly FieldError[];
+  /** Sent as the `Retry-After` header (429 answers), not in the body. */
+  readonly retryAfterSeconds?: number;
 }
 
 /** An expected error with a code of the catalog (US-006:AC3); the global filter turns it into problem+json. */

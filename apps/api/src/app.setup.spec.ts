@@ -26,6 +26,11 @@ class ProbeController {
     });
   }
 
+  @Get('limited')
+  limited(): never {
+    throw apiError('RATE_LIMITED', { retryAfterSeconds: 90 });
+  }
+
   @Get('domain')
   domain(): never {
     throw fromDomainError(new DomainError('ROUND_CLOSED', { round: 3, internal: 'stream 42' }));
@@ -87,6 +92,15 @@ describe('problem+json errors', () => {
       correlationId: res.headers['x-correlation-id'],
       errors: [{ path: 'result', code: 'ALREADY_SET', message: 'The game has a result' }],
     });
+  });
+
+  it('[US-006:AC3][BR-AUTH-07] should tell a limited client when to retry, outside the body', async () => {
+    const res = await http().get('/api/v1/probe/limited');
+
+    expect(res.status).toBe(429);
+    expect(res.headers['retry-after']).toBe('90');
+    expect(JSON.parse(res.text)).toMatchObject({ code: 'RATE_LIMITED', status: 429 });
+    expect(JSON.parse(res.text)).not.toHaveProperty('retryAfterSeconds');
   });
 
   it('[US-006:AC3] should map a domain error by its code without exposing its details', async () => {

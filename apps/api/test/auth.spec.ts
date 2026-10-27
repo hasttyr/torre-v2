@@ -33,6 +33,8 @@ beforeAll(async () => {
     REDIS_URL: inject('redis').url,
     LOG_LEVEL: 'silent',
     COOKIE_SECURE: 'true',
+    // Every request of this suite comes from one address; the limits have their own suite (auth-limits).
+    AUTH_THROTTLE_LIMIT: '1000',
   });
   const moduleRef = await Test.createTestingModule({
     imports: [await AppModule.forRoot({ ignoreEnvFile: true, prefix: `torre-test-${randomUUID()}` })],
