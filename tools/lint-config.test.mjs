@@ -62,7 +62,7 @@ describe('shared ESLint config (US-002, ARCHITECTURE.md §3.1)', () => {
     expect(inside.messages).toEqual([]);
   });
 
-  it('[US-002:AC3][US-009:AC6] should lint Vue components with the Vue and TypeScript rules', async () => {
+  it('[US-002:AC3] should lint Vue components with the Vue and TypeScript rules', async () => {
     const [result] = await eslint.lintFiles(['tools/fixtures/lint/apps/web/src/Loose.vue']);
     const rules = result.messages.map((m) => m.ruleId);
 
@@ -73,6 +73,25 @@ describe('shared ESLint config (US-002, ARCHITECTURE.md §3.1)', () => {
         'vue/multi-word-component-names',
       ]),
     );
+  });
+
+  it('[US-009:AC5][TC-064] should allow UI libraries only inside shared/ui', async () => {
+    const [feature] = await eslint.lintFiles(['tools/fixtures/lint/apps/web/src/features/standings/table.ts']);
+    const [designLayer] = await eslint.lintFiles(['tools/fixtures/lint/apps/web/src/shared/ui/button.ts']);
+
+    expect(feature.messages.map((m) => m.ruleId)).toEqual([
+      'no-restricted-imports',
+      'no-restricted-imports',
+      'no-restricted-imports',
+    ]);
+    expect(designLayer.messages).toEqual([]);
+  });
+
+  it('[TC-064] should reject decisions taken from the name of a role, in the API, the web and the domain', async () => {
+    const [result] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/role-check.ts']);
+    const roleRules = result.messages.filter((m) => m.message.includes('never with a role name'));
+
+    expect(roleRules.map((m) => m.line)).toEqual([3, 5, 8]);
   });
 
   it('[US-002:AC3] should allow `!`, the clock and randomness in test files', async () => {

@@ -70,6 +70,40 @@ const API_OPENS_TRANSACTION = {
     'Open transactions with DatabaseService.withTransaction (apps/api/src/database), never $transaction (US-007).',
 };
 
+// Permissions come from the catalogue, never from the name of a role (CLAUDE.md rule 13,
+// AUTHORIZATION.md §4.1): comparing with, or switching on, a role key is an error. Defining the roles
+// (seeds, catalogue) is fine.
+const ROLE_KEYS = '/^(platform_admin|org_owner|org_admin|tournament_director|arbiter|captain|player|viewer)$/';
+const ROLE_DECISION_MESSAGE =
+  'Decide with a permission of the catalogue (AuthorizationService), never with a role name.';
+const ROLE_DECISIONS = [
+  { selector: `BinaryExpression[operator=/^[!=]==?$/][right.value=${ROLE_KEYS}]`, message: ROLE_DECISION_MESSAGE },
+  { selector: `BinaryExpression[operator=/^[!=]==?$/][left.value=${ROLE_KEYS}]`, message: ROLE_DECISION_MESSAGE },
+  { selector: `SwitchCase[test.value=${ROLE_KEYS}]`, message: ROLE_DECISION_MESSAGE },
+];
+
+// UI libraries of UI-UX.md §2.3: only the design layer (apps/web/src/shared/ui) imports them, so every
+// view looks the same (UI-UX.md §2.4 rule 1, US-009:AC5).
+const UI_LIBRARIES = [
+  'reka-ui',
+  'lucide-vue-next',
+  'vue-sonner',
+  '@tanstack/vue-table',
+  '@tanstack/vue-virtual',
+  'echarts',
+  'vue-echarts',
+  'cm-chessboard',
+  '@fullcalendar/*',
+];
+const UI_ONLY_IN_SHARED_UI = {
+  patterns: [
+    {
+      group: UI_LIBRARIES.flatMap((name) => (name.endsWith('/*') ? [name] : [name, `${name}/*`])),
+      message: 'Import UI components from shared/ui, never from the library (UI-UX.md §2.4, US-009).',
+    },
+  ],
+};
+
 /**
  * @param {{ tsconfigRootDir: string, ignores?: string[] }} options
  */
@@ -130,6 +164,16 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
       },
     },
     {
+      files: ['**/apps/**/*.{ts,vue}'],
+      ignores: TEST_FILES,
+      rules: { 'no-restricted-syntax': ['error', ...ROLE_DECISIONS] },
+    },
+    {
+      files: ['**/apps/web/src/**/*.{ts,vue}'],
+      ignores: ['**/apps/web/src/shared/ui/**'],
+      rules: { 'no-restricted-imports': ['error', UI_ONLY_IN_SHARED_UI] },
+    },
+    {
       files: TEST_FILES,
       rules: {
         // Tests may assert presence with `!` (CLAUDE.md rule 3).
@@ -158,6 +202,7 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
             selector: "MemberExpression[object.name='Math'][property.name='random']",
             message: 'Math.random() is forbidden in the domain: use the seeded PRNG of @torre/core (CLAUDE.md rule 2).',
           },
+          ...ROLE_DECISIONS,
         ],
         'no-restricted-imports': [
           'error',

@@ -47,7 +47,7 @@
 
 ### 2.4 Reglas de homogeneidad (MUST)
 
-1. Las vistas importan componentes **solo** desde `shared/ui`. Regla ESLint `no-restricted-imports` sobre las librerías de UI; un *fixture* demuestra que falla.
+1. Las vistas importan componentes **solo** desde `shared/ui`. Regla ESLint `no-restricted-imports` sobre las librerías de UI; un *fixture* demuestra que falla (implementada en `US-009c`: `packages/config/eslint.js`, lista `UI_LIBRARIES`; una librería de UI nueva se añade a esa lista en el mismo cambio que su ADR).
 2. Un solo set de iconos, una familia tipográfica, una escala de espaciado.
 3. Patrones únicos: campo de formulario (etiqueta, ayuda, error), tabla, estado vacío, estado de carga, diálogo de confirmación.
 4. Catálogo visual en Storybook con los tres temas + capturas automáticas (`US-069`).

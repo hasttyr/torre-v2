@@ -140,7 +140,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 | US-006 | Capa transversal de la API: logging, errores, salud y seguridad básica | F0 | MUST | M | DONE | US-005 |
 | US-007 | Base de datos: Prisma, migraciones, seeds y utilidades de prueba | F0 | MUST | L | IN_PROGRESS | US-003, US-005 |
 | US-008 | Contratos de API con oRPC (prueba previa) y OpenAPI | F0 | MUST | M | DONE | US-006 |
-| US-009 | Esqueleto de la aplicación web | F0 | MUST | L | IN_PROGRESS | US-002, US-008 |
+| US-009 | Esqueleto de la aplicación web | F0 | MUST | L | DONE | US-002, US-008 |
 | US-117 | Módulo de colas y proceso *worker* (BullMQ) | F0 | MUST | M | DONE | US-003, US-005, US-006 (parcial: US-025) |
 
 #### EP-01
