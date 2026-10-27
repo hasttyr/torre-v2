@@ -10,7 +10,19 @@ process.chdir(top);
 if (existsSync('.env')) process.loadEnvFile('.env');
 
 const suites = [
-  { dir: 'apps/api/test', label: 'API (integración)', args: ['run', '--config', 'vitest.e2e.config.ts'] },
+  {
+    dir: 'apps/api/test',
+    label: 'API (integración)',
+    // The JSON report feeds test:trace and test:report (TEST-PLAN.md §6.2.1).
+    args: [
+      'run',
+      '--config',
+      'vitest.e2e.config.ts',
+      '--reporter=default',
+      '--reporter=json',
+      '--outputFile.json=reports/vitest-e2e.json',
+    ],
+  },
   { dir: 'apps/web/e2e', label: 'UI (Playwright)', args: null },
 ];
 const present = suites.filter((s) => existsSync(s.dir));

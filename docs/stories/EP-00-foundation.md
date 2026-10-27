@@ -53,6 +53,7 @@
 - **Depende de:** US-001
 - **Fuera de alcance:** Dockerfiles de producción de api/web (se hacen con `US-004`/despliegue).
 - **Notas para la IA:** no pongas credenciales reales; usa valores de desarrollo claramente identificables.
+- **Avance sin Docker (2026-10-27):** el modo nativo levanta Postgres y, en Windows con WSL, Valkey 7.2 desempaquetado de los paquetes firmados de Ubuntu sin `sudo` (decisión del responsable). `pnpm infra:check` da verde para `postgres` y `redis`; Mailpit y S3 siguen pendientes de Docker.
 
 ### US-004 — Pipeline de integración continua
 - **Epic:** EP-00 · **Fase:** F0 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** IN_PROGRESS

@@ -34,7 +34,8 @@ pnpm verify           # lint, tipos, límites y pruebas
 | S3 local (RustFS, `ADR-0003`) y su consola; *bucket* `torre-dev` | `rustfs/rustfs:1.0.1` | 9000 (`S3_PORT`) y 9001 (`S3_CONSOLE_PORT`) |
 
 - Con Docker, `pnpm dev:infra` usa `docker-compose.yml` y `pnpm dev:infra:down` lo detiene.
-- Sin Docker (modo nativo), `pnpm dev:infra` levanta solo PostgreSQL con los binarios instalados en el equipo (`PG_BIN` o `C:\Program Files\PostgreSQL\<versión>\bin`), con los datos en `.tools/infra/postgres`. Si el puerto 5432 está ocupado, cambia `POSTGRES_PORT` y el puerto de las URL de la base en `.env`.
+- Sin Docker (modo nativo), `pnpm dev:infra` levanta PostgreSQL con los binarios instalados en el equipo (`PG_BIN` o `C:\Program Files\PostgreSQL\<versión>\bin`), con los datos en `.tools/infra/postgres`. Si el puerto 5432 está ocupado, cambia `POSTGRES_PORT` y el puerto de las URL de la base en `.env`.
+- En Windows con WSL, el modo nativo levanta además **Valkey** (compatible con Redis, `noeviction` y AOF) dentro de la distribución por defecto: descarga los paquetes oficiales firmados (`valkey-server`, `valkey-tools`, `libjemalloc2`, `liblzf1`) con `apt-get download`, los desempaqueta con `dpkg -x` en `.tools/infra/valkey` (sin `sudo` ni instalar nada) y lo deja escuchando en `127.0.0.1:6379`. En Ubuntu 24.04 la versión es 7.2.x; Docker y el despliegue usan Valkey 8. Mailpit y S3 siguen necesitando Docker.
 - Todas las credenciales son de desarrollo y están marcadas como tales.
 
 ### Integración continua

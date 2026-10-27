@@ -17,7 +17,10 @@ const THRESHOLDS = [
 ];
 
 const manifest = readJson('reports/run-manifest.json') ?? {};
-const tests = parseResults([at('reports/vitest.json'), at('reports/playwright.json')], root);
+const tests = parseResults(
+  [at('reports/vitest.json'), at('reports/vitest-e2e.json'), at('reports/playwright.json')],
+  root,
+);
 const stories = parseStories(at('docs/stories'));
 const cases = parsePlanCases(at('docs/TEST-PLAN.md'));
 const traced = trace({ stories, cases, tests });
