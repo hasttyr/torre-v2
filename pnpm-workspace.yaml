@@ -85,6 +85,13 @@ catalog:
   vue-tsc: 3.3.13
   zod: 4.6.7
 
+# Security fixes for transitive dependencies, each scoped to the vulnerable version so it stops applying
+# once the parent package moves on (ADR-0001).
+# - multer 2.4.0, from @nestjs/platform-express 12.2.0: GHSA-q7qp-rjg7-q26m (high, DoS), fixed in 2.5.0.
+#   Remove it when Nest is upgraded to 12.3.2 or later, which already depends on multer 2.5.0.
+overrides:
+  'multer@2.4.0': 2.5.0
+
 # Dependency build scripts are blocked unless approved here after reading them
 # (security-and-hardening: block scripts before first execution).
 # - prisma (preinstall): only checks the Node version and prints a message (read 2026-10-27, 7.10.1).

@@ -52,6 +52,17 @@ describe('CI workflow (US-004)', () => {
 
     expect(readme).toContain('Require status checks to pass');
     for (const job of ['quality', 'security', 'infra']) expect(readme).toContain(`\`${job}\``);
+    // Required too: it runs the integration tests and the traceability check.
+    expect(readme).toContain('`integration`');
+  });
+
+  it('[US-004:AC8] should check traceability once unit and integration results both exist', () => {
+    // Criteria of DONE stories may be covered only by integration tests: the quality job alone cannot see them.
+    const runs = runsOf('integration');
+
+    expect(runsOf('quality')).not.toContain('pnpm test:trace');
+    expect(runs.indexOf('pnpm test:trace')).toBeGreaterThan(runs.indexOf('pnpm test:e2e'));
+    expect(runs.indexOf('pnpm test:e2e')).toBeGreaterThan(runs.indexOf('pnpm test:ci'));
   });
 
   it('[US-004:AC6][US-004:AC7] should upload coverage and JSON/JUnit evidence for 90 days', () => {
@@ -79,6 +90,7 @@ describe('CI workflow (US-004)', () => {
       'pnpm test:ci',
       'pnpm test:e2e',
       'pnpm test:coverage',
+      'pnpm test:trace',
     ]);
   });
 

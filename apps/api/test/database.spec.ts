@@ -80,6 +80,22 @@ describe('application role', () => {
   });
 });
 
+describe('plan case TC-045', () => {
+  it('[TC-045] should build the schema from an empty database, serve a minimal CRUD and leave migrating to the migration role', async () => {
+    const applied = await queryOne<{ total: number }>(
+      db.migrationUrl,
+      'SELECT count(*)::int AS total FROM _prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL',
+    );
+    const created = await db.prisma.institution.create({ data: { name: 'Universidad TC-045', city: 'Tunja' } });
+    const read = await db.prisma.institution.findUniqueOrThrow({ where: { id: created.id } });
+
+    expect(applied.total).toBe(migrationNames().length);
+    expect(read.name).toBe('Universidad TC-045');
+    await expect(execute(db.appUrl, 'CREATE TABLE tc045_intruder (id int)')).rejects.toThrow(/permission denied/);
+    await expect(execute(db.appUrl, 'SELECT count(*) FROM _prisma_migrations')).rejects.toThrow(/permission denied/);
+  });
+});
+
 describe('test databases', () => {
   it('[US-007:AC5] should give every suite its own clean copy of the migrated database', async () => {
     const other = await createTestDatabase();

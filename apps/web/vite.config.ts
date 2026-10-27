@@ -8,6 +8,9 @@ export default defineConfig({
   // The repository-level .env (only VITE_* reach the browser).
   envDir: '../..',
   resolve: { conditions: ['@torre/source', 'module', 'browser', 'development|production'] },
+  // Specs under `@vitest-environment node` resolve on the server side; without this they fall back to
+  // dist/, which only exists after a build (a clean CI checkout has none).
+  ssr: { resolve: { conditions: ['@torre/source', 'module', 'node', 'development|production'] } },
   server: { port: 5173, strictPort: true },
   build: { outDir: 'dist', sourcemap: true },
   // The `web` project of the root Vitest run (vitest.config.ts).
