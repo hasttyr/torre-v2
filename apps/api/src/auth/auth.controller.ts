@@ -1,12 +1,14 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, UseGuards } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
-import { setCookie } from '@orpc/server/helpers';
+import { getCookie, setCookie } from '@orpc/server/helpers';
 import { apiContract } from '@torre/contracts';
 import { apiError } from '../common/api-error.js';
 import { AppConfig } from '../config/app-config.js';
 import { AuthContext } from './auth-context.js';
 import { AuthService } from './auth.service.js';
+import type { IssuedSession } from './auth.service.js';
 import { Public } from './public.decorator.js';
+import { SameSiteGuard } from './same-site.guard.js';
 import { refreshCookie } from './tokens.js';
 
 const { auth } = apiContract;
@@ -33,17 +35,34 @@ export class AuthController {
       const account = await this.service.verifyCredentials(input.email, input.password);
       if (!account) throw apiError('UNAUTHENTICATED');
       const session = await this.service.startSession(account.id, context.reqHeaders?.get('user-agent') ?? null);
-      const cookie = refreshCookie(this.config.get('COOKIE_SECURE'));
-      setCookie(context.resHeaders, cookie.name, session.refreshToken, {
-        ...cookie.options,
-        expires: session.refreshExpiresAt,
-      });
-      return { accessToken: session.accessToken, tokenType: 'Bearer' as const, expiresIn: session.expiresIn };
+      return this.signedIn(context.resHeaders, session);
+    });
+  }
+
+  /** Public: the refresh cookie authenticates it, so it only accepts same-site requests (INV-A-4). */
+  @Public()
+  @UseGuards(SameSiteGuard)
+  @Implement(auth.refresh)
+  refresh() {
+    return implement(auth.refresh).handler(async ({ context }) => {
+      const session = await this.service.rotate(getCookie(context.reqHeaders, this.cookie().name));
+      return this.signedIn(context.resHeaders, session);
     });
   }
 
   @Implement(auth.me)
   me() {
     return implement(auth.me).handler(() => this.service.account(this.context.principal().userId));
+  }
+
+  private cookie() {
+    return refreshCookie(this.config.get('COOKIE_SECURE'));
+  }
+
+  /** The refresh token goes only to the cookie, which expires with the session; the body has the access token. */
+  private signedIn(resHeaders: Headers | undefined, session: IssuedSession) {
+    const cookie = this.cookie();
+    setCookie(resHeaders, cookie.name, session.refreshToken, { ...cookie.options, expires: session.refreshExpiresAt });
+    return { accessToken: session.accessToken, tokenType: 'Bearer' as const, expiresIn: session.expiresIn };
   }
 }
