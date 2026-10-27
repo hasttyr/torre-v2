@@ -9,7 +9,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['packages/*/src/**/*.ts', 'apps/api/src/**/*.ts'],
-      exclude: ['**/*.spec.ts', '**/*.test.ts', '**/__tests__/**', 'packages/testing/**'],
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/__tests__/**',
+        'packages/testing/**',
+        'apps/api/src/database/generated/**',
+      ],
       reporter: ['text-summary', 'lcov', 'html', 'json-summary'],
       reportsDirectory: 'coverage',
       // CONSTRAINTS.md §2.

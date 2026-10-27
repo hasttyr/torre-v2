@@ -30,6 +30,7 @@ const PORTS = {
 const SUPERUSER_PASSWORD = 'torre_dev_postgres';
 const NATIVE_DIR = join(top, '.tools', 'infra');
 const NATIVE_PGDATA = join(NATIVE_DIR, 'postgres');
+const INIT_DIR = join('infra', 'postgres', 'init');
 
 const [command = 'check'] = process.argv.slice(2).filter((a) => !a.startsWith('--') && !a.includes(','));
 const onlyArg = process.argv.indexOf('--only');
@@ -141,28 +142,33 @@ async function nativeUp() {
     throw new Error(`PostgreSQL no quedó listo en 127.0.0.1:${PORTS.postgres}; revisa .tools/infra/postgres.log`);
   if (psql("select 1 from pg_database where datname = 'torre'", { database: 'postgres' }).trim() !== '1') {
     psql('create database torre', { database: 'postgres' });
-    execFileSync(
-      exe(bin, 'psql'),
-      [
-        '-h',
-        '127.0.0.1',
-        '-p',
-        String(PORTS.postgres),
-        '-U',
-        'postgres',
-        '-d',
-        'torre',
-        '-v',
-        'ON_ERROR_STOP=1',
-        '-f',
-        'infra/postgres/init/01-roles-and-extensions.sql',
-      ],
-      {
-        env: { ...process.env, PGPASSWORD: SUPERUSER_PASSWORD },
-        stdio: ['ignore', 'ignore', 'inherit'],
-        timeout: 15_000,
-      },
-    );
+    // Same order as the Docker entrypoint: every init script, sorted by name.
+    for (const script of readdirSync(INIT_DIR)
+      .filter((f) => f.endsWith('.sql'))
+      .sort()) {
+      execFileSync(
+        exe(bin, 'psql'),
+        [
+          '-h',
+          '127.0.0.1',
+          '-p',
+          String(PORTS.postgres),
+          '-U',
+          'postgres',
+          '-d',
+          'torre',
+          '-v',
+          'ON_ERROR_STOP=1',
+          '-f',
+          join(INIT_DIR, script),
+        ],
+        {
+          env: { ...process.env, PGPASSWORD: SUPERUSER_PASSWORD },
+          stdio: ['ignore', 'ignore', 'inherit'],
+          timeout: 15_000,
+        },
+      );
+    }
   }
   console.log(`infra (nativo): PostgreSQL en 127.0.0.1:${PORTS.postgres} (datos en .tools/infra/postgres)`);
   console.log('infra (nativo): Redis, Mailpit y S3 necesitan Docker; no se levantaron (docs/PROGRESS.md).');

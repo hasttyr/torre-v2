@@ -50,6 +50,24 @@ const NODE_IO_MODULES = [
   'process',
 ];
 
+// The API reads its environment only through AppConfig, validated at start-up (US-005:AC2).
+const API_READS_ENV = {
+  object: 'process',
+  property: 'env',
+  message: 'Read configuration through AppConfig (apps/api/src/config), never process.env (US-005).',
+};
+// Raw SQL is always a tagged template, so every value travels as a parameter (US-007:AC6, CONVENTIONS.md §7).
+const API_UNSAFE_SQL = ['$queryRawUnsafe', '$executeRawUnsafe'].map((property) => ({
+  property,
+  message: 'Use the tagged templates $queryRaw / $executeRaw (parameters, never string concatenation; US-007).',
+}));
+// Every transaction goes through DatabaseService.withTransaction, which sets the tenant context (US-007:AC3).
+const API_OPENS_TRANSACTION = {
+  property: '$transaction',
+  message:
+    'Open transactions with DatabaseService.withTransaction (apps/api/src/database), never $transaction (US-007).',
+};
+
 /**
  * @param {{ tsconfigRootDir: string, ignores?: string[] }} options
  */
@@ -64,6 +82,8 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
         'reports/**',
         '.tools/**',
         'tools/fixtures/**',
+        // Prisma Client, generated on install (US-007).
+        '**/apps/api/src/database/generated/**',
         ...ignores,
       ],
     },
@@ -128,20 +148,21 @@ export function torreConfig({ tsconfigRootDir, ignores = [] }) {
         ],
       },
     },
+    // `no-restricted-properties` takes one list per file, so each API folder repeats the restrictions it keeps.
     {
-      // The API reads its environment only through AppConfig, validated at start-up (US-005:AC2).
       files: ['**/apps/api/src/**/*.ts'],
-      ignores: ['**/apps/api/src/config/**', ...TEST_FILES],
-      rules: {
-        'no-restricted-properties': [
-          'error',
-          {
-            object: 'process',
-            property: 'env',
-            message: 'Read configuration through AppConfig (apps/api/src/config), never process.env (US-005).',
-          },
-        ],
-      },
+      ignores: ['**/apps/api/src/config/**', '**/apps/api/src/database/**', ...TEST_FILES],
+      rules: { 'no-restricted-properties': ['error', API_READS_ENV, ...API_UNSAFE_SQL, API_OPENS_TRANSACTION] },
+    },
+    {
+      files: ['**/apps/api/src/config/**/*.ts'],
+      ignores: TEST_FILES,
+      rules: { 'no-restricted-properties': ['error', ...API_UNSAFE_SQL, API_OPENS_TRANSACTION] },
+    },
+    {
+      files: ['**/apps/api/src/database/**/*.ts'],
+      ignores: TEST_FILES,
+      rules: { 'no-restricted-properties': ['error', API_READS_ENV, ...API_UNSAFE_SQL] },
     },
     {
       files: JS_FILES,

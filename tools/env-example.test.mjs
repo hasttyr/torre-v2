@@ -27,7 +27,7 @@ describe('.env.example (US-003:AC5)', () => {
 
   it('[US-003:AC5] should point the database URLs at the roles created by the init script', () => {
     const example = read('.env.example');
-    const init = read('infra/postgres/init/01-roles-and-extensions.sql');
+    const init = read('infra/postgres/init/01-roles.sql');
 
     expect(example).toMatch(/^DATABASE_URL=postgresql:\/\/torre_app:torre_app_dev@/m);
     expect(example).toMatch(/^DATABASE_MIGRATION_URL=postgresql:\/\/torre_migrator:torre_migrator_dev@/m);

@@ -319,7 +319,7 @@ Reglas:
 ### 6.3 Contexto de tenant y petición
 
 - `nestjs-cls` (o `AsyncLocalStorage`) guarda: `requestId/correlationId`, `userId`, `organizationId`, `memberships`.
-- Cada transacción de base de datos **MUST** ejecutar `SELECT set_config('app.organization_id', $1, true)` (equivalente a `SET LOCAL`) antes de cualquier consulta (`DEC-009`), y también `app.user_id`, que usan las políticas por usuario (p. ej. `role_requests`, `BR-ROLE-05`).
+- Cada transacción de base de datos **MUST** ejecutar `SELECT set_config('app.organization_id', $1, true)` (equivalente a `SET LOCAL`) antes de cualquier consulta (`DEC-009`), y también `app.user_id`, que usan las políticas por usuario (p. ej. `role_requests`, `BR-ROLE-05`). Implementado en `withTransaction` (`US-007`): sin tenant o sin usuario fija `''`, porque una variable ya usada en la sesión vuelve a `''` (no a `NULL`) al terminar la transacción; las políticas la leen con `NULLIF(current_setting(…, true), '')::uuid` y, sin tenant, no ven filas. Hoy el contexto se pasa como parámetro; `US-025` lo toma del contexto de la petición (`nestjs-cls`).
 - Las consultas públicas (torneos `PUBLIC`) usan un rol/política de solo lectura distinta (§8.3).
 
 ### 6.4 Manejo de errores
@@ -529,7 +529,7 @@ Convenciones: `snake_case`, claves primarias UUID v7, `timestamptz` en UTC, `cre
 ```sql
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON players
-  USING (organization_id = current_setting('app.organization_id', true)::uuid);
+  USING (organization_id = NULLIF(current_setting('app.organization_id', true), '')::uuid);
 ```
 
 - Rol de aplicación **sin** `BYPASSRLS` y sin ser dueño de las tablas (`FORCE ROW LEVEL SECURITY`).

@@ -2,6 +2,7 @@ pnpm-lock.yaml
 docs/
 *.md
 dist/
+apps/api/src/database/generated/
 coverage/
 reports/
 .tools/

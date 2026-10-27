@@ -47,6 +47,21 @@ describe('shared ESLint config (US-002, ARCHITECTURE.md §3.1)', () => {
     expect(inside.messages).toEqual([]);
   });
 
+  it('[US-007:AC6] should reject unsafe raw SQL anywhere in the API', async () => {
+    const [result] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/raw-sql.ts']);
+    const messages = result.messages.map((m) => `${m.ruleId}: ${m.message}`);
+
+    expect(messages.filter((m) => m.includes('$queryRaw / $executeRaw'))).toHaveLength(2);
+  });
+
+  it('[US-007:AC3] should open transactions only through the database module', async () => {
+    const [outside] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/raw-sql.ts']);
+    const [inside] = await eslint.lintFiles(['tools/fixtures/lint/apps/api/src/database/opens-transaction.ts']);
+
+    expect(outside.messages.filter((m) => m.message.includes('withTransaction'))).toHaveLength(1);
+    expect(inside.messages).toEqual([]);
+  });
+
   it('[US-002:AC3] should allow `!`, the clock and randomness in test files', async () => {
     expect(await rulesHit('allowed.spec.ts')).toEqual([]);
   });
