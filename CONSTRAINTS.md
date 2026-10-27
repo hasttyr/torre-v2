@@ -62,7 +62,7 @@ Controles externos (no los juzga el propio código del proyecto): `gitleaks`, `p
 
 | ID | Regla | Ruta | Razón | Dueño | Vence |
 |---|---|---|---|---|---|
-| — | — | — | — | — | — |
+| W1 | Secretos: 0 hallazgos de gitleaks (§2) | `apps/api/src/common/logging.spec.ts` en el commit `b2fb8ac` (solo historial); huella en `.gitleaksignore` | Contraseña ficticia de una prueba (no es una credencial) que la regla `generic-api-key` marca; el árbol actual usa otro valor desde `7291f7e`. El responsable eligió no reescribir el historial (2026-10-27) | Responsable del proyecto | 2027-01-25 |
 
 Una excepción lleva dueño y fecha de vencimiento (máximo 90 días) y la aprueba el responsable del proyecto.
 
