@@ -1,10 +1,18 @@
 import type { TestProject } from 'vitest/node';
-import { createMigratedDatabase, dropDatabase, startPostgresServer, uniqueDatabaseName } from './postgres.js';
+import {
+  createMigratedDatabase,
+  dropDatabase,
+  startPostgresServer,
+  startRedisServer,
+  uniqueDatabaseName,
+} from './postgres.js';
 
 declare module 'vitest' {
   export interface ProvidedContext {
     /** Superuser URL of the integration server and the migrated template every suite copies (US-007:AC5). */
     postgres: { adminUrl: string; template: string };
+    /** Redis-compatible server of the run (TC-081, US-117). */
+    redis: { url: string };
   }
 }
 
@@ -22,9 +30,16 @@ export default async function setup(project: TestProject): Promise<() => Promise
     await server.stop();
     throw error;
   }
+  const redis = await startRedisServer().catch(async (error: unknown) => {
+    await dropDatabase(server.adminUrl, template);
+    await server.stop();
+    throw error;
+  });
   project.provide('postgres', { adminUrl: server.adminUrl, template });
+  project.provide('redis', { url: redis.url });
   return async () => {
     await dropDatabase(server.adminUrl, template);
     await server.stop();
+    await redis.stop();
   };
 }

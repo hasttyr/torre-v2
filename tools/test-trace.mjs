@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // pnpm test:trace — writes reports/traceability.md and fails when the CI rule of TEST-PLAN.md §6.2.1 is broken.
 // Options: --stories <dir> --plan <file> --results <a.json,b.json> --out <file>
+// Results default to the unit run (test:ci), the integration run (test:e2e) and Playwright.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +15,7 @@ const arg = (name, fallback) => {
 
 const stories = parseStories(resolve(root, arg('stories', 'docs/stories')));
 const cases = parsePlanCases(resolve(root, arg('plan', 'docs/TEST-PLAN.md')));
-const resultFiles = arg('results', 'reports/vitest.json,reports/playwright.json')
+const resultFiles = arg('results', 'reports/vitest.json,reports/vitest-e2e.json,reports/playwright.json')
   .split(',')
   .map((f) => resolve(root, f));
 const tests = parseResults(resultFiles, root);

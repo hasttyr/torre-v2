@@ -737,7 +737,7 @@ Como la SPA no ejecuta JS en los rastreadores de vista previa (WhatsApp, etc.), 
 
 | Entorno | Propósito | Notas |
 |---|---|---|
-| `local` | Desarrollo | `docker-compose` con Postgres, Redis (Valkey), Mailpit y S3 (RustFS); sin Docker, Postgres nativo (`pnpm dev:infra`) |
+| `local` | Desarrollo | `docker-compose` con Postgres, Redis (Valkey), Mailpit y S3 (RustFS); sin Docker, Postgres nativo y, en Windows con WSL, Valkey desempaquetado de los paquetes de Ubuntu (`pnpm dev:infra`) |
 | `ci` | Pruebas automáticas | Testcontainers para BD |
 | `staging` | Demo en la nube (opcional) | Plan en §16.5 (`DEC-050`) |
 | `production` | Opcional, según el plan de §16.5 | `DEC-050` |

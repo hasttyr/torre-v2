@@ -3,14 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
+import { GenericContainer } from 'testcontainers';
 import pg from 'pg';
 
 const API_DIR = fileURLToPath(new URL('../../', import.meta.url));
 const INIT_DIR = fileURLToPath(new URL('../../../../infra/postgres/init/', import.meta.url));
 const PRISMA_CLI = fileURLToPath(new URL('../../node_modules/prisma/build/index.js', import.meta.url));
 
-/** Same image as docker-compose.yml. */
+/** Same images as docker-compose.yml. */
 export const POSTGRES_IMAGE = 'postgres:18';
+export const VALKEY_IMAGE = 'valkey/valkey:8.1.10';
 
 /** Development-only credentials of infra/postgres/init/01-roles.sql (and .env.example). */
 export const ROLES = {
@@ -53,6 +55,31 @@ const initScripts = (): string[] =>
   readdirSync(INIT_DIR)
     .filter((f) => f.endsWith('.sql'))
     .sort();
+
+export interface RedisServer {
+  readonly url: string;
+  stop(): Promise<void>;
+}
+
+/**
+ * The Redis-compatible server of the integration suites (TC-081, US-117): `TEST_REDIS_URL` when set
+ * (locally, the Valkey of `pnpm dev:infra`; use a database index of its own, such as `/15`), or a
+ * Valkey container configured like docker-compose.yml.
+ */
+export async function startRedisServer(): Promise<RedisServer> {
+  const existing = process.env['TEST_REDIS_URL'];
+  if (existing) return { url: existing, stop: () => Promise.resolve() };
+  const container = await new GenericContainer(VALKEY_IMAGE)
+    .withCommand(['valkey-server', '--maxmemory-policy', 'noeviction', '--appendonly', 'yes'])
+    .withExposedPorts(6379)
+    .start();
+  return {
+    url: `redis://${container.getHost()}:${container.getMappedPort(6379)}`,
+    stop: async () => {
+      await container.stop();
+    },
+  };
+}
 
 /** `url` pointing at another database and, optionally, as another role. */
 export function databaseUrl(url: string, database: string, role?: { user: string; password: string }): string {
