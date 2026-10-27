@@ -696,6 +696,13 @@ apps/web/src/
 7. Estados de carga/vacío/error obligatorios; toasts accesibles (`aria-live`).
 8. Para el árbitro: toda acción frecuente tiene atajo de teclado (`UI-UX.md` §6).
 
+### 13.2.1 Cliente de la API (`US-009b`)
+
+- `shared/api/client.ts`: `createApiClient({ baseUrl, refreshSession })` sobre `OpenAPILink` con `X-Correlation-Id` por petición, cookies (`credentials: 'include'`) y un único reintento tras renovar la sesión ante un 401; `createQueryUtils` da las opciones y claves de Vue Query por contrato (`orpc.system.ping.queryOptions()`, `orpc.system.key()`).
+- `shared/api/problem.ts`: `toApiProblem(error)` → `{ code, status, correlationId, detail, errors }`; los textos salen de `errors.<CODE>` en i18n. `NETWORK_ERROR` es solo del cliente (la petición no llegó a la API).
+- El cliente oRPC solo interpreta `application/json`: el `fetch` del cliente reetiqueta `application/problem+json` (RFC 9457) para que el cuerpo llegue parseado en `ORPCError.data.body`.
+- `app/error-handler.ts`: `app.config.errorHandler` lleva lo no manejado a `/403` (si la API respondió `FORBIDDEN`) o a `/500` con el `correlationId`.
+
 ### 13.3 Cliente en vivo
 
 `shared/api/live.ts`: se suscribe a `tournament:{id}`, compara `version`, invalida *query keys* de Vue Query y hace *resync* si detecta un salto. Reconexión con retroceso exponencial.

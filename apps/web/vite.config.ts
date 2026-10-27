@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config';
 // Web app (US-009). Workspace packages are read from their sources, like everywhere else (ADR-0001).
 export default defineConfig({
   plugins: [vue()],
+  // The repository-level .env (only VITE_* reach the browser).
+  envDir: '../..',
   resolve: { conditions: ['@torre/source', 'module', 'browser', 'development|production'] },
   server: { port: 5173, strictPort: true },
   build: { outDir: 'dist', sourcemap: true },
