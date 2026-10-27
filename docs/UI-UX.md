@@ -19,6 +19,7 @@
 - **shadcn-vue** copia los componentes a tu repositorio (código propio) sobre **Reka UI** (primitivas accesibles sin estilo) y Tailwind. Verificado: su Calendar usa Reka UI y `@internationalized/date`; incluye Range Calendar, Date Picker (con rangos), Combobox, Command, Data Table (basada en TanStack Table) y Sonner.
 - Desde febrero de 2025 la CLI instala Reka UI (reemplazó a Radix Vue); no seguir guías antiguas con Radix Vue.
 - **Por qué:** homogeneidad por tokens, control total del código, buen soporte de accesibilidad, sin estilo "impuesto".
+- **Sin el CLI** (`ADR-0005`): los componentes de shadcn-vue se portan a mano en `shared/ui`, con los tokens y el vidrio aprobados; el *Drawer* va sobre el `Dialog` de Reka UI.
 - **Estilo 100 % Tailwind** (`DEC-085`): shadcn-vue y Reka UI aportan el comportamiento accesible (foco, teclado, ARIA); **todo** el estilo sale de utilidades de Tailwind v4 y de los tokens declarados en `@theme`. El único CSS escrito a mano es la hoja de entrada de Tailwind (`@import`, `@theme`, `@custom-variant` y las variables de los tres temas). Sin librerías de vidrio, sin filtros SVG y sin hojas `.css` por componente.
 
 ### 2.2 Alternativas evaluadas

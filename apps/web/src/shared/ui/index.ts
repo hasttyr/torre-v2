@@ -1,3 +1,20 @@
 // Public API of the design layer (UI-UX.md §2.4): views import components and styles only from here.
+export { default as Badge } from './Badge.vue';
+export { default as Button } from './Button.vue';
+export { default as Checkbox } from './Checkbox.vue';
+export { default as EmptyState } from './EmptyState.vue';
+export { default as FormField } from './FormField.vue';
 export { default as GlassPanel } from './GlassPanel.vue';
+export { default as Input } from './Input.vue';
+export { default as Skeleton } from './Skeleton.vue';
+export { default as Switch } from './Switch.vue';
+export { default as Table } from './table/Table.vue';
+export { default as TableBody } from './table/TableBody.vue';
+export { default as TableCaption } from './table/TableCaption.vue';
+export { default as TableCell } from './table/TableCell.vue';
+export { default as TableHead } from './table/TableHead.vue';
+export { default as TableHeader } from './table/TableHeader.vue';
+export { default as TableRow } from './table/TableRow.vue';
+export { cn } from './cn.js';
 export { glassSurface, glassSurfaceStrong } from './glass.js';
+export { badgeVariants, buttonVariants } from './variants.js';
