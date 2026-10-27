@@ -165,7 +165,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 
 | ID | Historia | Fase | Prioridad | Tamaño | Estado | Depende de |
 |---|---|---|---|---|---|---|
-| US-022 | Registro, inicio de sesión y sesiones con refresh rotativo | F2 | MUST | L | IN_PROGRESS | US-006, US-007, US-008 |
+| US-022 | Registro, inicio de sesión y sesiones con refresh rotativo | F2 | MUST | L | DONE | US-006, US-007, US-008 |
 | US-023 | Organizaciones y membresías | F2 | MUST | M | READY | US-022 |
 | US-024 | Autorización con CASL y matriz de pruebas | F2 | MUST | L | READY | US-023 |
 | US-025 | Aislamiento por tenant con Row-Level Security | F2 | MUST | L | READY | US-007, US-023 (parcial: US-117) |
