@@ -123,6 +123,7 @@
 - **Depende de:** US-003, US-005
 - **Fuera de alcance:** tablas de negocio (cada historia añade las suyas); RLS (`US-025`).
 - **Notas para la IA:** si Prisma estorba para el event store (R1), proponer un ADR antes de cambiar de herramienta.
+- **Implementación (b), 2026-10-27:** `withTransaction` en `apps/api/src/database/transaction.ts` (y `DatabaseService.withTransaction`) recibe `{ organizationId, userId }` explícitos; `US-025` los sacará del contexto de la petición. Guía de SQL crudo en `CONVENTIONS.md` §9.1.
 - **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. **Pendiente:** ejecutar la ruta de Testcontainers (sin Docker en esta máquina; lo hará el trabajo `integration` de la CI).
 
 ### US-008 — Contratos de API con oRPC (prueba previa) y OpenAPI

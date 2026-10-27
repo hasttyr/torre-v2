@@ -228,8 +228,31 @@ Cada paquete expone una API pública desde `src/index.ts`; nadie importa rutas i
 - `events` es **append-only**: sin `UPDATE`/`DELETE` (trigger + privilegios).
 - **Sin `DELETE` físico** en las tablas de negocio: borrado lógico con `deleted_at`, `deleted_by`, `delete_reason` y `deletion_batch_id`; restricciones de unicidad como índices parciales `WHERE deleted_at IS NULL` (`BR-DEL-02`, `ARCHITECTURE.md` §8.4).
 - Los permisos se consultan por clave del catálogo (`AUTHORIZATION.md` §4.1); **prohibido** decidir por nombre de rol en el código (`if (role === 'arbiter')`).
-- Consultas crudas siempre parametrizadas.
+- Consultas crudas siempre parametrizadas (guía en §9.1).
+- Toda transacción se abre con `DatabaseService.withTransaction(work, { organizationId, userId })` (`apps/api/src/database/transaction.ts`, `US-007`); ESLint prohíbe `$transaction` fuera de `apps/api/src/database`.
 - Seeds idempotentes; datos demo marcados como demo.
+
+### 9.1 SQL crudo parametrizado (event store y consultas que Prisma no expresa)
+
+Se usa para el event store (`US-045`) y para consultas que el cliente de Prisma no cubre (`R1`). Reglas, comprobadas por ESLint y por `apps/api/test/transaction.spec.ts`:
+
+1. **Solo plantillas etiquetadas**: `tx.$queryRaw` para leer y `tx.$executeRaw` para escribir. Cada `${valor}` viaja como parámetro (`$1`, `$2`…), nunca como texto SQL. `$queryRawUnsafe` y `$executeRawUnsafe` están prohibidos.
+2. **Dentro de `withTransaction`**, para que rija el contexto de tenant y, desde `US-025`, RLS.
+3. **Tipos explícitos con *cast*** cuando PostgreSQL no puede inferirlos: `${id}::uuid`, `${json}::jsonb` (el JSON se pasa como cadena con `JSON.stringify`), `${at}::timestamptz`.
+4. **El resultado se tipa** con el genérico (`$queryRaw<Fila[]>`) y se valida si viene de `jsonb`. `count`, `bigserial` y `bigint` llegan como `bigint` de JavaScript.
+5. **Listas dinámicas** con `Prisma.join(valores)` (`IN (${Prisma.join(ids)})`); fragmentos opcionales con `Prisma.sql` y `Prisma.empty`.
+6. **Identificadores** (tablas, columnas, `ORDER BY`) nunca salen de la entrada del usuario: se eligen de una lista fija en el código y solo entonces se insertan con `Prisma.raw`.
+
+```ts
+const appended = await this.db.withTransaction(async (tx) => {
+  const [head] = await tx.$queryRaw<{ sequence: bigint | null }[]>`
+    SELECT max(sequence) AS sequence FROM events WHERE stream_id = ${streamId}::uuid`;
+  return tx.$executeRaw`
+    INSERT INTO events (event_id, organization_id, stream_type, stream_id, sequence, type, schema_version, payload, metadata, occurred_at)
+    VALUES (${eventId}::uuid, ${organizationId}::uuid, 'tournament', ${streamId}::uuid, ${next}, ${type}, ${version},
+            ${JSON.stringify(payload)}::jsonb, ${JSON.stringify(metadata)}::jsonb, ${occurredAt}::timestamptz)`;
+}, { organizationId, userId });
+```
 
 ## 10. Logging
 

@@ -3,6 +3,8 @@ import type { OnModuleDestroy } from '@nestjs/common';
 import { AppConfig } from '../config/app-config.js';
 import { createPrismaClient } from './prisma.js';
 import type { PrismaClient } from './prisma.js';
+import { withTransaction } from './transaction.js';
+import type { Transaction, TransactionContext } from './transaction.js';
 
 /**
  * The database as the application role (`DATABASE_URL`, US-007:AC2): no DDL, no DELETE and, from
@@ -14,6 +16,11 @@ export class DatabaseService implements OnModuleDestroy {
 
   constructor(@Inject(AppConfig) config: AppConfig) {
     this.client = createPrismaClient(config.get('DATABASE_URL'));
+  }
+
+  /** Runs `work` in one transaction with the tenant context set (US-007:AC3). */
+  withTransaction<T>(work: (tx: Transaction) => Promise<T>, context?: TransactionContext): Promise<T> {
+    return withTransaction(this.client, work, context);
   }
 
   async onModuleDestroy(): Promise<void> {
