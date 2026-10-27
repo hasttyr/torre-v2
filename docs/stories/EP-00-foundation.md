@@ -112,7 +112,7 @@
   1. Prisma configurado; migraciones SQL versionadas; **prohibido** `db push` fuera de local.
   2. Conexión con el rol de aplicación (`DATABASE_URL`) y migración con otro rol (`DATABASE_MIGRATION_URL`).
   3. Helper de transacción único (`withTransaction`) preparado para recibir el contexto de tenant (`US-025`).
-  4. Seeds idempotentes para desarrollo (instituciones de ejemplo, usuario admin local).
+  4. Seeds idempotentes para desarrollo (instituciones de ejemplo, usuario admin local). El usuario admin local lo añade `US-028` (criterio 6) a este seed, porque necesita las tablas de usuarios, roles y membresías.
   5. Utilidad de pruebas: arranca Postgres con Testcontainers, aplica migraciones y expone un cliente limpio por suite.
   6. Documentado cómo ejecutar SQL crudo parametrizado para el event store.
 - **Plan de división** (una parte por sesión y por PR; cada parte cierra los criterios indicados con sus pruebas y deja `pnpm verify` en verde):
@@ -123,6 +123,7 @@
 - **Depende de:** US-003, US-005
 - **Fuera de alcance:** tablas de negocio (cada historia añade las suyas); RLS (`US-025`).
 - **Notas para la IA:** si Prisma estorba para el event store (R1), proponer un ADR antes de cambiar de herramienta.
+- **Implementación (c), 2026-10-27:** `pnpm db:seed` compila la API y ejecuta `dist/database/seed.main.js` con el rol de aplicación; las instituciones demo tienen ids fijos y se insertan solo si faltan (no se pisan los cambios hechos a mano); se niega a correr con `NODE_ENV=production`.
 - **Implementación (b), 2026-10-27:** `withTransaction` en `apps/api/src/database/transaction.ts` (y `DatabaseService.withTransaction`) recibe `{ organizationId, userId }` explícitos; `US-025` los sacará del contexto de la petición. Guía de SQL crudo en `CONVENTIONS.md` §9.1.
 - **Implementación (a), 2026-10-27:** la utilidad usa Testcontainers (`postgres:18`, los scripts de `infra/postgres/init`) y, si `TEST_DATABASE_ADMIN_URL` está definida, un servidor existente (el clúster nativo de esta máquina, sin Docker). En los dos casos migra una plantilla una vez por ejecución y cada suite copia la plantilla. **Pendiente:** ejecutar la ruta de Testcontainers (sin Docker en esta máquina; lo hará el trabajo `integration` de la CI).
 

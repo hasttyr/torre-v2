@@ -14,7 +14,8 @@ const migrationUrl = process.env['DATABASE_MIGRATION_URL'];
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
-  migrations: { path: 'prisma/migrations' },
+  // `prisma migrate reset` seeds after migrating; it needs `pnpm build` first (db:seed does both).
+  migrations: { path: 'prisma/migrations', seed: 'node dist/database/seed.main.js' },
   // `prisma generate` needs no database, so CI can install without one.
   ...(migrationUrl ? { datasource: { url: migrationUrl } } : {}),
 });

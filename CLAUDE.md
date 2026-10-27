@@ -91,6 +91,7 @@ pnpm dev:infra       # infraestructura local (Docker o Postgres nativo); infra:c
 pnpm db:migrate      # crea y aplica una migración SQL en local (prisma migrate dev; nunca db push)
 pnpm db:deploy       # aplica las migraciones pendientes (prisma migrate deploy, rol de migraciones)
 pnpm db:status       # estado de las migraciones
+pnpm db:seed         # datos de desarrollo idempotentes (instituciones demo); nunca en producción
 pnpm secrets         # gitleaks sobre el diff (--all: todo el historial)
 pnpm build
 pnpm dev             # levanta api + web con docker compose para dependencias

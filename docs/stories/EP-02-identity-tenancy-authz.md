@@ -125,7 +125,7 @@
   3. Sin escalada: el actor necesita `membership.grant` en el alcance y todos los permisos del rol que otorga (subconjunto, `AUTHORIZATION.md` §3); nunca `platform_admin` por API; siempre queda al menos un `org_owner`.
   4. El cambio surte efecto de inmediato: se invalida la caché de membresías del usuario afectado.
   5. Cada cambio queda en `audit_log` con actor, rol anterior y nuevo, alcance, razón y origen `DIRECT`.
-  6. El primer `platform_admin` se crea con un comando de consola auditado (`users:grant-platform-admin --email`); en desarrollo lo crea el seed (`US-007`).
+  6. El primer `platform_admin` se crea con un comando de consola auditado (`users:grant-platform-admin --email`); en desarrollo lo crea el seed de `US-007` (`pnpm db:seed`), que esta historia amplía con el usuario admin local (idempotente, con id fijo y contraseña solo de desarrollo).
   7. Pantalla de miembros del alcance (organización o torneo): lista, cambio y revocación con un diálogo que exige la razón.
   8. Exige confirmación de contraseña reciente (`BR-AUTH-05`) cuando exista `US-107`.
 - **Pruebas requeridas:** e2e de asignar, cambiar y revocar; escalada; último `org_owner`; caché invalidada; auditoría (`TEST-PLAN.md` TC-105).
