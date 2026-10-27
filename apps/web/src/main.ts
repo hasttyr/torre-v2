@@ -1,5 +1,6 @@
 // Entry point of @torre/web (US-009).
 import { createApp } from 'vue';
+import './app/styles.css';
 import App from './app/App.vue';
 import { installErrorHandler } from './app/error-handler.js';
 import { installProviders } from './app/providers.js';

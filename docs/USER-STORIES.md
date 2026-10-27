@@ -240,7 +240,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 | US-066 | Pantallas de autenticación y organización | F4 | MUST | M | READY | US-009, US-022, US-023, US-069 |
 | US-067 | Pantallas de gestión del torneo: crear, configurar, inscribir, equipos | F4 | MUST | L | READY | US-030, US-031, US-032, US-069 (parcial: US-033, US-071, US-069) |
 | US-068 | Operación del árbitro: rondas y registro de resultados | F4 | MUST | L | READY | US-035, US-036, US-039, US-069 (parcial: US-037, US-041, US-073) |
-| US-069 | Sistema de diseño: tokens, capa `shared/ui` y catálogo | F0/F4 | MUST | L | READY | US-009 |
+| US-069 | Sistema de diseño: tokens, capa `shared/ui` y catálogo | F0/F4 | MUST | L | IN_PROGRESS | US-009 |
 | US-070 | Páginas públicas del torneo y enlaces compartibles | F4 | MUST | M | READY | US-046, US-069 |
 | US-071 | Tablas interactivas: orden, filtros, virtualización y estado en la URL | F4 | MUST | L | READY | US-069, US-046 |
 | US-072 | Búsqueda inteligente | F4 | SHOULD | M | READY | US-031, US-069 |

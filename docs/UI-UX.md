@@ -112,7 +112,7 @@ Contraste verificado el 2026-10-26 (WCAG 2.x): texto ≥ 4.5:1 en claro y oscuro
 
 ### 3.3 Superficies de vidrio (*Liquid Glass*, `DEC-085`)
 
-Decidido el 2026-10-27 por el responsable: superficies translúcidas como en las últimas versiones de iOS, escritas solo con Tailwind. **Estado: especificado, sin implementar** (lo implementa `US-069a`; la web aún no existe, `US-009`).
+Decidido el 2026-10-27 por el responsable: superficies translúcidas como en las últimas versiones de iOS, escritas solo con Tailwind. **Estado: implementado en `US-069a`** (`apps/web/src/app/styles.css` y `apps/web/src/shared/ui/glass.ts`), comprobado en el navegador en claro, oscuro, proyector y con la transparencia reducida.
 
 **Dónde va el vidrio**
 
@@ -128,9 +128,9 @@ Decidido el 2026-10-27 por el responsable: superficies translúcidas como en las
 
 **Receta con Tailwind** (sin CSS propio fuera de la hoja de entrada):
 
-- Fondo de página: `bg-backdrop` con `--backdrop` = degradado suave de `--primary` y `--accent` sobre `--background`, fijo (`bg-fixed`) para que el vidrio tenga algo que desenfocar.
-- Superficie de vidrio: `bg-glass backdrop-blur-glass backdrop-saturate-150 border border-glass shadow-glass` más un brillo superior con `inset-ring` o `before:` de `--glass-highlight`. Las variantes `-strong` suben la opacidad del fondo.
-- Sin soporte de `backdrop-filter`: el fondo cae a `--card` opaco (variante `supports-[backdrop-filter]:` para activar el vidrio solo donde existe).
+- Fondo de página (*layout*): `bg-background` más dos degradados radiales de `--backdrop-primary` y `--backdrop-accent` (el primario y el acento al 18 %), fijos (`bg-fixed`), para que el vidrio tenga algo que desenfocar.
+- Superficie de vidrio (`glassSurface` / `glassSurfaceStrong` de `shared/ui`): `bg-glass` (o `bg-glass-strong`), `backdrop-blur-glass` (o `-strong`), `backdrop-saturate-150`, `border border-glass-border`, `shadow-glass` y un brillo superior con `inset-shadow-[0_1px_0_var(--glass-highlight)]`. `GlassPanel` es la tarjeta de vidrio.
+- Sin soporte de `backdrop-filter`: el relleno semitransparente sigue siendo legible (el contraste se cumple incluso sin desenfoque, ver la medición).
 - Movimiento: solo transiciones CSS de §3.2; el vidrio no anima el desenfoque.
 
 **Accesibilidad (fallback opaco, obligatorio)**
@@ -139,9 +139,24 @@ Decidido el 2026-10-27 por el responsable: superficies translúcidas como en las
 - El texto sobre vidrio usa los colores de primer plano de §3.1. El contraste se mide **sobre el peor fondo posible**: la superficie de vidrio compuesta sobre el color más claro y el más oscuro de `--backdrop` en cada tema; debe cumplir los mínimos de §3.1 (texto ≥ 4.5:1, controles y foco ≥ 3:1). Si no cumple, se sube la opacidad de `--glass-bg`, nunca se baja el umbral.
 - El catálogo (`US-069c`) incluye una historia por superficie de vidrio sobre fondos claros, oscuros y con imagen, con axe y la verificación de contraste.
 
-**Valores de los tokens de vidrio:** los fija `US-069a` a partir de la medición de contraste anterior y se escriben en esta sección al implementarse (hoy no hay valores aprobados; no se inventan aquí).
+**Valores (`DEC-087`, aprobados por el responsable el 2026-10-27):**
 
-**Pendiente de verificar al implementar (`US-069a`):** soporte real de `prefers-reduced-transparency` en los navegadores de `DEC-066` (por eso existe la preferencia manual) y la sintaxis exacta de `@custom-variant` y de las utilidades `inset-ring` y `backdrop-*` en la versión de Tailwind v4 que fije `ADR-0001`.
+| Token | Claro | Oscuro | Proyector |
+|---|---|---|---|
+| `--glass-bg` (tarjetas) | blanco al 35 % | `#0E1223` al 40 % | `--card` (opaco) |
+| `--glass-bg-strong` (barras, diálogos, menús, toasts) | blanco al 55 % | `#0E1223` al 60 % | `--popover` (opaco) |
+| `--glass-blur` / `--glass-blur-strong` | 24 px / 40 px (saturación 150 %) | igual | 0 |
+| `--backdrop-primary` / `--backdrop-accent` | `--primary` / `--accent` al 18 % | igual con los colores oscuros | transparente |
+| `--glass-border` | blanco al 60 % | blanco al 12 % | — |
+| `--glass-highlight` | blanco al 70 % | blanco al 16 % | transparente |
+| `--glass-shadow` | `0 8px 32px` pizarra al 12 % | `0 8px 32px` negro al 45 % | — |
+| Radios (`rounded-control` / `-card` / `-panel`) | 12 / 16 / 24 px | igual | igual |
+
+Borde, brillo y sombra no tienen efecto en el contraste y los propuso la IA dentro del estilo aprobado (el responsable puede ajustarlos).
+
+**Medición de contraste** (`apps/web/src/app/tokens.spec.ts`, en cada ejecución): vidrio compuesto sobre el fondo liso, sobre el fondo teñido de primario y de acento, y sobre `--card` (lo que pasa bajo las barras). Mínimos: claro, texto 8,30:1, texto atenuado 6,07:1 y foco 6,99:1; oscuro, 16,19:1, 6,61:1 y 9,39:1. Incluso con el vidrio totalmente transparente se cumple AA (texto atenuado 5,35:1 en claro), así que la opacidad es una decisión estética.
+
+**Verificado al implementar (`US-069a`):** Tailwind 4.3.3 compila `@custom-variant reduced-transparency` con sus tres ramas (las dos *media queries* y los atributos), `inset-shadow-*` y `backdrop-blur-*` con el espacio `--blur-*`. El soporte de `prefers-reduced-transparency` en los navegadores de `DEC-066` no es universal: por eso existe la preferencia manual (`US-074`).
 
 ## 4. Patrones de componentes y pantallas
 
