@@ -6,34 +6,44 @@
 
 - **Fecha:** 2026-10-27
 - **Rebanada en curso:** VS-1 (esqueleto andante). Detalle por historia en `docs/PROGRESS.md`.
-- **Terminada en esta sesión:** `US-022a2` — `POST /auth/refresh` (rotación atómica, reuso que revoca la familia), `POST /auth/logout`, CSRF por Fetch Metadata, límites de registro y login con bloqueo, contadores compartidos en Redis; y la medición combinada de cobertura de `apps/api` (`DEC-094`). Rama `feat/US-022a2-refresh-limits-csrf`, integrada en `main`.
-- **Siguiente historia recomendada:** `US-022b` (criterios 7, 9 y 10: `audit_log` de login, reuso y logout; `GET /user/sessions` y `DELETE /user/other-sessions`; cuentas suspendidas o anonimizadas con `ACCOUNT_SUSPENDED`). Después, `US-023`, `US-024`, `US-025`, `US-045`, `US-046`.
+- **Terminadas en esta sesión** (el responsable pidió avanzar sin su intervención):
+  - `US-004` — CI en GitHub (`hasttyr/torre-v2`): los cuatro trabajos en verde; protección de `main` activa (PR, `quality`/`security`/`infra`/`integration`, rama al día, sin excepciones para administradores); PR #2 con un fallo deliberado quedó `BLOCKED` y se cerró.
+  - `US-007` — la ruta de Testcontainers corrió en el trabajo `integration`; `TC-045` tiene su prueba.
+  - `US-003` — Docker en la CI levanta los cuatro servicios; pruebas etiquetadas de los criterios 1 a 3.
+  - `US-022b` — `audit_log` de solo inserción con los eventos de seguridad, `GET /user/sessions`, `DELETE /user/other-sessions` y cuentas suspendidas. `US-022` queda `DONE`.
+- **PR apilados, sin fusionar:** #1 (`fix/US-004-ci-on-github`) ← #3 (`test/US-003-close`) ← #4 (`feat/US-022b-sessions-audit`). Se fusionan en ese orden; al fusionar uno, GitHub cambia la base del siguiente a `main` y hay que pulsar "Update branch" (la protección exige la rama al día).
+- **Siguiente historia recomendada:** `US-023` (organizaciones y membresías); después `US-024`, `US-025`, `US-045`, `US-046`.
 
-## Decisiones de esta sesión
+## Lo que necesita al responsable
 
-- **`DEC-090`** contadores de límites en Redis con un almacén propio sobre `ioredis` (sin paquete nuevo); límite general por usuario autenticado o IP, uno para toda la API y sin `/health/*`; si Redis cae, el general falla abierto con aviso y los de autenticación fallan cerrados (500).
-- **`DEC-091`** CSRF: `same-origin` pasa, `cross-site` se rechaza; `same-site`, `none` o sin cabecera exigen `Origin` (o `Referer`) de `CORS_ORIGINS`/`PUBLIC_WEB_URL`; sin ninguno o con `Origin: null`, 403 `FORBIDDEN`.
-- **`DEC-092`** rotación estricta: el perdedor de una carrera revoca la familia; la web serializará la renovación entre pestañas con Web Locks (`US-066`, anotado en su criterio 2).
-- **`DEC-093`** límites: la "cuenta" es el email normalizado, exista o no; racha de fallos solo en el login, reiniciada por un éxito o tras 15 min sin fallos; el bloqueo rechaza también la contraseña correcta.
-- **`DEC-094`** cobertura de `apps/api` con unitarias + integración (`pnpm test:coverage` tras `test:ci` y `test:e2e`); el dominio sigue solo con unitarias. `main` ya medía 71,6 % solo con unitarias.
+1. **Fusionar los PR #1, #3 y #4.** El clasificador del modo automático de Claude Code rechaza `gh pr merge` ("Merge Without Review"), así que la IA no puede fusionar. Si quiere que lo haga, debe permitirlo en la configuración de permisos.
+2. **Revisar el PR #4** (autenticación, migración y contratos: revisión humana obligatoria según `AI-WORKFLOW.md` §2).
+3. **Confirmar o cambiar `DEC-095`…`DEC-098`** (`PROPUESTO`), tomadas sin consulta:
+   - `DEC-095` qué eventos de autenticación van a `audit_log` (incluye fallos y rechazos, no solo los tres del criterio).
+   - `DEC-096` IP como HMAC-SHA-256 con la variable nueva `IP_HASH_SECRET` (obligatoria en cada entorno).
+   - `DEC-097` forma de `GET /user/sessions` y `DELETE /user/other-sessions` (exige una sesión abierta).
+   - `DEC-098` `ACCOUNT_SUSPENDED` solo tras la contraseña correcta; el *refresh* de una cuenta suspendida revoca la familia.
 
 ## Entorno de esta máquina (lo que conviene saber)
 
 - `pnpm` está en `~/bin` (Corepack): en la herramienta bash, `export PATH="$HOME/bin:$PATH"`; en PowerShell no está en el `PATH`.
 - `pnpm dev:infra` levanta Postgres nativo (`127.0.0.1:55432`) y Valkey en WSL (`127.0.0.1:6379`); `pnpm infra:check --only postgres,redis` los comprueba.
+- El `.env` local ya tiene `IP_HASH_SECRET` (valor de desarrollo) y la base local tiene la migración `audit_log` aplicada, más una cuenta de prueba `local-boot@example.org` del arranque manual.
 - Cobertura: `pnpm test:ci`, luego `pnpm test:e2e` (completo, sin filtrar archivos) y `pnpm test:coverage`. `pnpm test:trace` lee `reports/vitest.json` y `reports/vitest-e2e.json`.
-- Las suites de integración usan un `prefix` de Redis propio (`AppModule.forRoot({ prefix })`); las de unidad, `counters: 'memory'`.
-- Editar documentos con la herramienta de edición: un script de Python en Windows los deja en CRLF.
+- La guardia de piso marca como "aserción quitada" cualquier línea quitada de una prueba que contenga `should`, `expect` o `assert`: renombrar una prueba la dispara. Para etiquetar un caso del plan, mejor una prueba nueva.
 
 ## Deuda y riesgos
 
-- Sin Docker: Mailpit y S3 (`US-061`, `US-065`) y la ruta de Testcontainers (`US-007`) siguen pendientes. Repositorio sin remoto: la CI no ha corrido (`US-004`), tampoco el nuevo paso `test:coverage` del trabajo `integration`.
-- `trust proxy` sin configurar hasta el despliegue (`US-105`): detrás de un *proxy*, los límites contarían la IP del *proxy*.
+- La guardia de piso solo detecta mutaciones de `events`/`audit_log` en SQL crudo; por Prisma (`auditLog.update…`) no. Endurecerla es una mejora posible (apretar, no aflojar).
+- `audit_log` sin RLS hasta `US-025`; hoy solo guarda eventos sin organización.
+- `trust proxy` sin configurar hasta el despliegue (`US-105`): detrás de un *proxy*, límites y hash de IP verían la IP del *proxy*.
+- `override` de `multer` 2.5.0 hasta subir Nest a 12.3.2 o posterior (`ADR-0001`).
 - `experimental_RethrowHandlerPlugin` de oRPC puede cambiar (`ADR-0002`).
-- Respuestas de ASCUN pendientes (`docs/requests/SOLICITUD-ASCUN.md`); `OQ-033`, `OQ-034`, `OQ-035` antes de `US-015`, `US-035`, `US-042`.
+- Respuestas de ASCUN pendientes (`docs/requests/SOLICITUD-ASCUN.md`); `OQ-033`, `OQ-034`, `OQ-035` antes de `US-015`, `US-035`, `US-042`; `US-018` bloqueada por `OQ-013`.
 
 ## Antes de empezar la próxima sesión
 
 1. Leer `CLAUDE.md`, `CONSTRAINTS.md`, este archivo y la historia elegida.
-2. `pnpm dev:infra` y `pnpm infra:check --only postgres,redis`.
-3. Trabajar en una rama por historia; `pnpm verify:fast` antes de cada commit.
+2. Comprobar si los PR #1, #3 y #4 ya están fusionados (`gh pr list --state all`); si no, partir de `feat/US-022b-sessions-audit`.
+3. `pnpm dev:infra` y `pnpm infra:check --only postgres,redis`.
+4. Trabajar en una rama por historia; `pnpm verify:fast` antes de cada commit.
