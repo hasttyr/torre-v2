@@ -111,6 +111,19 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Unit coverage blob for the combined API coverage (DEC-094)
+        if: hashFiles('apps/api/test/**/*.ts') != ''
+        run: pnpm test:ci
       - name: API integration tests (Testcontainers)
         if: hashFiles('apps/api/test/**/*.ts') != ''
         run: pnpm test:e2e
+      - name: API coverage, unit and integration together (CONSTRAINTS.md §2)
+        if: hashFiles('apps/api/test/**/*.ts') != ''
+        run: pnpm test:coverage
+      - name: Coverage evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 90

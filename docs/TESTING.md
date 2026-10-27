@@ -217,7 +217,7 @@ La **regresión** no es un nivel aparte: es volver a ejecutar **todas** las suit
 |---|---|
 | Lint, typecheck | 0 errores |
 | Cobertura de paquetes de dominio | ≥ 90 % líneas y ramas |
-| Cobertura de `apps/api` | ≥ 80 % líneas |
+| Cobertura de `apps/api` | ≥ 80 % líneas, con las pruebas unitarias y las de integración combinadas (`pnpm test:coverage`, `DEC-094`); el dominio se mide solo con unitarias |
 | Propiedades en CI normal | ≥ 200 casos por propiedad |
 | Propiedades en CI nocturno | ≥ 5 000 torneos simulados |
 | e2e | rama principal y nocturno |

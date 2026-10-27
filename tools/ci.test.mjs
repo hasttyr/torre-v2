@@ -62,6 +62,26 @@ describe('CI workflow (US-004)', () => {
     expect(ci).toContain('retention-days: 90');
   });
 
+  it('[US-004:AC6][DEC-094] should judge apps/api coverage on unit and integration tests together', () => {
+    const coverageConfig = read('vitest.coverage.config.ts');
+    const unitConfig = read('vitest.config.ts');
+
+    expect(scripts['test:ci']).toContain('--outputFile.blob=reports/blob/unit.json');
+    expect(read('tools/run-e2e.mjs')).toContain("'--outputFile.blob=reports/blob/e2e.json'");
+    expect(scripts['test:coverage']).toContain('--merge-reports=reports/blob');
+    expect(scripts['test:coverage']).toContain('--config vitest.coverage.config.ts');
+    expect(coverageConfig).toContain("'apps/api/src/**': { lines: 80 }");
+    // The domain keeps its unit-only threshold; the API one moved, it did not disappear.
+    expect(unitConfig).toContain("'packages/*/src/**': { lines: 90, branches: 90 }");
+    expect(unitConfig).not.toContain("'apps/api/src/**': { lines");
+    expect(runsOf('integration')).toEqual([
+      'pnpm install --frozen-lockfile',
+      'pnpm test:ci',
+      'pnpm test:e2e',
+      'pnpm test:coverage',
+    ]);
+  });
+
   it('[US-004:AC7][TC-083] should write a run manifest with commit, versions and seeds', () => {
     const r = spawnSync(process.execPath, ['tools/run-manifest.mjs', '--suite', 'unit=passed'], {
       cwd: root,

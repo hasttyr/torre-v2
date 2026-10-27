@@ -18,10 +18,10 @@ export default defineConfig({
       ],
       reporter: ['text-summary', 'lcov', 'html', 'json-summary'],
       reportsDirectory: 'coverage',
-      // CONSTRAINTS.md §2.
+      // CONSTRAINTS.md §2. The domain is judged on unit tests alone; apps/api on unit and integration
+      // together (vitest.coverage.config.ts, `pnpm test:coverage`, DEC-094).
       thresholds: {
         'packages/*/src/**': { lines: 90, branches: 90 },
-        'apps/api/src/**': { lines: 80 },
       },
     },
     projects: [
