@@ -20,5 +20,9 @@
   },
   "devDependencies": {
     "@torre/config": "workspace:*"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "zod": "catalog:"
   }
 }

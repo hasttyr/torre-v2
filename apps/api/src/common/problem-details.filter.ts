@@ -1,5 +1,6 @@
 import type { ServerResponse } from 'node:http';
 import { Catch, HttpException, Logger } from '@nestjs/common';
+import { ORPCError, ValidationError } from '@orpc/server';
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { ERROR_CATALOG, PROBLEM_CONTENT_TYPE } from '@torre/contracts';
 import type { ErrorCode, FieldError, ProblemDetails } from '@torre/contracts';
@@ -33,9 +34,39 @@ const httpErrorStatus = (exception: unknown): number | undefined => {
   return typeof status === 'number' && expose === true ? status : undefined;
 };
 
+/** A Zod issue seen through Standard Schema: `code` and `keys` exist at run time only. */
+interface Issue {
+  readonly message: string;
+  readonly path?: readonly (PropertyKey | { readonly key: PropertyKey })[] | undefined;
+  readonly code?: unknown;
+  readonly keys?: unknown;
+}
+
+/** `errors[]` of a contract validation failure: one entry per field, unknown fields one by one. */
+export function fieldErrors(issues: readonly Issue[]): FieldError[] {
+  return issues.flatMap((issue) => {
+    const path = (issue.path ?? []).map((segment) => String(typeof segment === 'object' ? segment.key : segment));
+    const code = typeof issue.code === 'string' ? issue.code : 'invalid';
+    if (Array.isArray(issue.keys)) {
+      return issue.keys.map((key) => ({ path: [...path, String(key)].join('.'), code, message: issue.message }));
+    }
+    return [{ path: path.join('.'), code, message: issue.message }];
+  });
+}
+
 function mapException(exception: unknown): Mapped {
   if (exception instanceof ApiError) return { code: exception.code, ...exception.options };
-  const status = exception instanceof HttpException ? exception.getStatus() : httpErrorStatus(exception);
+  // Contract input that fails its schema (strict objects reject unknown fields). An output that fails
+  // its schema is a 500: the handler broke its own contract.
+  if (exception instanceof ORPCError && exception.status === 400 && exception.cause instanceof ValidationError) {
+    return { code: 'VALIDATION_FAILED', errors: fieldErrors(exception.cause.issues) };
+  }
+  const status =
+    exception instanceof HttpException
+      ? exception.getStatus()
+      : exception instanceof ORPCError && exception.status !== 500
+        ? exception.status
+        : httpErrorStatus(exception);
   const code = status === undefined ? undefined : CODE_BY_STATUS[status];
   // Framework errors (unknown route, unreadable body, rate limit) keep only their code: their messages
   // describe internals.

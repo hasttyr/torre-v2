@@ -3,6 +3,8 @@ docs/
 *.md
 dist/
 apps/api/src/database/generated/
+# Written by the contracts test exactly as generated (US-008)
+packages/contracts/openapi.json
 coverage/
 reports/
 .tools/

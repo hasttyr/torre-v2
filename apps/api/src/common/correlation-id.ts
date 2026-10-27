@@ -18,6 +18,8 @@ export function correlationIdOf(req: IncomingMessage): string {
 export function correlationIdMiddleware(req: WithCorrelationId, res: ServerResponse, next: () => void): void {
   const id = req.correlationId ?? correlationIdOf(req);
   req.correlationId = id;
+  // Handlers that only see headers (oRPC contracts, US-008) read the same id.
+  req.headers[CORRELATION_HEADER] = id;
   res.setHeader(CORRELATION_HEADER, id);
   next();
 }
