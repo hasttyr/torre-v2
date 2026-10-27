@@ -1,5 +1,5 @@
 # Continuous integration (US-004, ARCHITECTURE.md §16.4, CONSTRAINTS.md §2).
-# Branch protection on `main` must require the jobs quality, security and infra (README "Integración continua").
+# Branch protection on `main` must require the jobs quality, security, infra and integration (README "Integración continua").
 name: CI
 
 on:
@@ -42,8 +42,6 @@ jobs:
           FLOOR_GUARD_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
       - name: Unit and property tests with coverage
         run: pnpm test:ci
-      - name: Traceability (TEST-PLAN.md §6.2.1)
-        run: pnpm test:trace
       - run: pnpm build
       - name: Run manifest and report
         if: always()
@@ -120,10 +118,15 @@ jobs:
       - name: API coverage, unit and integration together (CONSTRAINTS.md §2)
         if: hashFiles('apps/api/test/**/*.ts') != ''
         run: pnpm test:coverage
-      - name: Coverage evidence
+      # Here, not in quality: some criteria of DONE stories are covered only by integration tests.
+      - name: Traceability over unit and integration results (TEST-PLAN.md §6.2.1)
+        run: pnpm test:trace
+      - name: Coverage and traceability evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-${{ github.run_id }}
-          path: coverage/
+          path: |
+            coverage/
+            reports/traceability.md
           retention-days: 90
