@@ -62,20 +62,21 @@
 ### US-069 — Sistema de diseño: tokens, capa `shared/ui` y catálogo
 - **Epic:** EP-07 · **Fase:** F0/F4 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
 - **Historia:** Como equipo quiero una capa de UI homogénea para que nada parezca "pegado".
-- **Referencias:** DEC-017 · `UI-UX.md` §2–§4
+- **Referencias:** DEC-017, DEC-081, DEC-085 · `UI-UX.md` §2–§4
 - **Criterios de aceptación:**
-  1. Tailwind configurado con tokens (color, radio, sombras, espaciado, tipografía, duración de animaciones) como variables CSS con tema claro, oscuro y proyector.
+  1. Tailwind configurado con tokens (color, radio, sombras, espaciado, tipografía, duración de animaciones y vidrio `--glass-*`) como variables CSS con tema claro, oscuro y proyector. Todo el estilo sale de utilidades de Tailwind; el único CSS propio es la hoja de entrada (`@theme`, `@custom-variant`, variables de tema) (`DEC-085`).
   2. shadcn-vue inicializado; los componentes se copian al repo y se **envuelven/exponen** exclusivamente desde `shared/ui`.
   3. Componentes mínimos: Button, Input, Select, Combobox (múltiple), DatePicker/RangeCalendar, Checkbox, Switch, Dialog, Drawer, Tabs, Tooltip, Toast (Sonner), Table base, Badge, EmptyState, Skeleton, Form fields con etiqueta/ayuda/error.
   4. Un único set de iconos (Lucide) y una familia tipográfica.
   5. Storybook (o equivalente) con todos los componentes en los tres temas; pruebas de capturas con Playwright para detectar regresiones.
   6. Regla ESLint verificada: importar una librería de UI fuera de `shared/ui` falla el lint.
   7. Documento `UI-UX.md` actualizado con lo realmente implementado.
+  8. Superficies de vidrio (`UI-UX.md` §3.3) en barras, diálogos, menús, toasts y tarjetas; tablas densas y proyector opacos; la variante `reduced-transparency:` (media `prefers-reduced-transparency`, `contrast-more:` y `data-transparency="reduced"`) las vuelve opacas; contraste AA medido sobre el peor fondo de `--backdrop` en claro y oscuro, y los valores de `--glass-*` escritos en `UI-UX.md` §3.3.
 - **Plan de división** (una parte por sesión y por PR; cada parte cierra los criterios indicados con sus pruebas y deja `pnpm verify` en verde):
-  - (a) Tokens y temas en Tailwind, iconos y tipografía (requiere el sistema visual aprobado, `UI-UX.md` §3) — criterios 1, 4 · M
+  - (a) Tokens y temas en Tailwind, iconos, tipografía y tokens de vidrio con su medición de contraste (requiere el sistema visual aprobado, `UI-UX.md` §3) — criterios 1, 4, 8 · M
   - (b) shadcn-vue envuelto en `shared/ui`, componentes mínimos y regla ESLint — criterios 2, 3, 6 · M
   - (c) Catálogo con capturas en los tres temas y `UI-UX.md` actualizado — criterios 5, 7 · M
-- **Pruebas requeridas:** capturas visuales; pruebas de accesibilidad automáticas (axe) por componente.
+- **Pruebas requeridas:** capturas visuales; pruebas de accesibilidad automáticas (axe) por componente; contraste del texto sobre cada superficie de vidrio compuesta sobre el color más claro y el más oscuro del fondo; capturas con la transparencia reducida.
 - **Depende de:** US-009
 - **Fuera de alcance:** pantallas de negocio.
 
@@ -145,9 +146,9 @@
 - **Historia:** Como usuario quiero cambiar entre claro y oscuro y usar un modo de alto contraste para proyectar.
 - **Referencias:** `UI-UX.md` §7 · DEC-017
 - **Criterios de aceptación:**
-  1. Selector de tema (claro/oscuro/sistema) persistido (perfil si hay sesión; `localStorage` con `try/catch` si no).
+  1. Selector de tema (claro/oscuro/sistema) y preferencia "Reducir transparencia" (`data-transparency="reduced"`, `UI-UX.md` §3.3) persistidos (perfil si hay sesión; `localStorage` con `try/catch` si no).
   2. Respeta `prefers-color-scheme`; sin parpadeo inicial (aplicado antes del primer render).
-  3. Modo proyector: variables de tipografía y espaciado ampliadas y contraste reforzado, activable por URL/parámetro y por interruptor.
+  3. Modo proyector: variables de tipografía y espaciado ampliadas, contraste reforzado y sin vidrio (todo opaco), activable por URL/parámetro y por interruptor.
   4. Todos los componentes del catálogo verificados en los tres temas (capturas de `US-069`).
   5. Contraste conforme a AA en todos los temas.
 - **Pruebas requeridas:** pruebas de capturas por tema; verificación automática de contraste.

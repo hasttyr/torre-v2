@@ -46,4 +46,5 @@
 - **`US-018`** (eliminación directa) bloqueada por `OQ-013`.
 - **`OQ-033`** (puntos del PAB con doble partida): decidir antes de `US-015`.
 - **Hallazgo de gitleaks en el historial** (decide el responsable): el commit `b2fb8ac` (`US-006b`) tiene en `apps/api/src/common/logging.spec.ts` una contraseña de prueba (no es una credencial real) que la regla `generic-api-key` marca. El árbol actual ya está limpio, pero `pnpm secrets --all` falla mientras ese commit exista. Opciones: reescribir el historial local antes del primer *push* (aún no hay remoto) o registrar la excepción en `CONSTRAINTS.md` §4 con su huella en `.gitleaksignore`.
+- **Diseño visual *Liquid Glass*** (`DEC-085`, 2026-10-27): especificado en `UI-UX.md` §3.3, sin implementar. Lo implementa `US-069a` (tokens `--glass-*` con su medición de contraste, variante `reduced-transparency:`); la preferencia "Reducir transparencia" llega con `US-074`. Los valores de los tokens de vidrio no están aprobados todavía: se fijan con la medición de contraste.
 - **`OQ-034`** (asignación de números de Berger) y **`OQ-035`** (registro del descanso en todos contra todos): decidir antes de `US-035`/`US-042`.
