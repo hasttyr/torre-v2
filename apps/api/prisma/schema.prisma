@@ -54,6 +54,9 @@ model User {
   deletionBatchId      String?        @map("deletion_batch_id") @db.Uuid
   sessions             AuthSession[]
   refreshTokens        RefreshToken[]
+  memberships          Membership[]   @relation("MembershipUser")
+  grantedMemberships   Membership[]   @relation("MembershipGrantedBy")
+  revokedMemberships   Membership[]   @relation("MembershipRevokedBy")
 
   @@map("users")
 }
@@ -113,4 +116,78 @@ model AuditLog {
   @@index([actorUserId, occurredAt])
   @@index([targetType, targetId])
   @@map("audit_log")
+}
+
+/// Tenants (ARCHITECTURE.md §8.1, US-023): a university, league or federation. Only a platform_admin
+/// creates one directly (DEC-056). It always keeps a live org_owner: a deferred trigger checks it at
+/// every commit. The slug is unique among live organizations (partial index in the migration).
+model Organization {
+  id              String       @id @default(uuid(7)) @db.Uuid
+  name            String
+  slug            String
+  logoKey         String?      @map("logo_key")
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  deletedBy       String?      @map("deleted_by") @db.Uuid
+  deleteReason    String?      @map("delete_reason")
+  deletionBatchId String?      @map("deletion_batch_id") @db.Uuid
+  memberships     Membership[]
+  roles           Role[]
+
+  @@map("organizations")
+}
+
+/// Roles (ARCHITECTURE.md §8.1): the seven system roles (organization_id null, inserted by the
+/// migration of US-023) and, with US-108, an organization's own roles. Their permissions arrive with
+/// US-024 (role_permissions). The key is unique per organization among live rows (partial index).
+model Role {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  organizationId  String?       @map("organization_id") @db.Uuid
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  key             String
+  name            String
+  scopeType       String        @map("scope_type")
+  isSystem        Boolean       @default(false) @map("is_system")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  deletedBy       String?       @map("deleted_by") @db.Uuid
+  deleteReason    String?       @map("delete_reason")
+  deletionBatchId String?       @map("deletion_batch_id") @db.Uuid
+  memberships     Membership[]
+
+  // Target of the memberships' (role_id, scope_type) key: a role is only granted in its own scope.
+  @@unique([id, scopeType])
+  @@map("roles")
+}
+
+/// A role of a user in a scope (AUTHORIZATION.md §2–§3, §9). Audited CRUD, not event-sourced
+/// (ARCHITECTURE.md §7.1): a membership is never deleted, it is revoked. One live membership per user,
+/// role and scope (partial index); organization_id and scope_id are null only in the PLATFORM scope.
+model Membership {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  organizationId String?       @map("organization_id") @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  userId         String        @map("user_id") @db.Uuid
+  user           User          @relation("MembershipUser", fields: [userId], references: [id])
+  scopeType      String        @map("scope_type")
+  scopeId        String?       @map("scope_id") @db.Uuid
+  roleId         String        @map("role_id") @db.Uuid
+  role           Role          @relation(fields: [roleId, scopeType], references: [id, scopeType])
+  source         String
+  grantedBy      String?       @map("granted_by") @db.Uuid
+  grantedByUser  User?         @relation("MembershipGrantedBy", fields: [grantedBy], references: [id], onDelete: Restrict)
+  grantReason    String?       @map("grant_reason")
+  /// The approved role request (US-029); its foreign key arrives with that table.
+  roleRequestId  String?       @map("role_request_id") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt      DateTime?     @map("revoked_at") @db.Timestamptz(6)
+  revokedBy      String?       @map("revoked_by") @db.Uuid
+  revokedByUser  User?         @relation("MembershipRevokedBy", fields: [revokedBy], references: [id], onDelete: Restrict)
+  revokeReason   String?       @map("revoke_reason")
+
+  @@index([userId, revokedAt])
+  @@index([scopeType, scopeId])
+  @@map("memberships")
 }
