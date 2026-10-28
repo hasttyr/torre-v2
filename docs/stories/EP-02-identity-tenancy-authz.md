@@ -31,7 +31,7 @@
 - **Implementación (b), 2026-10-27:** tabla `audit_log` de solo inserción desde su migración (`REVOKE UPDATE` al rol de la app y *triggers* que rechazan `UPDATE`, `DELETE` y `TRUNCATE` incluso al dueño, `DEC-077`; adelanta el criterio 7 de `US-025`); módulo `audit` con `AuditLog.record(entry, tx?)`, que guarda el hash de la IP y el `correlationId` de la petición. Eventos (`DEC-095`): login correcto, fallido o rechazado por el estado de la cuenta, *refresh* reutilizado o rechazado, logout de una sesión abierta y cierre de las demás sesiones. La IP se guarda como HMAC-SHA-256 con `IP_HASH_SECRET` en la sesión y en la auditoría (`DEC-096`). Contratos `user.sessions` (`GET /user/sessions`) y `user.revokeOtherSessions` (`DELETE /user/other-sessions`, 204), que exige que la sesión actual siga abierta (`DEC-097`). Cuentas suspendidas o anonimizadas: 403 `ACCOUNT_SUSPENDED` solo con la contraseña correcta, y el *refresh* revoca la familia (`DEC-098`). Las cuatro decisiones quedan `PROPUESTO` hasta que el responsable las confirme. La confirmación de contraseña de `DELETE /user/other-sessions` llega con `US-107`.
 
 ### US-023 — Organizaciones y membresías
-- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
+- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** DONE
 - **Historia:** Como usuario quiero crear una organización y tener roles dentro de ella para gestionar torneos como equipo.
 - **Referencias:** DEC-009, DEC-011 · `AUTHORIZATION.md` §2–§3
 - **Criterios de aceptación:**
@@ -43,6 +43,7 @@
 - **Pruebas requeridas:** e2e de creación y consulta; prueba de "último owner".
 - **Depende de:** US-022
 - **Fuera de alcance:** invitaciones (`US-026`), permisos finos (`US-024`).
+- **Implementación, 2026-10-27 (decisiones `DEC-099`…`DEC-101`, `PROPUESTO`):** migración `organizations_memberships` con `organizations` (*slug* único entre las vivas, formato y longitud comprobados también en la base), `roles` con los 7 roles del sistema y su alcance, y `memberships` con las columnas de §8.1 de `ARCHITECTURE.md`: una membresía viva por usuario, rol y alcance (`NULLS NOT DISTINCT`), el rol solo en su alcance (clave compuesta `(role_id, scope_type)`), `organization_id` y `scope_id` nulos solo en `PLATFORM` y el alcance `ORGANIZATION` igual a la organización. Criterio 5 en la base: *triggers* de restricción diferidos (`memberships_keep_an_org_owner`, `organizations_need_an_org_owner`) bloquean la fila de la organización y cuentan los dueños vivos al confirmar; una organización tampoco nace sin dueño. `@torre/contracts` exporta `ROLE_KEYS`, `ROLE_SCOPES`, `SCOPE_TYPES`, `MEMBERSHIP_SOURCES` y `ORGANIZATION_SLUG`; la web tiene sus nombres en español (`roleLabelKey`, `scopeLabelKey`). Rutas `POST /organizations`, `GET /organizations` y `GET /me/memberships` (módulo `organizations`); la creación deja `organization.created` y `membership.granted` en `audit_log`. El primer `platform_admin` (comando de consola y *seed*) llega con `US-028`; mientras, las pruebas le dan la membresía en la base. El error de la API al quitar al último dueño (hoy, el de la base) se define con `US-028`, que es quien revoca.
 
 ### US-024 — Autorización con CASL y matriz de pruebas
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
@@ -67,6 +68,7 @@
 - **Depende de:** US-023
 - **Fuera de alcance:** RLS de BD (`US-025`).
 - **Notas para la IA:** la UI puede ocultar botones con `can()`, pero la API **siempre** revalida.
+- **Avance desde `US-023` (2026-10-27):** la tabla `roles` ya existe con los 7 roles del sistema (`DEC-099`); falta `permissions`, `role_permissions` y sembrar la matriz. `POST /organizations` se autoriza con una membresía en el alcance `PLATFORM` y un `TODO(US-024)` (`DEC-100`): cambiarlo por `@RequirePermission('organization.create')`.
 
 ### US-025 — Aislamiento por tenant con Row-Level Security
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
@@ -90,6 +92,7 @@
 - **Depende (parcial):** US-117 (prueba de RLS en los *workers*)
 - **Fuera de alcance:** cifrado en reposo, particionado.
 - **Notas para la IA:** si Prisma impide el patrón (R1), documenta en ADR y propone Kysely/Drizzle para esa capa.
+- **Avance desde `US-023` (2026-10-27):** `organizations`, `roles` y `memberships` existen sin RLS. `GET /me/memberships` y `GET /organizations` leen las membresías de la cuenta en **todas** sus organizaciones: necesitan, además de la política por `organization_id`, una por `app.user_id` (como `role_requests`), y ya pasan `userId` a `withTransaction`. Los roles del sistema (`organization_id` nulo) se leen desde cualquier tenant, como los presets de `rulesets`. El *trigger* del último dueño bloquea la fila de la organización: con RLS, la política debe dejar verla dentro de su tenant.
 - **Avance desde `US-022b` (2026-10-27):** `audit_log` ya nace de solo inserción (`REVOKE UPDATE` y *triggers* contra `UPDATE`, `DELETE` y `TRUNCATE`), con pruebas `[US-025:AC7]` en `apps/api/test/auth-sessions.spec.ts`. Falta su RLS: hoy solo guarda eventos sin organización (`organization_id` nulo).
 
 ### US-026 — Invitaciones y gestión de miembros
@@ -136,6 +139,7 @@
 - **Depende de:** US-024
 - **Depende (parcial):** US-107 (confirmación de contraseña)
 - **Fuera de alcance:** invitaciones por email (`US-026`).
+- **Avance desde `US-023` (2026-10-27):** la base ya impide dejar una organización sin `org_owner` vivo (revocar o cambiar el rol del último falla al confirmar con la restricción `organizations_keep_an_org_owner`, SQLSTATE `23514`); esta historia traduce ese fallo a un error de la API. La membresía guarda `source`, `granted_by`, `grant_reason`, `revoked_by` y `revoke_reason`; la razón obligatoria de `BR-ROLE-02` se valida aquí.
 
 ### US-029 — Solicitudes de rol con razón y bandeja de revisión
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
