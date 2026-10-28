@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CLS_REQ, ClsService } from 'nestjs-cls';
 import { apiError } from '../common/api-error.js';
+import { PRINCIPAL_KEY } from '../common/request-context.js';
 import { clientAddressOf } from '../common/request-meta.js';
 
 /** Who made the request, as the access token says (US-022:AC8). */
@@ -9,7 +10,7 @@ export interface Principal {
   readonly sessionId: string;
 }
 
-const PRINCIPAL = 'principal';
+const PRINCIPAL = PRINCIPAL_KEY;
 
 /**
  * The principal of the current request, kept in the request context (nestjs-cls, ARCHITECTURE.md §6.3)

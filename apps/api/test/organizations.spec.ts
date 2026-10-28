@@ -70,7 +70,7 @@ const roleId = async (key: RoleKey) =>
 /** What the console command of US-028 will do: the bootstrap platform_admin membership (BR-ROLE-01). */
 async function platformAdmin(email: string): Promise<Account> {
   const admin = await account(email);
-  await db.prisma.membership.create({
+  await db.admin.membership.create({
     data: { userId: admin.id, scopeType: 'PLATFORM', roleId: await roleId('platform_admin'), source: 'BOOTSTRAP' },
   });
   return admin;
@@ -87,7 +87,7 @@ async function organization(as: Account, slug: string): Promise<string> {
 
 /** A membership granted straight in the database, as US-028 will do through the API. */
 async function grant(userId: string, role: RoleKey, organizationId: string, scopeId = organizationId) {
-  return db.prisma.membership.create({
+  return db.admin.membership.create({
     data: {
       userId,
       organizationId,
@@ -100,15 +100,15 @@ async function grant(userId: string, role: RoleKey, organizationId: string, scop
 }
 
 const liveOwners = (organizationId: string) =>
-  db.prisma.membership.count({
+  db.admin.membership.count({
     where: { organizationId, revokedAt: null, role: { key: 'org_owner', organizationId: null } },
   });
 
 const revoke = (membershipId: string) =>
-  db.prisma.membership.update({ where: { id: membershipId }, data: { revokedAt: new Date() } });
+  db.admin.membership.update({ where: { id: membershipId }, data: { revokedAt: new Date() } });
 
 const ownerMembership = (organizationId: string, userId: string) =>
-  db.prisma.membership.findFirstOrThrow({
+  db.admin.membership.findFirstOrThrow({
     where: { organizationId, userId, revokedAt: null, role: { key: 'org_owner', organizationId: null } },
   });
 
@@ -188,7 +188,7 @@ describe('the memberships table (US-023)', () => {
 
     await expect(grant(member.id, 'org_admin', org)).rejects.toMatchObject({ code: 'P2002' });
     await expect(
-      db.prisma.membership.create({
+      db.admin.membership.create({
         data: { userId: admin.id, scopeType: 'PLATFORM', roleId: await roleId('platform_admin'), source: 'BOOTSTRAP' },
       }),
     ).rejects.toMatchObject({ code: 'P2002' });
@@ -216,11 +216,13 @@ describe('the memberships table (US-023)', () => {
 
     for (const attempt of attempts) {
       await expect(
-        db.prisma.membership.create({ data: { userId: member.id, source: 'DIRECT', ...attempt } }),
+        db.admin.membership.create({ data: { userId: member.id, source: 'DIRECT', ...attempt } }),
         JSON.stringify(attempt),
       ).rejects.toThrow();
     }
     expect(await db.prisma.membership.count({ where: { userId: member.id } })).toBe(0);
+    // What the database holds, beyond what the application role may see (US-025).
+    expect(await db.admin.membership.count({ where: { userId: member.id } })).toBe(0);
   });
 
   it('[US-023:AC3] should hold in the database the system roles and scopes of @torre/contracts', async () => {
@@ -311,7 +313,7 @@ describe('the last org_owner (US-023)', () => {
 
     await expect(revoke(owner.id)).rejects.toThrow(/without an org_owner/);
     await expect(
-      db.prisma.membership.update({ where: { id: owner.id }, data: { roleId: await roleId('org_admin') } }),
+      db.admin.membership.update({ where: { id: owner.id }, data: { roleId: await roleId('org_admin') } }),
     ).rejects.toThrow(/without an org_owner/);
     expect(await liveOwners(org)).toBe(1);
   });
@@ -323,19 +325,23 @@ describe('the last org_owner (US-023)', () => {
     const owner = await ownerMembership(org, admin.id);
 
     // Revoke first, grant after: the check waits for the commit.
-    await withTransaction(db.prisma, async (tx) => {
-      await tx.membership.update({ where: { id: owner.id }, data: { revokedAt: new Date() } });
-      await tx.membership.create({
-        data: {
-          userId: heir.id,
-          organizationId: org,
-          scopeType: 'ORGANIZATION',
-          scopeId: org,
-          roleId: await roleId('org_owner'),
-          source: 'DIRECT',
-        },
-      });
-    });
+    await withTransaction(
+      db.prisma,
+      async (tx) => {
+        await tx.membership.update({ where: { id: owner.id }, data: { revokedAt: new Date() } });
+        await tx.membership.create({
+          data: {
+            userId: heir.id,
+            organizationId: org,
+            scopeType: 'ORGANIZATION',
+            scopeId: org,
+            roleId: await roleId('org_owner'),
+            source: 'DIRECT',
+          },
+        });
+      },
+      { organizationId: org },
+    );
 
     expect(await liveOwners(org)).toBe(1);
     await expect(ownerMembership(org, heir.id)).resolves.toBeDefined();
@@ -351,16 +357,24 @@ describe('the last org_owner (US-023)', () => {
     // the lock on the organization, both would see the other owner and both would commit.
     const immediate = (tx: Transaction) => tx.$executeRaw`SET CONSTRAINTS "memberships_keep_an_org_owner" IMMEDIATE`;
     let secondRevocation: Promise<unknown> | undefined;
-    const firstRevocation = withTransaction(db.prisma, async (tx) => {
-      await immediate(tx);
-      await tx.membership.update({ where: { id: first.id }, data: { revokedAt: new Date() } });
-      secondRevocation = withTransaction(db.prisma, async (tx2) => {
-        await immediate(tx2);
-        await tx2.membership.update({ where: { id: other.id }, data: { revokedAt: new Date() } });
-      });
-      // With the lock the second one waits for this commit; give it time to get there.
-      await Promise.race([secondRevocation.catch(() => undefined), new Promise((r) => setTimeout(r, 500))]);
-    });
+    const firstRevocation = withTransaction(
+      db.prisma,
+      async (tx) => {
+        await immediate(tx);
+        await tx.membership.update({ where: { id: first.id }, data: { revokedAt: new Date() } });
+        secondRevocation = withTransaction(
+          db.prisma,
+          async (tx2) => {
+            await immediate(tx2);
+            await tx2.membership.update({ where: { id: other.id }, data: { revokedAt: new Date() } });
+          },
+          { organizationId: org },
+        );
+        // With the lock the second one waits for this commit; give it time to get there.
+        await Promise.race([secondRevocation.catch(() => undefined), new Promise((r) => setTimeout(r, 500))]);
+      },
+      { organizationId: org },
+    );
 
     const outcomes = await Promise.allSettled([firstRevocation, firstRevocation.then(() => secondRevocation)]);
     expect(outcomes.map((o) => o.status)).toEqual(['fulfilled', 'rejected']);
