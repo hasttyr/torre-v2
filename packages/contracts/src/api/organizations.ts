@@ -15,9 +15,9 @@ const organization = z.strictObject({
 });
 
 /**
- * `POST /organizations` (US-023:AC2): only a `platform_admin` creates an organization directly; other
- * accounts ask for one (US-029, DEC-056). Whoever creates it becomes its `org_owner`. A slug already in
- * use answers `VALIDATION_FAILED` on `slug`.
+ * `POST /organizations` (US-023:AC2): needs `organization.create`, a permission only `platform_admin`
+ * holds; other accounts ask for an organization (US-029, DEC-056). Whoever creates it becomes its
+ * `org_owner`. A slug already in use answers `VALIDATION_FAILED` on `slug`.
  */
 export const create = oc
   .route({
@@ -65,4 +65,13 @@ export const memberships = oc
   .route({ method: 'GET', path: '/me/memberships', operationId: 'listMyMemberships', tags: ['organizations'] })
   .output(z.array(membership));
 
-export const organizationsContract = { create, list, memberships };
+/**
+ * `GET /organizations/{id}` (US-024:AC2): one organization, for whoever holds `organization.view` in it
+ * (its members, `platform_admin`). Another organization's id answers 403; an unknown one, 404.
+ */
+export const get = oc
+  .route({ method: 'GET', path: '/organizations/{id}', operationId: 'getOrganization', tags: ['organizations'] })
+  .input(z.strictObject({ id: z.uuid() }))
+  .output(organization);
+
+export const organizationsContract = { create, list, get, memberships };

@@ -21,10 +21,13 @@ export type AppAbility = MongoAbility<[AppAction, AuthzSubject | AuthzResource]>
 export const authzResource = <S extends AuthzSubject>(type: S, attributes: Record<string, unknown>) =>
   subject(type, attributes);
 
-/** A permission of one of the account's memberships, in the scope of that membership (§6.1). */
+/**
+ * A permission of one of the account's memberships, in the scope of that membership (§6.1), with the
+ * organization the scope belongs to (null only in the PLATFORM scope).
+ */
 export interface Grant {
   readonly permission: PermissionKey;
-  readonly scope: { readonly type: ScopeType; readonly id: string | null };
+  readonly scope: { readonly type: ScopeType; readonly id: string | null; readonly organizationId: string | null };
 }
 
 /** The signed-in account, or null for an anonymous visitor (a viewer, BR-ROLE-01). */
@@ -44,11 +47,24 @@ const SCOPE_FIELD = {
   TEAM: 'teamId',
 } as const satisfies Record<Exclude<ScopeType, 'PLATFORM'>, string>;
 
-function scopeCondition(scope: Grant['scope']): MongoQuery<AuthzResource> | undefined {
+/**
+ * Permissions whose condition is "a membership in the organization" in any scope (AUTHORIZATION.md §4,
+ * "Ver organización: solo con membresía en ella"): an arbiter of one tournament sees its organization.
+ * Every other permission acts within the grant's own scope, which fails closed on resources that do not
+ * carry that scope's field; the stories of each resource add its conditions here (DEC-104).
+ */
+const ORGANIZATION_WIDE: ReadonlySet<PermissionKey> = new Set<PermissionKey>(['organization.view']);
+
+/** Matches nothing: a grant that lost its ids denies instead of widening. */
+const NOTHING = { id: { $in: [] } };
+
+function scopeCondition(grant: Grant): MongoQuery<AuthzResource> | undefined {
+  const { scope } = grant;
   if (scope.type === 'PLATFORM') return undefined;
-  // A non-platform grant without its scope id would match nothing; deny instead of guessing.
-  if (scope.id === null) return { [SCOPE_FIELD[scope.type]]: { $in: [] } };
-  return { [SCOPE_FIELD[scope.type]]: scope.id };
+  if (ORGANIZATION_WIDE.has(grant.permission)) {
+    return scope.organizationId === null ? NOTHING : { organizationId: scope.organizationId };
+  }
+  return scope.id === null ? NOTHING : { [SCOPE_FIELD[scope.type]]: scope.id };
 }
 
 /**
@@ -72,7 +88,7 @@ export function defineAbilitiesFor(user: AuthUser | null, grants: readonly Grant
 
   for (const grant of grants) {
     const { subject } = PERMISSIONS[grant.permission];
-    const condition = scopeCondition(grant.scope);
+    const condition = scopeCondition(grant);
     if (condition === undefined) can(grant.permission, subject);
     else can(grant.permission, subject, condition);
   }
