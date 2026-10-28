@@ -1,0 +1,33 @@
+# Auto-merge (DEC-102): the owner's own pull requests to `main` merge by themselves once the branch
+# protection is satisfied (jobs quality, security, infra and integration green, branch up to date).
+# Human review of critical changes happens after the merge (AI-WORKFLOW.md §2). To keep a PR open, open
+# it as a draft or run `gh pr merge --disable-auto <number>`.
+name: Auto-merge
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  enable:
+    name: enable
+    # Only non-draft PRs from a branch of this repository, opened by its owner (never a fork).
+    if: >-
+      !github.event.pull_request.draft &&
+      github.event.pull_request.user.login == github.repository_owner &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # Merge commits, as every PR so far. Nothing from the PR is interpolated into the command.
+      - run: gh pr merge "$PR" --auto --merge --repo "$REPO"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}

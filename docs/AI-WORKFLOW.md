@@ -39,6 +39,8 @@ Modo de revisión según el riesgo:
 | Infra y CI | Recomendada |
 | UI de presentación, textos, estilos | Muestreo / revisión visual |
 
+**Momento de la revisión (`DEC-102`, decidido por el responsable el 2026-10-28):** los PR que la IA abre contra `main` con la cuenta del responsable se fusionan solos cuando pasan los cuatro trabajos obligatorios y la rama está al día (`.github/workflows/auto-merge.yml`). La revisión humana de la tabla anterior, incluida la obligatoria, se hace **después** de la fusión sobre el PR ya cerrado; lo que se encuentre se corrige con un PR nuevo. Para revisar antes, el PR se abre como borrador o se le quita el *auto-merge* (`gh pr merge --disable-auto <n>`). La IA sigue marcando en cada PR qué revisión le corresponde.
+
 ## 3. Plantillas de prompts
 
 Sustituye lo que está entre `<…>`. Pega la historia o indica su ruta.
@@ -138,7 +140,7 @@ El plan Pro tiene límites de uso y de contexto; hay que gastarlos bien.
 ### 5.2 De proceso
 
 - Estado `BLOCKED` explícito en historias que dependen de `OQ-*`.
-- Revisión humana obligatoria en los cambios críticos (§2).
+- Revisión humana obligatoria en los cambios críticos (§2), después de la fusión automática (`DEC-102`).
 - Cada decisión nueva se registra (`DEC-*` o ADR) en el mismo PR.
 - Casos dorados con **fuente del valor esperado** anotada; nunca derivados ejecutando el código que se prueba.
 

@@ -41,6 +41,7 @@ US-nnn — <título> (docs/stories/EP-xx-….md)
 <qué queda pendiente o puede fallar>
 
 ## Revisión humana requerida
-- [ ] Sí (dominio crítico / contratos / migraciones / authz)
+<!-- El PR se fusiona solo al pasar la CI (DEC-102): la revisión es posterior. Para revisar antes, ábralo como borrador. -->
+- [ ] Sí, después de la fusión (dominio crítico / contratos / migraciones / authz)
 - [ ] No
 ```
