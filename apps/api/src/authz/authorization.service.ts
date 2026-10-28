@@ -7,6 +7,8 @@ import { SharedCache } from '../common/shared-cache.js';
 import { DatabaseService } from '../database/database.service.js';
 import { authzResource, defineAbilitiesFor } from './abilities.js';
 import type { AppAbility, AppAction, Grant } from './abilities.js';
+import { accessibleWhere } from './listing.js';
+import type { ListableSubject, ListingWhere } from './listing.js';
 
 /** How long the permissions of an account stay cached: short, as AUTHORIZATION.md §1 asks (DEC-104). */
 export const GRANTS_TTL_MS = 60_000;
@@ -68,6 +70,18 @@ export class AuthorizationService {
     if (userId === null) return false;
     if (ACCOUNT_PERMISSIONS.includes(permission)) return true;
     return (await this.grantsOf(userId)).some((g) => g.permission === permission);
+  }
+
+  /**
+   * The Prisma filter of the rows of `subject` the account may see with `permission` (US-024:AC9,
+   * `accessibleBy` of @casl/prisma), or `null` when it may see none: answer an empty list without a query.
+   */
+  async accessibleWhere(
+    userId: string | null,
+    permission: PermissionKey,
+    subject: ListableSubject,
+  ): Promise<ListingWhere | null> {
+    return userId === null ? null : accessibleWhere(await this.grantsOf(userId), permission, subject);
   }
 
   /** Makes every cached permission stale; call it after committing a change of roles or memberships. */
