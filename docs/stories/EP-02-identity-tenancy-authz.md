@@ -75,7 +75,7 @@
 - **Implementación (d), 2026-10-28 (`DEC-106`, `PROPUESTO`):** `GET /me/abilities` con las reglas empaquetadas (`packRules`) para `@casl/vue`; `AuthorizationService.accessibleWhere` con `@casl/prisma` 2.0.2 por su entrada `runtime` (Prisma 7) y una tabla de columnas por modelo listable; `GET /organizations` lista las organizaciones visibles (todas para `platform_admin`). Con (d), `US-024` queda `DONE`.
 
 ### US-025 — Aislamiento por tenant con Row-Level Security
-- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como responsable quiero que la base de datos misma impida cruzar datos entre organizaciones para tener defensa en profundidad.
 - **Referencias:** DEC-009 · `ARCHITECTURE.md` §6.3, §8.3 · INV-T-1 · R1
 - **Criterios de aceptación:**
@@ -96,6 +96,7 @@
 - **Depende (parcial):** US-117 (prueba de RLS en los *workers*)
 - **Fuera de alcance:** cifrado en reposo, particionado.
 - **Notas para la IA:** si Prisma impide el patrón (R1), documenta en ADR y propone Kysely/Drizzle para esa capa.
+- **Implementación (a), 2026-10-28 (`DEC-107`, `PROPUESTO`):** migración `tenant_rls` con `app_current_organization()`, `app_current_user()` y RLS forzada en `memberships` y `roles` (política del tenant y lecturas propias de la cuenta); `organizations` queda como registro de tenants sin RLS. `TenantContext` (tenant en `nestjs-cls`) y `DatabaseService.withTransaction` que aplica el tenant y la cuenta de la petición (criterio 3); `useTenant` para entrar en una organización recién creada. Prueba que recorre el catálogo (`INV-T-1`, `TC-034`) y exige política en toda tabla con `organization_id`, salvo `audit_log`, que se cierra en (c). **Pendiente de aprobación del responsable:** la política de `audit_log` obliga a cambiar una aserción de `auth-sessions.spec.ts` (`US-022b`) que hoy lee con el rol de la app; la guardia de piso exige para eso una excepción de `CONSTRAINTS.md` §4.
 - **Avance desde `US-023` (2026-10-27):** `organizations`, `roles` y `memberships` existen sin RLS. `GET /me/memberships` y `GET /organizations` leen las membresías de la cuenta en **todas** sus organizaciones: necesitan, además de la política por `organization_id`, una por `app.user_id` (como `role_requests`), y ya pasan `userId` a `withTransaction`. Los roles del sistema (`organization_id` nulo) se leen desde cualquier tenant, como los presets de `rulesets`. El *trigger* del último dueño bloquea la fila de la organización: con RLS, la política debe dejar verla dentro de su tenant.
 - **Avance desde `US-022b` (2026-10-27):** `audit_log` ya nace de solo inserción (`REVOKE UPDATE` y *triggers* contra `UPDATE`, `DELETE` y `TRUNCATE`), con pruebas `[US-025:AC7]` en `apps/api/test/auth-sessions.spec.ts`. Falta su RLS: hoy solo guarda eventos sin organización (`organization_id` nulo).
 
