@@ -14,6 +14,11 @@ export interface TestDatabase {
   readonly maintenanceUrl: string;
   /** Prisma Client as the application role. */
   readonly prisma: PrismaClient;
+  /**
+   * Prisma Client as a superuser: it skips Row-Level Security (US-025). For preparing data and checking
+   * what the database holds; what the application may see is always asked with `prisma`.
+   */
+  readonly admin: PrismaClient;
   /** Disconnects the client and drops the database. */
   dispose(): Promise<void>;
 }
@@ -37,14 +42,17 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     await migrator.$disconnect();
   }
   const prisma = createPrismaClient(appUrl);
+  const admin = createPrismaClient(databaseUrl(adminUrl, name));
   return {
     name,
     appUrl,
     migrationUrl,
     maintenanceUrl: databaseUrl(adminUrl, name, ROLES.maintenance),
     prisma,
+    admin,
     dispose: async () => {
       await prisma.$disconnect();
+      await admin.$disconnect();
       await dropDatabase(adminUrl, name);
     },
   };

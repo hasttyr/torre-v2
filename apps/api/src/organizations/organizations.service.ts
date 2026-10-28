@@ -4,7 +4,9 @@ import type { ApiInputs, ApiOutputs, RoleKey } from '@torre/contracts';
 import { AuditLog } from '../audit/audit-log.js';
 import { AuthorizationService } from '../authz/authorization.service.js';
 import { apiError } from '../common/api-error.js';
+import { TenantContext } from '../common/request-context.js';
 import { DatabaseService } from '../database/database.service.js';
+import { useTenant } from '../database/transaction.js';
 
 /** Whoever creates an organization owns it (AUTHORIZATION.md §4, "Crear organización"). */
 const CREATOR_ROLE: RoleKey = 'org_owner';
@@ -25,6 +27,7 @@ export class OrganizationsService {
     @Inject(DatabaseService) private readonly db: DatabaseService,
     @Inject(AuditLog) private readonly audit: AuditLog,
     @Inject(AuthorizationService) private readonly authz: AuthorizationService,
+    @Inject(TenantContext) private readonly tenant: TenantContext,
   ) {}
 
   /**
@@ -43,8 +46,12 @@ export class OrganizationsService {
             where: { key: CREATOR_ROLE, organizationId: null, deletedAt: null },
             select: { id: true },
           });
+          // The new tenant's id first, so the rest of the work runs inside it (RLS, US-025).
+          const [generated] = await tx.$queryRaw<{ id: string }[]>`SELECT uuidv7()::text AS id`;
+          if (generated === undefined) throw new Error('uuidv7() returned no row');
+          await useTenant(tx, generated.id);
           const organization = await tx.organization.create({
-            data: { name: input.name, slug: input.slug },
+            data: { id: generated.id, name: input.name, slug: input.slug },
             select: ORGANIZATION,
           });
           const membership = await tx.membership.create({
@@ -110,9 +117,10 @@ export class OrganizationsService {
    * another organization gets 403 for this id (INV-T-3).
    */
   async get(userId: string, id: string): Promise<ApiOutputs['organizations']['get']> {
-    const organization = await this.db.withTransaction(
-      (tx) => tx.organization.findFirst({ where: { id, deletedAt: null }, select: ORGANIZATION }),
-      { userId },
+    // The request acts in this organization from here on (US-025:AC3).
+    this.tenant.use(id);
+    const organization = await this.db.withTransaction((tx) =>
+      tx.organization.findFirst({ where: { id, deletedAt: null }, select: ORGANIZATION }),
     );
     if (!organization) throw apiError('NOT_FOUND');
     await this.authz.assertCan(userId, 'organization.view', 'Organization', { organizationId: organization.id });

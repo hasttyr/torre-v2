@@ -36,3 +36,12 @@ export async function withTransaction<T>(
     return work(tx);
   });
 }
+
+/**
+ * Moves the transaction into `organizationId` once it knows it, for work that creates the tenant it then
+ * writes in (a new organization, US-023). Same rules as `withTransaction`: a UUID chosen by the server.
+ */
+export async function useTenant(tx: Transaction, organizationId: string): Promise<void> {
+  if (!UUID.test(organizationId)) throw new TypeError('useTenant: organizationId must be a UUID');
+  await tx.$executeRaw`SELECT set_config('app.organization_id', ${organizationId}, true)`;
+}

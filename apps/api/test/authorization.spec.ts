@@ -75,14 +75,14 @@ const roleId = async (key: RoleKey) =>
   (await db.prisma.role.findFirstOrThrow({ where: { key, organizationId: null } })).id;
 
 async function makePlatformAdmin(userId: string) {
-  await db.prisma.membership.create({
+  await db.admin.membership.create({
     data: { userId, scopeType: 'PLATFORM', roleId: await roleId('platform_admin'), source: 'BOOTSTRAP' },
   });
   await authz.invalidate();
 }
 
 async function grant(userId: string, role: RoleKey, organizationId: string, scopeId = organizationId) {
-  await db.prisma.membership.create({
+  await db.admin.membership.create({
     data: {
       userId,
       organizationId,
@@ -164,7 +164,7 @@ describe('AuthorizationService (US-024)', () => {
     expect((await createOrganization(someone, 'authz-cache-1')).status).toBe(403);
 
     // A membership written without invalidating: the cached permissions still answer.
-    await db.prisma.membership.create({
+    await db.admin.membership.create({
       data: { userId: someone.id, scopeType: 'PLATFORM', roleId: await roleId('platform_admin'), source: 'BOOTSTRAP' },
     });
     expect((await createOrganization(someone, 'authz-cache-2')).status).toBe(403);
