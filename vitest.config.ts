@@ -58,6 +58,8 @@ export default defineConfig({
         test: {
           name: 'api',
           include: ['apps/api/src/**/*.spec.ts'],
+          // Properties of the authorization rules (INV-T-7, US-024c) use the same parameters.
+          setupFiles: ['tools/vitest/fast-check.setup.ts'],
           benchmark: { include: [] },
         },
       },

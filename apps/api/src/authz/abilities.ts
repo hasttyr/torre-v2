@@ -1,6 +1,6 @@
 import { AbilityBuilder, createMongoAbility, subject } from '@casl/ability';
 import type { ForcedSubject, MongoAbility, MongoQuery } from '@casl/ability';
-import { ACCOUNT_PERMISSIONS, PERMISSIONS } from '@torre/contracts';
+import { ACCOUNT_PERMISSIONS, PERMISSION_KEYS, PERMISSIONS } from '@torre/contracts';
 import type { AuthzSubject, PermissionKey, ScopeType } from '@torre/contracts';
 
 /**
@@ -67,13 +67,29 @@ function scopeCondition(grant: Grant): MongoQuery<AuthzResource> | undefined {
   return scope.id === null ? NOTHING : { [SCOPE_FIELD[scope.type]]: scope.id };
 }
 
+/** Results of a round: none in a CLOSED round; there only `game.correct_admin` corrects (DEC-051). */
+const ROUND_RESULTS: readonly PermissionKey[] = ['game.record', 'game.correct', 'game.forfeit'];
+
+/**
+ * What changes a tournament: registration, teams, rounds and results, and its configuration. A CLOSED or
+ * CANCELLED tournament is read-only until it is reopened (AUTHORIZATION.md §5); reports, the audit trail,
+ * claims, reopening and archiving stay possible.
+ */
+export const TOURNAMENT_CHANGES: readonly PermissionKey[] = [
+  ...PERMISSION_KEYS.filter((key) => ['registration', 'teams', 'rounds', 'results'].includes(PERMISSIONS[key].group)),
+  'tournament.configure',
+  'tournament.transition',
+  'tournament.close',
+];
+
 /**
  * The abilities of an account (AUTHORIZATION.md §6.1, US-024:AC1): public reads, the permissions every
  * account has over its own resources, and the permissions of its grants, each limited to the scope of
- * its membership. The rules of state (§5) arrive with US-024c.
+ * its membership. Last, the rules of state of §5, which no set of permissions skips (INV-T-7, DEC-105):
+ * resources expose `tournamentStatus`, `roundStatus` and `nextRoundPublished` when they have them.
  */
 export function defineAbilitiesFor(user: AuthUser | null, grants: readonly Grant[]): AppAbility {
-  const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
+  const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
   // Public and unlisted tournaments, unless archived (AUTHORIZATION.md §4, BR-DEL-06).
   can('read', 'Tournament', { visibility: { $in: ['PUBLIC', 'UNLISTED'] }, archivedAt: null });
@@ -92,5 +108,12 @@ export function defineAbilitiesFor(user: AuthUser | null, grants: readonly Grant
     if (condition === undefined) can(grant.permission, subject);
     else can(grant.permission, subject, condition);
   }
+
+  for (const key of TOURNAMENT_CHANGES) {
+    cannot(key, PERMISSIONS[key].subject, { tournamentStatus: { $in: ['CLOSED', 'CANCELLED'] } });
+  }
+  for (const key of ROUND_RESULTS) cannot(key, 'Game', { roundStatus: 'CLOSED' });
+  // Once the next round is published a correction is administrative only (§5, DEC-051).
+  cannot('game.correct', 'Game', { nextRoundPublished: true });
   return build();
 }

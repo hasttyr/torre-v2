@@ -27,6 +27,7 @@
     "@types/passport-jwt": "catalog:",
     "@types/pg": "catalog:",
     "@types/supertest": "catalog:",
+    "fast-check": "catalog:",
     "prisma": "catalog:",
     "supertest": "catalog:",
     "testcontainers": "catalog:",
