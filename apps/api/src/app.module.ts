@@ -6,6 +6,7 @@ import type { CountersOptions } from './common/counters.module.js';
 import { LoggingModule } from './common/logging.module.js';
 import { ApiOrpcModule } from './common/orpc.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { AuthzModule } from './authz/authz.module.js';
 import { ThrottlingModule } from './common/throttling.module.js';
 import type { LoggingOptions } from './common/logging.module.js';
 import { AppConfigModule } from './config/config.module.js';
@@ -26,7 +27,7 @@ export type AppOptions = AppConfigOptions &
 
 /**
  * Root module: configuration (US-005), cross-cutting layer (US-006), database (US-007), contracts
- * (US-008), queues (US-117), authentication (US-022) and organizations (US-023). With `worker: true` it is
+ * (US-008), queues (US-117), authentication (US-022), authorization (US-024) and organizations (US-023). With `worker: true` it is
  * the worker process.
  */
 @Module({})
@@ -48,6 +49,7 @@ export class AppModule {
         }),
         ApiOrpcModule,
         AuthModule,
+        AuthzModule,
         OrganizationsModule,
         HealthModule,
         SystemModule,

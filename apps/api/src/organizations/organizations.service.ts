@@ -119,12 +119,17 @@ export class OrganizationsService {
     return organization;
   }
 
-  /** The live organizations where the account holds a live membership, in any scope (US-023:AC4). */
+  /**
+   * The live organizations the account may see (US-023:AC4, US-024:AC9): those of its memberships, in
+   * any scope, or every one for `platform_admin`. Filtered with `accessibleBy` (DEC-106).
+   */
   async mine(userId: string): Promise<ApiOutputs['organizations']['list']> {
+    const visible = await this.authz.accessibleWhere(userId, 'organization.view', 'Organization');
+    if (visible === null) return [];
     return this.db.withTransaction(
       (tx) =>
         tx.organization.findMany({
-          where: { deletedAt: null, memberships: { some: { userId, revokedAt: null } } },
+          where: { AND: [visible, { deletedAt: null }] },
           select: ORGANIZATION,
           orderBy: [{ name: 'asc' }, { id: 'asc' }],
         }),

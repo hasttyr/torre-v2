@@ -1,5 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
+import { createMongoAbility, subject } from '@casl/ability';
+import { unpackRules } from '@casl/ability/extra';
+import type { PackRule } from '@casl/ability/extra';
+import type { MongoAbility, RawRuleOf } from '@casl/ability';
 import type { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
@@ -201,5 +205,57 @@ describe('AuthorizationService (US-024)', () => {
     >;
 
     expect(Object.keys(claims).sort()).toEqual(['exp', 'iat', 'sid', 'sub']);
+  });
+});
+
+describe('abilities for the web and filtered listings (US-024)', () => {
+  it('[US-024:AC8] should hand the web the packed rules of the account, the same the API applies', async () => {
+    const admin = await account('authz-rules-admin@example.org');
+    await makePlatformAdmin(admin.id);
+    const arbiter = await account('authz-rules-arbiter@example.org');
+    const org = await organization(admin, 'authz-rules');
+    const tournament = randomUUID();
+    await grant(arbiter.id, 'arbiter', org, tournament);
+
+    const res = await http.get('/api/v1/me/abilities').set(bearer(arbiter));
+    expect(res.status).toBe(200);
+    const web = createMongoAbility(unpackRules((res.body as { rules: PackRule<RawRuleOf<MongoAbility>>[] }).rules));
+    const game = (tournamentId: string, roundStatus = 'PUBLISHED') =>
+      subject('Game', { organizationId: org, tournamentId, roundStatus });
+    expect(web.can('game.record', game(tournament))).toBe(true);
+    expect(web.can('game.record', game(randomUUID()))).toBe(false);
+    expect(web.can('game.record', game(tournament, 'CLOSED'))).toBe(false);
+    expect(web.can('tournament.create', subject('Tournament', { organizationId: org }))).toBe(false);
+    expect((await http.get('/api/v1/me/abilities')).status).toBe(401);
+  });
+
+  it('[US-024:AC8] should give an account without memberships only public reads and its own resources', async () => {
+    const viewer = await account('authz-rules-viewer@example.org');
+
+    const res = await http.get('/api/v1/me/abilities').set(bearer(viewer));
+    const web = createMongoAbility(unpackRules((res.body as { rules: PackRule<RawRuleOf<MongoAbility>>[] }).rules));
+    expect(web.can('read', subject('Tournament', { visibility: 'PUBLIC', archivedAt: null }))).toBe(true);
+    expect(web.can('profile.update_own', subject('User', { id: viewer.id }))).toBe(true);
+    expect(web.can('organization.view', subject('Organization', { organizationId: randomUUID() }))).toBe(false);
+  });
+
+  it('[US-024:AC9][TC-150] should filter the list of organizations with accessibleBy', async () => {
+    const admin = await account('authz-list-admin@example.org');
+    await makePlatformAdmin(admin.id);
+    const member = await account('authz-list-member@example.org');
+    const viewer = await account('authz-list-viewer@example.org');
+    const mine = await organization(admin, 'authz-list-mine');
+    const theirs = await organization(admin, 'authz-list-theirs');
+    await grant(member.id, 'captain', mine, randomUUID());
+
+    const list = async (who: Account) =>
+      ((await http.get('/api/v1/organizations').set(bearer(who))).body as { id: string }[]).map((o) => o.id);
+    const all = (await db.prisma.organization.findMany({ where: { deletedAt: null } })).map((o) => o.id);
+
+    expect(await list(member)).toEqual([mine]);
+    expect((await list(admin)).sort()).toEqual(all.sort());
+    expect(await list(admin)).toEqual(expect.arrayContaining([mine, theirs]));
+    expect(await list(viewer)).toEqual([]);
+    expect(await authz.accessibleWhere(viewer.id, 'organization.view', 'Organization')).toBeNull();
   });
 });

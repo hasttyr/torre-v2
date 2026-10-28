@@ -1,5 +1,5 @@
 import { AbilityBuilder, createMongoAbility, subject } from '@casl/ability';
-import type { ForcedSubject, MongoAbility, MongoQuery } from '@casl/ability';
+import type { ForcedSubject, MongoAbility } from '@casl/ability';
 import { ACCOUNT_PERMISSIONS, PERMISSION_KEYS, PERMISSIONS } from '@torre/contracts';
 import type { AuthzSubject, PermissionKey, ScopeType } from '@torre/contracts';
 
@@ -55,16 +55,19 @@ const SCOPE_FIELD = {
  */
 const ORGANIZATION_WIDE: ReadonlySet<PermissionKey> = new Set<PermissionKey>(['organization.view']);
 
-/** Matches nothing: a grant that lost its ids denies instead of widening. */
-const NOTHING = { id: { $in: [] } };
+/**
+ * Where a grant applies: everywhere (PLATFORM), nowhere (a scoped grant that lost its ids denies instead
+ * of widening) or on resources whose `field` holds `value`. Shared by the abilities and the listings.
+ */
+export type ScopeMatch = 'everywhere' | 'nowhere' | { readonly field: string; readonly value: string };
 
-function scopeCondition(grant: Grant): MongoQuery<AuthzResource> | undefined {
+export function scopeMatch(grant: Grant): ScopeMatch {
   const { scope } = grant;
-  if (scope.type === 'PLATFORM') return undefined;
+  if (scope.type === 'PLATFORM') return 'everywhere';
   if (ORGANIZATION_WIDE.has(grant.permission)) {
-    return scope.organizationId === null ? NOTHING : { organizationId: scope.organizationId };
+    return scope.organizationId === null ? 'nowhere' : { field: 'organizationId', value: scope.organizationId };
   }
-  return scope.id === null ? NOTHING : { [SCOPE_FIELD[scope.type]]: scope.id };
+  return scope.id === null ? 'nowhere' : { field: SCOPE_FIELD[scope.type], value: scope.id };
 }
 
 /** Results of a round: none in a CLOSED round; there only `game.correct_admin` corrects (DEC-051). */
@@ -104,9 +107,9 @@ export function defineAbilitiesFor(user: AuthUser | null, grants: readonly Grant
 
   for (const grant of grants) {
     const { subject } = PERMISSIONS[grant.permission];
-    const condition = scopeCondition(grant);
-    if (condition === undefined) can(grant.permission, subject);
-    else can(grant.permission, subject, condition);
+    const match = scopeMatch(grant);
+    if (match === 'everywhere') can(grant.permission, subject);
+    else if (match !== 'nowhere') can(grant.permission, subject, { [match.field]: match.value });
   }
 
   for (const key of TOURNAMENT_CHANGES) {

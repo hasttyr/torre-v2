@@ -168,6 +168,23 @@ describe('IDOR: changing the id does not reach another scope (US-024)', () => {
   });
 });
 
+describe('the whole matrix against changed ids (US-024)', () => {
+  it('[US-024:AC5][US-024:AC6][TC-035][INV-T-2][INV-T-3] should deny every permission of every role once any scope id points elsewhere', () => {
+    const scopeField = { ORGANIZATION: 'organizationId', TOURNAMENT: 'tournamentId', TEAM: 'teamId' } as const;
+    for (const role of ROLE_KEYS.filter((r) => r !== 'platform_admin')) {
+      // The filter narrows the role, so its scope is never PLATFORM here.
+      const type = ROLE_SCOPES[role];
+      for (const key of SYSTEM_ROLE_PERMISSIONS[role]) {
+        expect(abilities[role].can(key, resource(key, { ...HOME, ...OPEN })), `${role} ${key} at home`).toBe(true);
+        // organization.view follows the organization of the membership, every other permission its own scope.
+        const field = key === 'organization.view' ? 'organizationId' : scopeField[type];
+        const moved = { ...HOME, ...OPEN, [field]: AWAY[field] };
+        expect(abilities[role].can(key, resource(key, moved)), `${role} ${key} with another ${field}`).toBe(false);
+      }
+    }
+  });
+});
+
 describe('rules of state (US-024)', () => {
   const game = (state: Record<string, unknown>) => authzResource('Game', { ...HOME, ...OPEN, ...state });
 

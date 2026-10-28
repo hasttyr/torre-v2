@@ -36,8 +36,9 @@ export const create = oc
   .output(organization);
 
 /**
- * `GET /organizations` (US-023:AC4): the organizations where the account holds a live membership, in
- * any scope, by name. A new account has none (BR-ROLE-01).
+ * `GET /organizations` (US-023:AC4, US-024:AC9): the organizations the account may see, by name: those
+ * where it holds a live membership, in any scope, or all of them for `platform_admin`. A new account has
+ * none (BR-ROLE-01).
  */
 export const list = oc
   .route({ method: 'GET', path: '/organizations', operationId: 'listMyOrganizations', tags: ['organizations'] })

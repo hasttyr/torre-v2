@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@casl/ability": "catalog:",
+    "@casl/prisma": "catalog:",
     "@nestjs/bullmq": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
