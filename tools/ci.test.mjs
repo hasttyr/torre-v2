@@ -47,6 +47,19 @@ describe('CI workflow (US-004)', () => {
     expect(runsOf('quality')).toContain('pnpm check:floor');
   });
 
+  it('[DEC-102] should put on auto-merge only the owner’s own non-draft PRs to main, and only after the checks', () => {
+    const autoMerge = read('.github/workflows/auto-merge.yml');
+
+    expect(autoMerge).toMatch(/branches: \[main\]/);
+    expect(autoMerge).toContain('!github.event.pull_request.draft');
+    expect(autoMerge).toContain('github.event.pull_request.user.login == github.repository_owner');
+    expect(autoMerge).toContain('github.event.pull_request.head.repo.full_name == github.repository');
+    // `--auto` waits for the branch protection (the four jobs and an up-to-date branch); it never forces.
+    expect(autoMerge).toMatch(/gh pr merge "\$PR" --auto --merge/);
+    expect(autoMerge).not.toMatch(/--admin|\$\{\{ github\.event\.pull_request\.(title|body|head\.ref)/);
+    expect(autoMerge).toMatch(/^permissions: \{\}$/m);
+  });
+
   it('[US-004:AC5] should document the branch protection that blocks failing PRs', () => {
     const readme = read('README.md');
 
