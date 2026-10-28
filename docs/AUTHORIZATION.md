@@ -216,7 +216,7 @@ export function defineAbilitiesFor(user: AuthUser, grants: readonly Grant[]): Ap
 
 ## 7. Pruebas obligatorias
 
-1. **Matriz generada desde tabla** (`US-024`): rol × acción × recurso × estado. El archivo de la tabla se versiona; cada cambio de política muestra qué casos cambian.
+1. **Matriz generada desde tabla** (`US-024`): rol × acción × recurso × estado. El archivo de la tabla se versiona; cada cambio de política muestra qué casos cambian. Implementada en `US-024c`: `apps/api/src/authz/policy-matrix.md`, generada por `policy-matrix.spec.ts` (`DEC-105`).
 2. **IDOR (`INV-T-3`):**
    - Un `captain` del equipo A no puede actualizar plantilla ni alineación del equipo B cambiando el ID.
    - Un `arbiter` del torneo X no puede registrar resultados en el torneo Y.
