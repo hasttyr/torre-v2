@@ -10,4 +10,5 @@ export const orpc = createQueryUtils(api);
 export { createApiClient, createQueryUtils, newCorrelationId } from './client.js';
 export type { ApiClient, ApiClientOptions } from './client.js';
 export { NETWORK_ERROR, problemMessageKey, toApiProblem } from './problem.js';
+export { roleLabelKey, scopeLabelKey } from './roles.js';
 export type { ApiProblem } from './problem.js';

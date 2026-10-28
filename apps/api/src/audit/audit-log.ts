@@ -7,7 +7,8 @@ import type { Transaction } from '../database/transaction.js';
 /**
  * What the trail records (DEC-095). Authentication: a login that opened a session, failed or was refused
  * for the state of the account; a refresh token used twice or refused; a logout; the other sessions
- * ended at once (BR-AUTH-07, BR-AUTH-08).
+ * ended at once (BR-AUTH-07, BR-AUTH-08). Organizations: one created and a role granted (BR-AUD-02,
+ * DEC-101).
  */
 export type AuditAction =
   | 'auth.login.succeeded'
@@ -16,9 +17,11 @@ export type AuditAction =
   | 'auth.refresh.reused'
   | 'auth.refresh.refused'
   | 'auth.logout'
-  | 'auth.sessions.revoked_others';
+  | 'auth.sessions.revoked_others'
+  | 'organization.created'
+  | 'membership.granted';
 
-export type AuditTarget = 'user' | 'auth_session';
+export type AuditTarget = 'user' | 'auth_session' | 'organization' | 'membership';
 
 /** One row of `audit_log`: ids and counts only, never an email, a name or an address (DEC-077). */
 export interface AuditEntry {

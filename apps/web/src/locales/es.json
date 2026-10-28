@@ -64,5 +64,20 @@
     "CHECK_IN_CLOSED": "El check-in de esta ronda ya está cerrado.",
     "RATE_LIMITED": "Demasiados intentos. Espera unos minutos.",
     "INTERNAL_ERROR": "Ocurrió un error inesperado. Inténtalo de nuevo."
+  },
+  "roles": {
+    "platform_admin": "Administrador de la plataforma",
+    "org_owner": "Dueño de la organización",
+    "org_admin": "Administrador de la organización",
+    "tournament_director": "Director del torneo",
+    "arbiter": "Árbitro",
+    "captain": "Capitán",
+    "player": "Jugador"
+  },
+  "scopes": {
+    "PLATFORM": "Plataforma",
+    "ORGANIZATION": "Organización",
+    "TOURNAMENT": "Torneo",
+    "TEAM": "Equipo"
   }
 }
