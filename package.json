@@ -31,6 +31,7 @@
     "db:deploy": "pnpm --filter @torre/api db:deploy",
     "db:status": "pnpm --filter @torre/api db:status",
     "db:seed": "pnpm --filter @torre/api db:seed",
+    "permissions:sync": "pnpm --filter @torre/api permissions:sync",
     "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
     "secrets": "node tools/gitleaks.mjs",
     "check:floor": "node tools/floor-guard.mjs",

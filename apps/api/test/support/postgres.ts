@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { GenericContainer } from 'testcontainers';
 import pg from 'pg';
+import { syncPermissions } from '../../src/authz/permissions-sync.js';
+import { createPrismaClient } from '../../src/database/prisma.js';
 
 const API_DIR = fileURLToPath(new URL('../../', import.meta.url));
 const INIT_DIR = fileURLToPath(new URL('../../../../infra/postgres/init/', import.meta.url));
@@ -109,7 +111,7 @@ export const uniqueDatabaseName = (prefix: string): string => `${prefix}_${rando
 
 /**
  * Creates an empty database prepared like the local one (02-database.sql) and applies every migration
- * with the migration role, exactly as a deployment does (`prisma migrate deploy`).
+ * with the migration role, exactly as a deployment does (`prisma migrate deploy`, then `permissions:sync`).
  */
 export async function createMigratedDatabase(adminUrl: string, name: string): Promise<void> {
   // Idempotent: an existing server also gets the roles added after it was created.
@@ -119,6 +121,13 @@ export async function createMigratedDatabase(adminUrl: string, name: string): Pr
   for (const script of prepare)
     await execute(databaseUrl(adminUrl, name), readFileSync(`${INIT_DIR}${script}`, 'utf8'));
   migrateDeploy(databaseUrl(adminUrl, name, ROLES.migration));
+  // As every deploy does after the migrations (US-024:AC1): the catalogue and the default matrix.
+  const migrator = createPrismaClient(databaseUrl(adminUrl, name, ROLES.migration));
+  try {
+    await syncPermissions(migrator);
+  } finally {
+    await migrator.$disconnect();
+  }
 }
 
 /** `prisma migrate deploy` against `migrationUrl`; throws with the CLI output when it fails. */

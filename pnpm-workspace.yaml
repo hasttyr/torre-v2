@@ -5,6 +5,8 @@ packages:
 # Versions verified on 2026-10-26 and recorded in docs/adr/ADR-0001-stack-and-versions.md.
 # Every new dependency is added here first, with its ADR or story justification (CLAUDE.md rule 10).
 catalog:
+  # US-024 (DEC-011, DEC-058; ADR-0001 table): CASL evaluates the permissions.
+  '@casl/ability': 7.0.2
   '@commitlint/cli': 21.2.4
   '@commitlint/config-conventional': 21.2.4
   '@eslint/js': 10.0.1

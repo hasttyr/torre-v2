@@ -14,7 +14,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:seed": "tsc -p tsconfig.build.json && node dist/database/seed.main.js",
-    "jobs:retry": "tsc -p tsconfig.build.json && node dist/jobs/retry.main.js"
+    "jobs:retry": "tsc -p tsconfig.build.json && node dist/jobs/retry.main.js",
+    "permissions:sync": "tsc -p tsconfig.build.json && node dist/authz/permissions-sync.main.js"
   },
   "devDependencies": {
     "@nestjs/testing": "catalog:",
@@ -32,6 +33,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@casl/ability": "catalog:",
     "@nestjs/bullmq": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
