@@ -3,7 +3,7 @@
 > Fase F2. Infraestructura de event sourcing y CQRS (`ARCHITECTURE.md` §7). Estas historias se desarrollan **antes** de los comandos de `EP-03`, que dependen de ellas.
 
 ### US-045 — Event store: append, lectura, idempotencia y concurrencia
-- **Epic:** EP-04 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
+- **Epic:** EP-04 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
 - **Historia:** Como responsable quiero un almacén de eventos inmutable y seguro ante concurrencia para tener una fuente de verdad confiable.
 - **Referencias:** DEC-008, DEC-026, DEC-038 · BR-AUD-01, BR-GEN-05 · INV-E-1, INV-E-2, INV-E-4 · `ARCHITECTURE.md` §7.2, §7.5, §7.7, §8.1
 - **Criterios de aceptación:**
@@ -22,6 +22,7 @@
 - **Depende de:** US-007, US-021
 - **Fuera de alcance:** proyecciones concretas (US-046), publicación a Redis (US-051).
 - **Notas para la IA:** SQL parametrizado; no uses el ORM para el *append*. Cuida el aislamiento de transacción.
+- **Implementación (a), 2026-10-28 (`DEC-108`, `PROPUESTO`):** migración `event_store` con `events` (restricciones, `REVOKE UPDATE`, *triggers* que rechazan `UPDATE`, `DELETE` y `TRUNCATE` incluso al dueño, RLS por organización) y `outbox` (índice parcial de pendientes); `appendEvents` y `readStream` en `apps/api/src/events/event-store.ts` con SQL parametrizado. Pruebas de integración en `apps/api/test/event-store.spec.ts`: lote atómico, conflicto de versión, N escritores concurrentes (`TC-030`), lectura completa y desde una secuencia con una propiedad de `INV-E-1`, inmutabilidad (`TC-032`, `INV-E-4`) y aislamiento por tenant.
 
 ### US-046 — Proyecciones síncronas y reconstrucción
 - **Epic:** EP-04 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** READY
