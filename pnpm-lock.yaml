@@ -581,6 +581,9 @@ importers:
       '@types/supertest':
         specifier: 'catalog:'
         version: 7.2.1
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.10.2
       prisma:
         specifier: 'catalog:'
         version: 7.10.1(@types/node@24.19.2)(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3)
