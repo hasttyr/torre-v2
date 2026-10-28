@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { MEMBERSHIP_SOURCES, ROLE_KEYS, SCOPE_TYPES } from '@torre/contracts';
 import type { ApiInputs, ApiOutputs, RoleKey } from '@torre/contracts';
 import { AuditLog } from '../audit/audit-log.js';
+import { AuthorizationService } from '../authz/authorization.service.js';
 import { apiError } from '../common/api-error.js';
 import { DatabaseService } from '../database/database.service.js';
 
@@ -23,27 +24,21 @@ export class OrganizationsService {
   constructor(
     @Inject(DatabaseService) private readonly db: DatabaseService,
     @Inject(AuditLog) private readonly audit: AuditLog,
+    @Inject(AuthorizationService) private readonly authz: AuthorizationService,
   ) {}
 
   /**
    * Creates an organization with its creator as `org_owner`, in one transaction with its audit trail
-   * (US-023:AC2). Only a `platform_admin` creates one directly; other accounts ask for one (US-029).
+   * (US-023:AC2). The route requires `organization.create` (only `platform_admin`); other accounts ask
+   * for one (US-029).
    */
   async create(
     actorId: string,
     input: ApiInputs['organizations']['create'],
   ): Promise<ApiOutputs['organizations']['create']> {
     try {
-      return await this.db.withTransaction(
+      const created = await this.db.withTransaction(
         async (tx) => {
-          // TODO(US-024): `@RequirePermission('organization.create')` replaces this check. Until then a
-          // live membership in the PLATFORM scope stands for it: only platform_admin is granted there
-          // (AUTHORIZATION.md §3, DEC-100).
-          const platform = await tx.membership.findFirst({
-            where: { userId: actorId, scopeType: 'PLATFORM', revokedAt: null },
-            select: { id: true },
-          });
-          if (!platform) throw apiError('FORBIDDEN');
           const owner = await tx.role.findFirstOrThrow({
             where: { key: CREATOR_ROLE, organizationId: null, deletedAt: null },
             select: { id: true },
@@ -96,6 +91,9 @@ export class OrganizationsService {
         },
         { userId: actorId },
       );
+      // A new membership: the creator's permissions change (US-024:AC4).
+      await this.authz.invalidate();
+      return created;
     } catch (error) {
       // The only unique value written here is the slug: the new organization has no other membership.
       if ((error as { code?: unknown }).code === 'P2002') {
@@ -105,6 +103,20 @@ export class OrganizationsService {
       }
       throw error;
     }
+  }
+
+  /**
+   * One live organization (US-024:AC2): the fine check on the loaded organization, so a member of
+   * another organization gets 403 for this id (INV-T-3).
+   */
+  async get(userId: string, id: string): Promise<ApiOutputs['organizations']['get']> {
+    const organization = await this.db.withTransaction(
+      (tx) => tx.organization.findFirst({ where: { id, deletedAt: null }, select: ORGANIZATION }),
+      { userId },
+    );
+    if (!organization) throw apiError('NOT_FOUND');
+    await this.authz.assertCan(userId, 'organization.view', 'Organization', { organizationId: organization.id });
+    return organization;
   }
 
   /** The live organizations where the account holds a live membership, in any scope (US-023:AC4). */

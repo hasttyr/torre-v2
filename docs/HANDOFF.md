@@ -7,13 +7,13 @@
 - **Fecha:** 2026-10-28
 - **Modo de trabajo (pedido por el responsable):** avanzar sin su intervención, con prioridad en **terminar VS-1** (esqueleto andante). Las decisiones que la IA toma sola quedan `PROPUESTO` en `ARCHITECTURE.md` §20.
 - **Fusión automática (`DEC-102`):** cada PR que la IA abre contra `main` se fusiona solo cuando pasan `quality`, `security`, `infra` e `integration` con la rama al día (`.github/workflows/auto-merge.yml`; probado con el PR #7). La revisión humana de lo crítico es **posterior** a la fusión. Para revisar antes: abrir el PR como borrador o `gh pr merge --disable-auto <n>`.
-- **Hecho:** PR #5 (recuperación de `US-003`/`US-022b`), #6 (`US-023`), #7 (auto-merge) en `main`. `US-024a` (catálogo de permisos, `permissions:sync`, semilla de la matriz, `defineAbilitiesFor`) en su PR.
-- **Siguiente:** `US-024b` (`@RequirePermission()`, `AuthorizationService.can()`, permisos por petición con caché en Redis); luego `US-024c`, `US-024d`, `US-025a…c`, `US-028`, `US-029` y el resto de VS-1 en orden de dependencias.
+- **Hecho:** PR #5 (recuperación de `US-003`/`US-022b`), #6 (`US-023`), #7 (auto-merge) en `main`. `US-024a` (catálogo de permisos, `permissions:sync`, semilla de la matriz, `defineAbilitiesFor`) en el PR #8 y `US-024b` (`AuthorizationService`, `@RequirePermission()`, caché en Redis) en su PR.
+- **Siguiente:** `US-024c` (matriz de pruebas generada, IDOR, reglas de estado e `INV-T-7`); luego `US-024d`, `US-025a…c`, `US-028`, `US-029` y el resto de VS-1 en orden de dependencias.
 
 ## Lo que necesita al responsable
 
 1. **Revisar después de la fusión** los PR de autenticación, migraciones y contratos (#5, #6 y los de `US-024`).
-2. **Confirmar o cambiar las decisiones `PROPUESTO`:** `DEC-095`…`DEC-098` (auditoría, IP, sesiones, cuentas suspendidas), `DEC-099`…`DEC-101` (organizaciones y membresías) y `DEC-103` (catálogo de permisos: la acción de CASL es la clave del permiso; la matriz de `AUTHORIZATION.md` §4 ganó la columna "Permisos", filas separadas y el permiso nuevo `game.view_own`; `permissions:sync` siembra solo permisos nuevos).
+2. **Confirmar o cambiar las decisiones `PROPUESTO`:** `DEC-095`…`DEC-098` (auditoría, IP, sesiones, cuentas suspendidas), `DEC-099`…`DEC-101` (organizaciones y membresías) `DEC-104` (caché y `@RequirePermission`) y `DEC-103` (catálogo de permisos: la acción de CASL es la clave del permiso; la matriz de `AUTHORIZATION.md` §4 ganó la columna "Permisos", filas separadas y el permiso nuevo `game.view_own`; `permissions:sync` siembra solo permisos nuevos).
 3. Las historias bloqueadas por ASCUN o por preguntas abiertas siguen esperando (ver "Deuda y riesgos").
 
 ## Entorno de esta máquina (lo que conviene saber)
@@ -30,7 +30,7 @@
 
 ## Deuda y riesgos
 
-- `POST /organizations` sigue con la comprobación de alcance `PLATFORM` (`DEC-100`, `TODO(US-024)`) hasta `US-024b`.
+- Lección de la CI: el *global setup* de Vitest no puede importar código de la app (sin `dist` de los paquetes no arranca); la sincronización de permisos va en `createTestDatabase()`. Para reproducir la CI en local, apartar `packages/contracts/dist` antes de `pnpm test:e2e`.
 - `organizations`, `roles`, `memberships`, `role_permissions` y `audit_log` sin RLS hasta `US-025`; las listas propias necesitarán una política por `app.user_id`.
 - Error de la API para el último `org_owner` y primer `platform_admin` por consola: `US-028`. Quitar un permiso de un rol (sin `DELETE` para la app): lo resuelve `US-108`.
 - `trust proxy` sin configurar hasta `US-105`; `override` de `multer` hasta Nest 12.3.2 (`ADR-0001`); `experimental_RethrowHandlerPlugin` de oRPC (`ADR-0002`).

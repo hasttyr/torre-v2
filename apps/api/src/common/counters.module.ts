@@ -4,6 +4,7 @@ import { Redis } from 'ioredis';
 import { AppConfig } from '../config/app-config.js';
 import { redisConnection } from '../jobs/redis.js';
 import { MemoryRateCounter, RateCounter, RedisRateCounter } from './counters.js';
+import { MemorySharedCache, RedisSharedCache, SharedCache } from './shared-cache.js';
 
 export interface CountersOptions {
   /** `redis` everywhere but in unit tests that run without Redis. */
@@ -37,7 +38,10 @@ class CountersConnection implements OnModuleInit, OnApplicationShutdown {
   }
 }
 
-/** Rate-limit counters for the whole app (DEC-062): the general limit and the authentication limits. */
+/**
+ * State shared by every instance through Redis: the rate-limit counters (DEC-062) and the short caches
+ * of `SharedCache` (DEC-104), on one connection.
+ */
 @Module({})
 export class CountersModule {
   static forRoot(options: CountersOptions): DynamicModule {
@@ -45,8 +49,11 @@ export class CountersModule {
       return {
         module: CountersModule,
         global: true,
-        providers: [{ provide: RateCounter, useValue: new MemoryRateCounter() }],
-        exports: [RateCounter],
+        providers: [
+          { provide: RateCounter, useValue: new MemoryRateCounter() },
+          { provide: SharedCache, useValue: new MemorySharedCache() },
+        ],
+        exports: [RateCounter, SharedCache],
       };
     }
     return {
@@ -59,8 +66,13 @@ export class CountersModule {
           inject: [CountersConnection],
           useFactory: (connection: CountersConnection) => new RedisRateCounter(connection.redis, options.prefix),
         },
+        {
+          provide: SharedCache,
+          inject: [CountersConnection],
+          useFactory: (connection: CountersConnection) => new RedisSharedCache(connection.redis, options.prefix),
+        },
       ],
-      exports: [RateCounter],
+      exports: [RateCounter, SharedCache],
     };
   }
 }

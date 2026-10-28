@@ -16,7 +16,9 @@ const tournament = (organizationId: string, id: string, visibility = 'PRIVATE', 
 
 describe('defineAbilitiesFor (US-024)', () => {
   it('[US-024:AC1] should limit an organization grant to that organization and everything inside it', () => {
-    const grants: Grant[] = [{ permission: 'game.record', scope: { type: 'ORGANIZATION', id: orgA } }];
+    const grants: Grant[] = [
+      { permission: 'game.record', scope: { type: 'ORGANIZATION', id: orgA, organizationId: orgA } },
+    ];
     const ability = defineAbilitiesFor(user, grants);
 
     expect(ability.can('game.record', game(orgA, tournamentA1))).toBe(true);
@@ -27,15 +29,29 @@ describe('defineAbilitiesFor (US-024)', () => {
   });
 
   it('[US-024:AC1] should limit a tournament grant to that tournament (INV-T-3)', () => {
-    const grants: Grant[] = [{ permission: 'game.record', scope: { type: 'TOURNAMENT', id: tournamentA1 } }];
+    const grants: Grant[] = [
+      { permission: 'game.record', scope: { type: 'TOURNAMENT', id: tournamentA1, organizationId: orgA } },
+    ];
     const ability = defineAbilitiesFor(user, grants);
 
     expect(ability.can('game.record', game(orgA, tournamentA1))).toBe(true);
     expect(ability.can('game.record', game(orgA, tournamentA2))).toBe(false);
   });
 
+  it('[US-024:AC2] should let any membership in an organization see it, and only that one', () => {
+    const grants: Grant[] = [
+      { permission: 'organization.view', scope: { type: 'TOURNAMENT', id: tournamentA1, organizationId: orgA } },
+    ];
+    const ability = defineAbilitiesFor(user, grants);
+
+    expect(ability.can('organization.view', subject('Organization', { organizationId: orgA }))).toBe(true);
+    expect(ability.can('organization.view', subject('Organization', { organizationId: orgB }))).toBe(false);
+  });
+
   it('[US-024:AC1] should let a platform grant act anywhere', () => {
-    const grants: Grant[] = [{ permission: 'tournament.archive', scope: { type: 'PLATFORM', id: null } }];
+    const grants: Grant[] = [
+      { permission: 'tournament.archive', scope: { type: 'PLATFORM', id: null, organizationId: null } },
+    ];
     const ability = defineAbilitiesFor(user, grants);
 
     expect(ability.can('tournament.archive', tournament(orgA, tournamentA1))).toBe(true);
@@ -43,7 +59,9 @@ describe('defineAbilitiesFor (US-024)', () => {
   });
 
   it('[US-024:AC1] should deny a scoped grant that lost its scope id instead of widening it', () => {
-    const grants: Grant[] = [{ permission: 'game.record', scope: { type: 'TOURNAMENT', id: null } }];
+    const grants: Grant[] = [
+      { permission: 'game.record', scope: { type: 'TOURNAMENT', id: null, organizationId: orgA } },
+    ];
 
     expect(defineAbilitiesFor(user, grants).can('game.record', game(orgA, tournamentA1))).toBe(false);
   });
