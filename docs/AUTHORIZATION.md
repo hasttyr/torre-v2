@@ -206,6 +206,8 @@ export function defineAbilitiesFor(user: AuthUser, grants: readonly Grant[]): Ap
 
 ### 6.2 Dónde se aplica
 
+> **Implementación (`US-024a`/`US-024b`, 2026-10-28; `DEC-103`, `DEC-104`, `PROPUESTO`):** `defineAbilitiesFor` y `AuthorizationService` viven en `apps/api/src/authz`. Las rutas llevan `@RequirePermission('<clave>')` (un *guard* de Nest por ruta, después del JWT) y los servicios llaman a `assertCan(usuario, '<clave>', '<Sujeto>', atributos del recurso cargado)`, que responde 403 `FORBIDDEN`. Los permisos efectivos se cachean 60 s en Redis bajo la cuenta y una versión global que sube `invalidate()`.
+
 1. **Decorador** `@RequirePermission(...)` en cada operación (guard de Nest o middleware de oRPC, según lo que resuelva la prueba de `US-008`).
 2. **Servicio de aplicación:** comprueba la acción contra el recurso cargado y las reglas de estado antes de ejecutar el comando.
 3. **Dominio (`decide`)**: valida las reglas de estado del negocio (`BR-LIFE-*`) independientemente del rol.
