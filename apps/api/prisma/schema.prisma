@@ -223,3 +223,41 @@ model RolePermission {
   @@index([permissionKey])
   @@map("role_permissions")
 }
+
+/// The event store (ARCHITECTURE.md §7.2, §8.1, US-045): the source of truth of each tournament. Insert
+/// only (INV-E-4): the application role cannot update or delete and a trigger refuses it to anyone.
+/// Sequences run 1, 2, 3… per stream without gaps (INV-E-1); the append is raw SQL (event-store.ts).
+model Event {
+  globalPosition BigInt   @id @default(autoincrement()) @map("global_position")
+  eventId        String   @unique @default(dbgenerated("uuidv7()")) @map("event_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  streamType     String   @map("stream_type")
+  streamId       String   @map("stream_id") @db.Uuid
+  sequence       Int
+  type           String
+  schemaVersion  Int      @map("schema_version")
+  /// Identifiers only, never personal data (BR-AUD-06).
+  payload        Json
+  /// Actor, correlation and causation ids, idempotency key and reason (§7.2).
+  metadata       Json
+  /// When it happened in the tournament (may come from the client); recorded_at is the server's time.
+  occurredAt     DateTime @map("occurred_at") @db.Timestamptz(6)
+  recordedAt     DateTime @default(now()) @map("recorded_at") @db.Timestamptz(6)
+
+  @@unique([streamId, sequence])
+  @@index([organizationId, recordedAt])
+  @@map("events")
+}
+
+/// Transactional outbox (ARCHITECTURE.md §8.1): written in the transaction of the append (US-045c) and
+/// published to Redis later (US-051).
+model OutboxMessage {
+  id          BigInt    @id @default(autoincrement())
+  eventId     String    @map("event_id") @db.Uuid
+  topic       String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
+
+  @@map("outbox")
+}
