@@ -206,7 +206,7 @@ Sobre ASCUN: el cuello de botella de **negocio** es `OQ-001`; la ruta anterior n
 
 | ID | Historia | Fase | Prioridad | Tamaño | Estado | Depende de |
 |---|---|---|---|---|---|---|
-| US-045 | Event store: append, lectura, idempotencia y concurrencia | F2 | MUST | L | READY | US-007, US-021 |
+| US-045 | Event store: append, lectura, idempotencia y concurrencia | F2 | MUST | L | IN_PROGRESS | US-007, US-021 |
 | US-046 | Proyecciones síncronas y reconstrucción | F2 | MUST | L | READY | US-045, US-012 (parcial: US-013) |
 | US-047 | Línea de tiempo de auditoría | F2 | SHOULD | M | READY | US-046 |
 | US-048 | Medición de rendimiento y *snapshots* | F2 | SHOULD | M | READY | US-045, US-046 |
