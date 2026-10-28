@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { AuditModule } from '../audit/audit.module.js';
 import { AppConfig } from '../config/app-config.js';
 import { accessTokenOptions } from './access-token.js';
 import { AuthContext } from './auth-context.js';
@@ -12,6 +13,7 @@ import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { JwtStrategy } from './jwt.strategy.js';
 import { PasswordService } from './password.service.js';
+import { SessionsController } from './sessions.controller.js';
 
 const authLimits = (config: AppConfig): AuthLimits => ({
   attempts: config.get('AUTH_THROTTLE_LIMIT'),
@@ -21,11 +23,16 @@ const authLimits = (config: AppConfig): AuthLimits => ({
 
 /**
  * Fortify-style authentication (DEC-057, AUTHORIZATION.md §11): registration, login with attempt
- * limits, access tokens checked on every request by a global guard, and refresh sessions (US-022).
+ * limits, access tokens checked on every request by a global guard, refresh sessions the account can
+ * list and end, and the security events in the audit trail (US-022).
  */
 @Module({
-  imports: [PassportModule, JwtModule.registerAsync({ inject: [AppConfig], useFactory: accessTokenOptions })],
-  controllers: [AuthController],
+  imports: [
+    AuditModule,
+    PassportModule,
+    JwtModule.registerAsync({ inject: [AppConfig], useFactory: accessTokenOptions }),
+  ],
+  controllers: [AuthController, SessionsController],
   providers: [
     AuthContext,
     AuthService,

@@ -80,6 +80,25 @@ describe('application role', () => {
   });
 });
 
+describe('init scripts (US-003)', () => {
+  it('[US-003:AC2] should create pg_trgm, unaccent and the application and migration roles without BYPASSRLS', async () => {
+    const extensions = await queryOne<{ names: string[] }>(
+      db.appUrl,
+      "SELECT array_agg(extname::text ORDER BY extname) AS names FROM pg_extension WHERE extname IN ('pg_trgm', 'unaccent')",
+    );
+    const roles = await queryOne<{ roles: { name: string; bypass: boolean; superuser: boolean }[] }>(
+      db.appUrl,
+      "SELECT json_agg(json_build_object('name', rolname, 'bypass', rolbypassrls, 'superuser', rolsuper) ORDER BY rolname) AS roles FROM pg_roles WHERE rolname IN ('torre_app', 'torre_migrator')",
+    );
+
+    expect(extensions.names).toEqual(['pg_trgm', 'unaccent']);
+    expect(roles.roles).toEqual([
+      { name: 'torre_app', bypass: false, superuser: false },
+      { name: 'torre_migrator', bypass: false, superuser: false },
+    ]);
+  });
+});
+
 describe('plan case TC-045', () => {
   it('[TC-045] should build the schema from an empty database, serve a minimal CRUD and leave migrating to the migration role', async () => {
     const applied = await queryOne<{ total: number }>(

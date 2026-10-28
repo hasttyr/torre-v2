@@ -80,7 +80,8 @@ Clases: **Pública** (se muestra sin cuenta) · **Interna** (operación, sin dat
 | Hash de contraseña | `users.password_hash` | Secreto | No | No (`INV-A-2`) | Se borra al anonimizar |
 | Secreto TOTP | `users.two_factor_secret` | Secreto, cifrado con AES-256-GCM (`BR-AUTH-10`) | No | No (`INV-A-3`) | Se borra al desactivar el 2FA o al anonimizar |
 | Códigos de recuperación, tokens de *refresh*, de verificación y de restablecimiento | `two_factor_recovery_codes`, `refresh_tokens` y tablas de tokens | Secreto, guardado como hash | No | No | Los vencidos los purga la cola `maintenance` (`DEC-078`) |
-| Agente de usuario e IP de la sesión | `auth_sessions.user_agent`, `ip_hash` | Personal (la IP solo como hash) | No | No | Con la sesión; se anonimiza con la cuenta |
+| Agente de usuario e IP de la sesión | `auth_sessions.user_agent`, `ip_hash` | Personal (la IP solo como HMAC con `IP_HASH_SECRET`, `DEC-096`) | No | No | Con la sesión; se anonimiza con la cuenta |
+| IP de los eventos de seguridad | `audit_log.ip_hash` | Personal (solo el HMAC, `DEC-096`) | No | No | Inmutable (`DEC-077`); sin la clave no se puede revertir |
 | Nombre, apellido, institución y rama del jugador | `players` | Personal; **Pública** en torneos `PUBLIC` (`BR-PRIV-02`) | No: solo `playerId` | No | Anonimización a petición; los resultados se conservan (`BR-DEL-07`) |
 | FIDE ID, título, ratings | `players`, `player_ratings` | Pública (publicada por FIDE y la federación) | Instantánea de rating y título al inscribir (`BR-RAT-07`) | No | Con el jugador |
 | Email del suscriptor | `subscriptions.email` | Personal | No | No | Hasta la baja; se anonimiza a petición |

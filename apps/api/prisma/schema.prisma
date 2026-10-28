@@ -93,3 +93,24 @@ model RefreshToken {
   @@index([familyId])
   @@map("refresh_tokens")
 }
+
+/// Actions outside the tournament streams (ARCHITECTURE.md §8.1): security events since US-022b. Insert
+/// only (DEC-077): the application role cannot update or delete and a trigger refuses it to anyone.
+/// Ids without foreign keys, so the trail never blocks anything; no personal data, only ids and hashes.
+model AuditLog {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  actorUserId    String?  @map("actor_user_id") @db.Uuid
+  action         String
+  targetType     String?  @map("target_type")
+  targetId       String?  @map("target_id") @db.Uuid
+  reason         String?
+  changes        Json?
+  ipHash         String?  @map("ip_hash")
+  correlationId  String?  @map("correlation_id")
+  occurredAt     DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+
+  @@index([actorUserId, occurredAt])
+  @@index([targetType, targetId])
+  @@map("audit_log")
+}

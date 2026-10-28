@@ -3,7 +3,7 @@
 > Fase F2. Seguridad por diseño: autenticación, aislamiento entre organizaciones (RLS) y permisos con condiciones sobre el recurso. Ver `AUTHORIZATION.md`.
 
 ### US-022 — Registro, inicio de sesión y sesiones con refresh rotativo
-- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** IN_PROGRESS
+- **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** L · **Estado:** DONE
 - **Historia:** Como usuario quiero crear una cuenta e iniciar sesión de forma segura para acceder a mis torneos.
 - **Contexto:** Núcleo del módulo `auth` estilo Fortify (`AUTHORIZATION.md` §11). **Dividir:** (a) registro, login y tokens; (b) sesiones y suspensión.
 - **Referencias:** BR-AUTH-01..04, BR-AUTH-07..09, BR-ROLE-01 · DEC-010, DEC-057, DEC-062 · `ARCHITECTURE.md` §12, §14 · INV-A-1, INV-A-2, INV-A-4
@@ -28,6 +28,7 @@
 - **Notas para la IA:** el refresh **no** es un JWT; es aleatorio y se guarda **hasheado**.
 - **Implementación (a1), 2026-10-27:** contratos `auth.register`, `auth.login` y `auth.me` (`GET /me`); tablas `users` (email en minúsculas con índice único parcial entre cuentas vivas, `display_name`, versión de la política aceptada), `auth_sessions` y `refresh_tokens` (el rol de mantenimiento puede purgar los vencidos); política de `BR-AUTH-09` con la lista de SecLists fijada (47 317 entradas de 8 a 64 caracteres, `apps/api/assets/common-passwords.txt`); argon2id con `ARGON2_*`; login sin `passport-local` y guard global `passport-jwt` con `@Public()` (detalle en `AUTHORIZATION.md` §11). El nombre se guarda como `display_name` (`DEC-089`) y la versión de la política es `PRIVACY_POLICY_VERSION` (`DEC-088`). `ip_hash` de la sesión queda vacío hasta (b), que lista las sesiones.
 - **Implementación (a2), 2026-10-27:** contratos `auth.refresh` y `auth.logout` (204 sin cuerpo); rotación con *compare-and-set* en la transacción: el perdedor de una carrera cuenta como reutilización y revoca la familia (`DEC-092`); el sucesor vence con la sesión (24 h desde el login); `logout` revoca la familia de la cookie en cualquier estado y borra la cookie; `SameSiteGuard` en ambas rutas (`DEC-091`). Límites de registro y login por IP y por email en Redis, con bloqueo tras 10 fallos seguidos (`DEC-093`); contadores compartidos con un almacén propio sobre `ioredis`, que también usa el límite general por usuario o IP (`DEC-090`); `apiError` acepta `retryAfterSeconds` (cabecera `Retry-After`). La cobertura de `apps/api` se juzga con unitarias e integración combinadas (`DEC-094`). Quedan para (b): `audit_log` de los eventos de seguridad (criterio 7), sesiones (9) y cuentas suspendidas (10).
+- **Implementación (b), 2026-10-27:** tabla `audit_log` de solo inserción desde su migración (`REVOKE UPDATE` al rol de la app y *triggers* que rechazan `UPDATE`, `DELETE` y `TRUNCATE` incluso al dueño, `DEC-077`; adelanta el criterio 7 de `US-025`); módulo `audit` con `AuditLog.record(entry, tx?)`, que guarda el hash de la IP y el `correlationId` de la petición. Eventos (`DEC-095`): login correcto, fallido o rechazado por el estado de la cuenta, *refresh* reutilizado o rechazado, logout de una sesión abierta y cierre de las demás sesiones. La IP se guarda como HMAC-SHA-256 con `IP_HASH_SECRET` en la sesión y en la auditoría (`DEC-096`). Contratos `user.sessions` (`GET /user/sessions`) y `user.revokeOtherSessions` (`DELETE /user/other-sessions`, 204), que exige que la sesión actual siga abierta (`DEC-097`). Cuentas suspendidas o anonimizadas: 403 `ACCOUNT_SUSPENDED` solo con la contraseña correcta, y el *refresh* revoca la familia (`DEC-098`). Las cuatro decisiones quedan `PROPUESTO` hasta que el responsable las confirme. La confirmación de contraseña de `DELETE /user/other-sessions` llega con `US-107`.
 
 ### US-023 — Organizaciones y membresías
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** MUST · **Tamaño:** M · **Estado:** READY
@@ -89,6 +90,7 @@
 - **Depende (parcial):** US-117 (prueba de RLS en los *workers*)
 - **Fuera de alcance:** cifrado en reposo, particionado.
 - **Notas para la IA:** si Prisma impide el patrón (R1), documenta en ADR y propone Kysely/Drizzle para esa capa.
+- **Avance desde `US-022b` (2026-10-27):** `audit_log` ya nace de solo inserción (`REVOKE UPDATE` y *triggers* contra `UPDATE`, `DELETE` y `TRUNCATE`), con pruebas `[US-025:AC7]` en `apps/api/test/auth-sessions.spec.ts`. Falta su RLS: hoy solo guarda eventos sin organización (`organization_id` nulo).
 
 ### US-026 — Invitaciones y gestión de miembros
 - **Epic:** EP-02 · **Fase:** F2 · **Prioridad:** SHOULD · **Tamaño:** M · **Estado:** READY

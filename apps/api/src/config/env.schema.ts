@@ -117,6 +117,7 @@ export const envSchema = z.object({
   TWO_FACTOR_ENCRYPTION_KEYS: twoFactorKeys,
   TWO_FACTOR_ACTIVE_KEY_ID: z.string().regex(KEY_ID, 'must be a key id'),
   PASSWORD_CONFIRMATION_TTL: duration,
+  IP_HASH_SECRET: secret(32),
 
   AUTH_THROTTLE_LIMIT: integer(1),
   AUTH_THROTTLE_WINDOW: duration,
@@ -192,6 +193,7 @@ export const SECRET_VARIABLES: readonly EnvVariable[] = [
   'REDIS_URL',
   'JWT_ACCESS_SECRET',
   'TWO_FACTOR_ENCRYPTION_KEYS',
+  'IP_HASH_SECRET',
   'METRICS_TOKEN',
   'S3_ACCESS_KEY',
   'S3_SECRET_KEY',
