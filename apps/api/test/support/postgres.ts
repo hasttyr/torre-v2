@@ -109,7 +109,9 @@ export const uniqueDatabaseName = (prefix: string): string => `${prefix}_${rando
 
 /**
  * Creates an empty database prepared like the local one (02-database.sql) and applies every migration
- * with the migration role, exactly as a deployment does (`prisma migrate deploy`).
+ * with the migration role, exactly as a deployment does (`prisma migrate deploy`). `createTestDatabase`
+ * then runs `permissions:sync` on each copy: the global setup cannot load the application's code
+ * (in CI, without a build, its module runner fails to start).
  */
 export async function createMigratedDatabase(adminUrl: string, name: string): Promise<void> {
   // Idempotent: an existing server also gets the roles added after it was created.

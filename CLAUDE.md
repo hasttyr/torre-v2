@@ -91,6 +91,7 @@ pnpm bench           # benchmarks con presupuesto en modo completo (pnpm test ya
 pnpm dev:infra       # infraestructura local (Docker o Postgres nativo); infra:check la comprueba
 pnpm db:migrate      # crea y aplica una migración SQL en local (prisma migrate dev; nunca db push)
 pnpm db:deploy       # aplica las migraciones pendientes (prisma migrate deploy, rol de migraciones)
+pnpm permissions:sync # carga el catálogo de permisos y la matriz de los permisos nuevos (tras db:deploy)
 pnpm db:status       # estado de las migraciones
 pnpm db:seed         # datos de desarrollo idempotentes (instituciones demo); nunca en producción
 pnpm secrets         # gitleaks sobre el diff (--all: todo el historial)

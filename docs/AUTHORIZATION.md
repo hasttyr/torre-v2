@@ -49,70 +49,76 @@ Con los permisos por defecto, esta regla equivale a la jerarquía `org_owner` > 
 
 ## 4. Matriz de permisos por defecto de los roles del sistema
 
-> Esta matriz es la **semilla** de los permisos de cada rol del sistema (`DEC-058`); el `platform_admin` puede cambiarla. La prueba `INV-T-8` verifica que la semilla del código coincide con esta tabla. Las claves de cada permiso están en §4.1.
+> Esta matriz es la **semilla** de los permisos de cada rol del sistema (`DEC-058`); el `platform_admin` puede cambiarla. La prueba `INV-T-8` (`apps/api/src/authz/matrix.spec.ts`) lee esta tabla y verifica que la semilla del código (`SYSTEM_ROLE_PERMISSIONS`) coincide con ella: un rol marcado ✓ o ✓* en una fila recibe **todas** las claves de su columna "Permisos". Las filas "todos…" con clave son permisos de la cuenta propia (§4.1), que tiene toda cuenta con sesión sin pasar por un rol; sin clave ("—"), son lectura o acción pública. Las claves están en §4.1 (columna añadida y filas separadas por clave en `US-024a`, `DEC-103`).
 
 Leyenda: ✓ permitido · ✓* permitido **con condición** (ver columna) · — no permitido. `PA` platform_admin, `OO` org_owner, `OA` org_admin, `TD` tournament_director, `AR` arbiter, `CP` captain, `PL` player.
 
-| Acción | Recurso | PA | OO | OA | TD | AR | CP | PL | Condición |
-|---|---|---|---|---|---|---|---|---|---|
-| Gestionar catálogo de instituciones | Institution | ✓ | — | — | — | — | — | — | |
-| Crear organización | Organization | ✓ | — | — | — | — | — | — | Directamente solo PA; las demás cuentas, por solicitud que aprueba PA (`BR-ROLE-05`, `DEC-056`). Quien la crea o la solicita queda como `org_owner` |
-| Ver organización | Organization | ✓ | ✓* | ✓* | ✓* | ✓* | ✓* | ✓* | Solo con membresía en ella |
-| Editar organización | Organization | ✓ | ✓ | ✓* | — | — | — | — | OA: datos generales |
-| Borrar organización (lógico) | Organization | ✓ | — | — | — | — | — | — | Permiso reservado; sin torneos en curso; razón y confirmación de contraseña (§10) |
-| Gestionar miembros y roles (cambio directo) | Membership | ✓ | ✓ | ✓* | ✓* | — | — | — | Solo roles inferiores y dentro de su alcance; `reason` obligatoria (`BR-ROLE-02`) |
-| Solicitar un rol | RoleRequest | todos los usuarios autenticados, incluido `viewer` | | | | | | | Con razón; una pendiente por rol y alcance (`BR-ROLE-03`) |
-| Retirar una solicitud propia | RoleRequest | todos los usuarios autenticados | | | | | | | Solo si está pendiente |
-| Ver y resolver solicitudes de rol | RoleRequest | ✓ | ✓* | ✓* | ✓* | — | — | — | Solo las que podría otorgar directamente, en su alcance; nunca la propia; razón al rechazar (`BR-ROLE-05`) |
-| Crear versión de `RuleSet` (borrador) | RuleSet | ✓ | ✓* | ✓* | ✓* | — | — | — | De su organización; los presets de plataforma (`organization_id NULL`) solo PA (`DEC-047`) |
-| Aprobar / deprecar `RuleSet` | RuleSet | ✓ | ✓* | ✓* | — | — | — | — | Sin parámetros "sin confirmar" (`BR-GEN-04`); OO/OA solo los de su organización; presets de plataforma solo PA |
-| Ver jugadores | Player | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | — | TD/AR: de sus torneos; CP: de su institución/equipo |
-| Crear/editar jugadores | Player | ✓ | ✓ | ✓ | ✓ | — | ✓* | — | CP: solo de su institución/equipo |
-| Importar jugadores (CSV) | Player | ✓ | ✓ | ✓ | ✓ | — | — | — | |
-| Importar ratings (FIDE/nacional) | Player | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de jugadores de sus torneos (`US-104`) |
-| Vincular jugador con cuenta | Player | ✓ | ✓ | ✓ | ✓* | — | — | ✓* | TD: de sus torneos; PL: acepta su propia vinculación (`US-102`) |
-| Ver mis partidas, mesa y posición | Game | — | — | — | — | — | — | ✓* | Solo el jugador vinculado (`US-102`) |
-| Crear torneo | Tournament | ✓ | ✓ | ✓ | — | — | — | — | |
-| Configurar torneo | Tournament | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de su torneo y solo en `DRAFT`/estados permitidos |
-| Abrir/cerrar el check-in de una ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | Si el torneo lo activó (`BR-WD-06`) |
-| Marcar o deshacer check-in | Participant | ✓ | ✓ | ✓ | ✓* | ✓* | — | ✓* | AR/TD: de cualquier participante de su torneo; PL: solo el propio; con el check-in abierto |
-| Abrir/cerrar inscripción, iniciar, finalizar, cancelar | Tournament | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de su torneo; transición válida (`BR-LIFE-01`) |
-| Cerrar torneo | Tournament | ✓ | ✓ | ✓ | ✓* | — | — | — | Todas las rondas `CLOSED` |
-| Reabrir torneo cerrado | Tournament | ✓ | ✓ | ✓ | — | — | — | — | `reason` obligatorio |
-| Inscribir participante individual | Participant | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | Ventana abierta; CP: solo su institución; con marca de elegibilidad (`BR-REG-01`) |
-| Ajustar siembra | Participant | ✓ | ✓ | ✓ | ✓* | — | — | — | `reason` (`BR-REG-04`) |
-| Registrar o retirar bye solicitado | Participant | ✓ | ✓ | ✓ | ✓* | — | — | — | Antes de emparejar la ronda (`BR-WD-03`) |
-| Retirar/reincorporar participante | Participant | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: solo el suyo y solo retiro |
-| Registrar equipo / editar plantilla | Team, Roster | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: solo su equipo y dentro de plazo |
-| Presentar alineación | Lineup | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: su equipo; plazo del `RuleSet` |
-| Programar ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | `BR-LIFE-06` |
-| Generar/descartar borrador de ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | Ronda anterior `CLOSED` (Suizo) |
-| Ajustar emparejamiento en borrador | Pairing | ✓ | ✓ | ✓ | ✓* | — | — | — | Solo `PAIRED_DRAFT` |
-| Forzar violación absoluta (override) | Pairing | — | ✓ | ✓ | ✓* | — | — | — | Permiso explícito + `reason` (`BR-PAIR-08`) |
-| Publicar ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | |
-| Registrar resultado | Game | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | Ronda `PUBLISHED`; partida `PENDING`; AR/TD de ese torneo |
-| Corregir resultado | Game | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | `reason`. AR: solo con la ronda `PUBLISHED`/`COMPLETED` y la siguiente sin publicar. TD+: también corrección administrativa con la ronda `CLOSED` o la siguiente publicada (`BR-AUD-03`, `DEC-051`) |
-| Registrar forfeit/bye | Game | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | Motivo; reglas del `RuleSet` |
-| Cerrar ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | Ronda `COMPLETED` |
-| Reabrir ronda | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | `reason`; la siguiente sin publicar; marca rondas posteriores `STALE` (`BR-LIFE-04`) |
-| Mantener una ronda `STALE` | Round | ✓ | ✓ | ✓ | ✓* | — | — | — | `BR-AUD-03` |
-| Desempatar por sorteo | Standing | ✓ | ✓ | ✓ | ✓* | — | — | — | Con semilla registrada (`BR-TIE-05`) |
-| Generar reportes | Report | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | De su torneo |
-| Descargar reportes | Report | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | ✓* | Según visibilidad del torneo y del reporte |
-| Ver línea de tiempo de auditoría | Audit | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | De su torneo; AR solo lectura |
-| Presentar reclamación | Claim | ✓ | ✓ | ✓ | ✓ | — | ✓* | ✓* | CP: de su equipo o institución; PL: propias; dentro de plazo (`BR-AUD-07`) |
-| Resolver reclamación | Claim | ✓ | ✓ | ✓ | ✓* | — | — | — | Con razón; de su torneo (representa a la comisión, `SRC-02` Art. 2) |
-| Gestionar campeonato | Championship | ✓ | ✓ | ✓ | — | — | — | — | De su organización (`US-100`) |
-| Borrar cualquier recurso (lógico) | todos | ✓ | — | — | — | — | — | — | Permiso reservado (`<recurso>.delete`); razón y confirmación de contraseña (§10) |
-| Ver la papelera y restaurar | Trash | ✓ | — | — | — | — | — | — | Permiso reservado; restaura el lote completo (`BR-DEL-05`) |
-| Archivar / desarchivar torneo | Tournament | ✓ | — | — | — | — | — | — | Permiso reservado; los eventos no se tocan (`BR-DEL-06`) |
-| Anonimizar a un titular | User, Player | ✓ | — | — | — | — | — | — | Permiso reservado; irreversible; por solicitud del titular (`US-111`) |
-| Gestionar roles y permisos | Role | ✓ | — | — | — | — | — | — | Permiso reservado (§4.1) |
-| Suspender / reactivar cuentas | User | ✓ | — | — | — | — | — | — | Permiso reservado; razón (`BR-AUTH-08`) |
-| Ver torneo y resultados | Tournament | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | ✓* | Torneo `PRIVATE`: solo con membresía |
-| Ver torneo público/no listado | Tournament | todos (incluye `viewer`) | | | | | | | `PUBLIC`; `UNLISTED` con enlace |
-| Crear suscripción | Subscription | todos | | | | | | | Con consentimiento y confirmación (`BR-NOTIF-01`) |
-| Gestionar suscripción propia | Subscription | todos | | | | | | | Con token (`US-063`) |
+| Acción | Recurso | Permisos | PA | OO | OA | TD | AR | CP | PL | Condición |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Gestionar catálogo de instituciones | Institution | `institution.manage` | ✓ | — | — | — | — | — | — | |
+| Crear organización | Organization | `organization.create` | ✓ | — | — | — | — | — | — | Directamente solo PA; las demás cuentas, por solicitud que aprueba PA (`BR-ROLE-05`, `DEC-056`). Quien la crea o la solicita queda como `org_owner` |
+| Ver organización | Organization | `organization.view` | ✓ | ✓* | ✓* | ✓* | ✓* | ✓* | ✓* | Solo con membresía en ella |
+| Editar organización | Organization | `organization.update` | ✓ | ✓ | ✓* | — | — | — | — | OA: datos generales |
+| Borrar organización (lógico) | Organization | `organization.delete` | ✓ | — | — | — | — | — | — | Permiso reservado; sin torneos en curso; razón y confirmación de contraseña (§10) |
+| Gestionar miembros y roles (cambio directo) | Membership | `membership.grant`, `membership.revoke` | ✓ | ✓ | ✓* | ✓* | — | — | — | Solo roles inferiores y dentro de su alcance; `reason` obligatoria (`BR-ROLE-02`) |
+| Solicitar un rol | RoleRequest | `role_request.create` | todos los usuarios autenticados, incluido `viewer` | | | | | | | Con razón; una pendiente por rol y alcance (`BR-ROLE-03`) |
+| Retirar una solicitud propia | RoleRequest | `role_request.create` | todos los usuarios autenticados | | | | | | | Solo si está pendiente |
+| Ver y resolver solicitudes de rol | RoleRequest | `role_request.review` | ✓ | ✓* | ✓* | ✓* | — | — | — | Solo las que podría otorgar directamente, en su alcance; nunca la propia; razón al rechazar (`BR-ROLE-05`) |
+| Crear versión de `RuleSet` (borrador) | RuleSet | `ruleset.create_draft` | ✓ | ✓* | ✓* | ✓* | — | — | — | De su organización; los presets de plataforma (`organization_id NULL`) solo PA (`DEC-047`) |
+| Aprobar / deprecar `RuleSet` | RuleSet | `ruleset.approve` | ✓ | ✓* | ✓* | — | — | — | — | Sin parámetros "sin confirmar" (`BR-GEN-04`); OO/OA solo los de su organización; presets de plataforma solo PA |
+| Ver jugadores | Player | `player.view` | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | — | TD/AR: de sus torneos; CP: de su institución/equipo |
+| Crear/editar jugadores | Player | `player.create`, `player.update` | ✓ | ✓ | ✓ | ✓ | — | ✓* | — | CP: solo de su institución/equipo |
+| Importar jugadores (CSV) | Player | `player.import` | ✓ | ✓ | ✓ | ✓ | — | — | — | |
+| Importar ratings (FIDE/nacional) | Player | `rating.import` | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de jugadores de sus torneos (`US-104`) |
+| Vincular jugador con cuenta | Player | `player.link` | ✓ | ✓ | ✓ | ✓* | — | — | ✓* | TD: de sus torneos; PL: acepta su propia vinculación (`US-102`) |
+| Ver mis partidas, mesa y posición | Game | `game.view_own` | — | — | — | — | — | — | ✓* | Solo el jugador vinculado (`US-102`) |
+| Crear torneo | Tournament | `tournament.create` | ✓ | ✓ | ✓ | — | — | — | — | |
+| Configurar torneo | Tournament | `tournament.configure` | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de su torneo y solo en `DRAFT`/estados permitidos |
+| Abrir/cerrar el check-in de una ronda | Round | `round.checkin_manage` | ✓ | ✓ | ✓ | ✓* | — | — | — | Si el torneo lo activó (`BR-WD-06`) |
+| Marcar o deshacer el check-in de un participante | Participant | `participant.checkin_mark` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | AR/TD: de cualquier participante de su torneo; con el check-in abierto |
+| Marcar o deshacer el check-in propio | Participant | `participant.checkin_self` | — | — | — | — | — | — | ✓* | PL: solo el propio; con el check-in abierto |
+| Abrir/cerrar inscripción, iniciar, finalizar, cancelar | Tournament | `tournament.transition` | ✓ | ✓ | ✓ | ✓* | — | — | — | TD: de su torneo; transición válida (`BR-LIFE-01`) |
+| Cerrar torneo | Tournament | `tournament.close` | ✓ | ✓ | ✓ | ✓* | — | — | — | Todas las rondas `CLOSED` |
+| Reabrir torneo cerrado | Tournament | `tournament.reopen` | ✓ | ✓ | ✓ | — | — | — | — | `reason` obligatorio |
+| Inscribir participante individual | Participant | `participant.register` | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | Ventana abierta; CP: solo su institución; con marca de elegibilidad (`BR-REG-01`) |
+| Ajustar siembra | Participant | `participant.seed_adjust` | ✓ | ✓ | ✓ | ✓* | — | — | — | `reason` (`BR-REG-04`) |
+| Registrar o retirar bye solicitado | Participant | `bye.request` | ✓ | ✓ | ✓ | ✓* | — | — | — | Antes de emparejar la ronda (`BR-WD-03`) |
+| Retirar participante | Participant | `participant.withdraw` | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: solo el suyo |
+| Reincorporar participante | Participant | `participant.reinstate` | ✓ | ✓ | ✓ | ✓* | — | — | — | |
+| Registrar equipo / editar plantilla | Team, Roster | `team.register`, `roster.update` | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: solo su equipo y dentro de plazo |
+| Presentar alineación | Lineup | `lineup.submit` | ✓ | ✓ | ✓ | ✓* | — | ✓* | — | CP: su equipo; plazo del `RuleSet` |
+| Programar ronda | Round | `round.schedule` | ✓ | ✓ | ✓ | ✓* | — | — | — | `BR-LIFE-06` |
+| Generar/descartar borrador de ronda | Round | `round.pair` | ✓ | ✓ | ✓ | ✓* | — | — | — | Ronda anterior `CLOSED` (Suizo) |
+| Ajustar emparejamiento en borrador | Pairing | `pairing.adjust` | ✓ | ✓ | ✓ | ✓* | — | — | — | Solo `PAIRED_DRAFT` |
+| Forzar violación absoluta (override) | Pairing | `pairing.override` | — | ✓ | ✓ | ✓* | — | — | — | Permiso explícito + `reason` (`BR-PAIR-08`) |
+| Publicar ronda | Round | `round.publish` | ✓ | ✓ | ✓ | ✓* | — | — | — | |
+| Registrar resultado | Game | `game.record` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | Ronda `PUBLISHED`; partida `PENDING`; AR/TD de ese torneo |
+| Corregir resultado | Game | `game.correct` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | `reason`. AR: solo con la ronda `PUBLISHED`/`COMPLETED` y la siguiente sin publicar |
+| Corrección administrativa de resultado | Game | `game.correct_admin` | ✓ | ✓ | ✓ | ✓* | — | — | — | `reason`; con la ronda `CLOSED` o la siguiente publicada (`BR-AUD-03`, `DEC-051`) |
+| Registrar forfeit/bye | Game | `game.forfeit` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | Motivo; reglas del `RuleSet` |
+| Cerrar ronda | Round | `round.close` | ✓ | ✓ | ✓ | ✓* | — | — | — | Ronda `COMPLETED` |
+| Reabrir ronda | Round | `round.reopen` | ✓ | ✓ | ✓ | ✓* | — | — | — | `reason`; la siguiente sin publicar; marca rondas posteriores `STALE` (`BR-LIFE-04`) |
+| Mantener una ronda `STALE` | Round | `round.stale_ack` | ✓ | ✓ | ✓ | ✓* | — | — | — | `BR-AUD-03` |
+| Desempatar por sorteo | Standing | `standing.draw_lots` | ✓ | ✓ | ✓ | ✓* | — | — | — | Con semilla registrada (`BR-TIE-05`) |
+| Generar reportes | Report | `report.generate` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | De su torneo |
+| Descargar reportes | Report | `report.download` | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | ✓* | Según visibilidad del torneo y del reporte |
+| Ver línea de tiempo de auditoría | Audit | `audit.view` | ✓ | ✓ | ✓ | ✓* | ✓* | — | — | De su torneo; AR solo lectura |
+| Presentar reclamación | Claim | `claim.file` | ✓ | ✓ | ✓ | ✓ | — | ✓* | ✓* | CP: de su equipo o institución; PL: propias; dentro de plazo (`BR-AUD-07`) |
+| Resolver reclamación | Claim | `claim.resolve` | ✓ | ✓ | ✓ | ✓* | — | — | — | Con razón; de su torneo (representa a la comisión, `SRC-02` Art. 2) |
+| Gestionar campeonato | Championship | `championship.manage` | ✓ | ✓ | ✓ | — | — | — | — | De su organización (`US-100`) |
+| Borrar cualquier recurso (lógico) | todos | `player.delete`, `ruleset.delete`, `championship.delete`, `institution.delete`, `user.delete`, `report.delete`, `role.delete` | ✓ | — | — | — | — | — | — | Permiso reservado (`<recurso>.delete`); razón y confirmación de contraseña (§10) |
+| Ver la papelera y restaurar | Trash | `trash.view`, `trash.restore` | ✓ | — | — | — | — | — | — | Permiso reservado; restaura el lote completo (`BR-DEL-05`) |
+| Archivar / desarchivar torneo | Tournament | `tournament.archive` | ✓ | — | — | — | — | — | — | Permiso reservado; los eventos no se tocan (`BR-DEL-06`) |
+| Anonimizar a un titular | User, Player | `privacy.anonymize` | ✓ | — | — | — | — | — | — | Permiso reservado; irreversible; por solicitud del titular (`US-111`) |
+| Resolver solicitudes de los titulares | DataSubjectRequest | `privacy.resolve` | ✓ | — | — | — | — | — | — | Permiso reservado (`US-111`) |
+| Gestionar roles y permisos | Role | `role.manage` | ✓ | — | — | — | — | — | — | Permiso reservado (§4.1) |
+| Suspender / reactivar cuentas | User | `user.suspend` | ✓ | — | — | — | — | — | — | Permiso reservado; razón (`BR-AUTH-08`) |
+| Ver torneo y resultados | Tournament | `tournament.view_private` | ✓ | ✓ | ✓ | ✓* | ✓* | ✓* | ✓* | Torneo `PRIVATE`: solo con membresía |
+| Ver torneo público/no listado | Tournament | — (lectura pública) | todos (incluye `viewer`) | | | | | | | `PUBLIC`; `UNLISTED` con enlace |
+| Crear suscripción | Subscription | — (pública) | todos | | | | | | | Con consentimiento y confirmación (`BR-NOTIF-01`) |
+| Gestionar suscripción propia | Subscription | `subscription.manage_own` | todos | | | | | | | Con token (`US-063`) |
+| Editar el perfil propio | User | `profile.update_own` | todos los usuarios autenticados | | | | | | | Solo el propio |
+| Ejercer los derechos sobre los datos propios | DataSubjectRequest | `privacy.request_own` | todos los usuarios autenticados | | | | | | | Solo los propios (`US-111`) |
 
 Notas:
 - `✓*` implica **condición sobre el recurso cargado**, no solo sobre el rol.
@@ -126,11 +132,11 @@ El catálogo es **fijo y vive en el código** (`packages/contracts/src/permissio
 | Grupo | Permisos (clave) | Reservado |
 |---|---|---|
 | Plataforma | `institution.manage`, `organization.create`, `role.manage`, `user.suspend`, `trash.view`, `trash.restore`, `privacy.anonymize`, `privacy.resolve`, `tournament.archive` | **Sí** |
-| Borrado | `<recurso>.delete` para todo recurso CRUD (organización, jugador, `RuleSet`, campeonato, institución, usuario, reporte, rol…) | **Sí** |
+| Borrado | `<recurso>.delete` para todo recurso CRUD: hoy `organization.delete`, `player.delete`, `ruleset.delete`, `championship.delete`, `institution.delete`, `user.delete`, `report.delete`, `role.delete`; cada recurso CRUD nuevo añade el suyo | **Sí** |
 | Organización | `organization.view`, `organization.update`, `membership.grant`, `membership.revoke`, `role_request.review`, `championship.manage` | No |
 | Reglas | `ruleset.create_draft`, `ruleset.approve` (los presets de plataforma solo los aprueba PA) | No |
 | Jugadores | `player.view`, `player.create`, `player.update`, `player.import`, `player.link`, `rating.import` | No |
-| Torneo | `tournament.create`, `tournament.configure`, `tournament.transition`, `tournament.close`, `tournament.reopen`, `tournament.view_private` | No |
+| Torneo | `tournament.create`, `tournament.configure`, `tournament.transition`, `tournament.close`, `tournament.reopen`, `tournament.view_private`, `game.view_own` | No |
 | Inscripción | `participant.register`, `participant.withdraw`, `participant.reinstate`, `participant.seed_adjust`, `bye.request` | No |
 | Equipos | `team.register`, `roster.update`, `lineup.submit` | No |
 | Rondas | `round.schedule`, `round.checkin_manage`, `participant.checkin_mark`, `participant.checkin_self`, `round.pair`, `pairing.adjust`, `pairing.override`, `round.publish`, `round.close`, `round.reopen`, `round.stale_ack` | No |

@@ -142,20 +142,21 @@ model Organization {
 /// migration of US-023) and, with US-108, an organization's own roles. Their permissions arrive with
 /// US-024 (role_permissions). The key is unique per organization among live rows (partial index).
 model Role {
-  id              String        @id @default(uuid(7)) @db.Uuid
-  organizationId  String?       @map("organization_id") @db.Uuid
-  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  id              String           @id @default(uuid(7)) @db.Uuid
+  organizationId  String?          @map("organization_id") @db.Uuid
+  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   key             String
   name            String
-  scopeType       String        @map("scope_type")
-  isSystem        Boolean       @default(false) @map("is_system")
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt       DateTime?     @map("deleted_at") @db.Timestamptz(6)
-  deletedBy       String?       @map("deleted_by") @db.Uuid
-  deleteReason    String?       @map("delete_reason")
-  deletionBatchId String?       @map("deletion_batch_id") @db.Uuid
+  scopeType       String           @map("scope_type")
+  isSystem        Boolean          @default(false) @map("is_system")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  deletedBy       String?          @map("deleted_by") @db.Uuid
+  deleteReason    String?          @map("delete_reason")
+  deletionBatchId String?          @map("deletion_batch_id") @db.Uuid
   memberships     Membership[]
+  permissions     RolePermission[]
 
   // Target of the memberships' (role_id, scope_type) key: a role is only granted in its own scope.
   @@unique([id, scopeType])
@@ -190,4 +191,35 @@ model Membership {
   @@index([userId, revokedAt])
   @@index([scopeType, scopeId])
   @@map("memberships")
+}
+
+/// The fixed catalogue of permissions (AUTHORIZATION.md §4.1, US-024): loaded from @torre/contracts by
+/// `permissions:sync` with the migration role; the application role only reads it.
+model Permission {
+  key         String           @id
+  group       String
+  description String
+  reserved    Boolean
+  /// Scopes where a role holding it may be granted; empty for the permissions of the own account.
+  scopeTypes  String[]         @map("scope_types")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+/// The permissions of a role (DEC-058). The system roles get the matrix of AUTHORIZATION.md §4 when a
+/// permission first enters the catalogue; a trigger keeps reserved permissions on platform_admin only
+/// (INV-T-6) and each permission within its scopes.
+model RolePermission {
+  roleId        String     @map("role_id") @db.Uuid
+  role          Role       @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  permissionKey String     @map("permission_key")
+  permission    Permission @relation(fields: [permissionKey], references: [key], onDelete: Restrict)
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([roleId, permissionKey])
+  @@index([permissionKey])
+  @@map("role_permissions")
 }
